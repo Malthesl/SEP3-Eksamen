@@ -22,7 +22,7 @@ public class QuestionsManagerDB implements QuestionsManager
     try
     {
       PreparedStatement statement = connection.prepareStatement(
-          "INSERT INTO Questions (question, answer) VALUES (?, ?) RETURNING Questions.id as id");
+          "INSERT INTO proof_of_concept.questions (question, answer) VALUES (?, ?) RETURNING proof_of_concept.questions.id as id");
       statement.setString(1, question);
       statement.setString(2, answer);
 
@@ -51,7 +51,7 @@ public class QuestionsManagerDB implements QuestionsManager
     try
     {
       PreparedStatement statement = connection.prepareStatement(
-          "SELECT * FROM Questions");
+          "SELECT * FROM proof_of_concept.questions");
       ResultSet res = statement.executeQuery();
 
       while (res.next())
@@ -79,7 +79,7 @@ public class QuestionsManagerDB implements QuestionsManager
       return question;
 
     try {
-      PreparedStatement statement = connection.prepareStatement("SELECT * FROM Questions WHERE id=?");
+      PreparedStatement statement = connection.prepareStatement("SELECT * FROM proof_of_concept.questions WHERE id=?");
       statement.setInt(1, id);
 
       ResultSet res = statement.executeQuery();
