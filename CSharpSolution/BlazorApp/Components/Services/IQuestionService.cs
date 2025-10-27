@@ -4,7 +4,7 @@ namespace BlazorApp.Components.Services;
 
 public interface IQuestionService
 {
-    Task<List<QuestionDTO>> GetAllQuestionsAsync();
+    Task<QuestionListDTO> GetAllQuestionsAsync();
     Task<QuestionDTO> GetQuestionByIdAsync(int id);
     Task<QuestionDTO> AddQuestionAsync(CreateQuestionDTO question);
 }

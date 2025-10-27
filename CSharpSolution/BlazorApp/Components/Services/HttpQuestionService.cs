@@ -12,9 +12,9 @@ public class HttpQuestionService : IQuestionService
         _client = client;
     }
     
-    public async Task<List<QuestionDTO>> GetAllQuestionsAsync()
+    public async Task<QuestionListDTO> GetAllQuestionsAsync()
     {
-        List<QuestionDTO>? questions = await _client.GetFromJsonAsync<List<QuestionDTO>>("Questions");
+        QuestionListDTO? questions = await _client.GetFromJsonAsync<QuestionListDTO>("Questions");
         if (questions is null) throw new NullReferenceException();
 
         return questions;
