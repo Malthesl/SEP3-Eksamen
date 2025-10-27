@@ -6,9 +6,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{23E864
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{7AAD1EDF-1F39-42F3-A09A-12597F72213B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrpcService", "GrpcService\GrpcService.csproj", "{86FB9E97-9568-45D6-8FC8-E616853CE852}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiContracts", "ApiContracts\ApiContracts.csproj", "{31C44176-B239-46B2-8FC2-F967B6D1A974}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "WebAPI\WebAPI.csproj", "{CD96A691-DF1B-427B-999C-5BC9C3E6F060}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,17 +16,17 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{86FB9E97-9568-45D6-8FC8-E616853CE852} = {7AAD1EDF-1F39-42F3-A09A-12597F72213B}
 		{31C44176-B239-46B2-8FC2-F967B6D1A974} = {23E86414-9B91-4007-9ADC-9AA15386D8E6}
+		{CD96A691-DF1B-427B-999C-5BC9C3E6F060} = {7AAD1EDF-1F39-42F3-A09A-12597F72213B}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{86FB9E97-9568-45D6-8FC8-E616853CE852}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{86FB9E97-9568-45D6-8FC8-E616853CE852}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{86FB9E97-9568-45D6-8FC8-E616853CE852}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{86FB9E97-9568-45D6-8FC8-E616853CE852}.Release|Any CPU.Build.0 = Release|Any CPU
 		{31C44176-B239-46B2-8FC2-F967B6D1A974}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{31C44176-B239-46B2-8FC2-F967B6D1A974}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31C44176-B239-46B2-8FC2-F967B6D1A974}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31C44176-B239-46B2-8FC2-F967B6D1A974}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD96A691-DF1B-427B-999C-5BC9C3E6F060}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD96A691-DF1B-427B-999C-5BC9C3E6F060}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD96A691-DF1B-427B-999C-5BC9C3E6F060}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD96A691-DF1B-427B-999C-5BC9C3E6F060}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
