@@ -1,10 +1,10 @@
 package mnm.sep3;
 
+import mnm.sep3.database.Database;
+
 public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello world!");
-        while (true) {
-          System.out.println("نيكولاي شاذ");
-        }
-    }
+  public static void main(String[] args)
+  {
+    Database.getConnection();
+  }
 }
