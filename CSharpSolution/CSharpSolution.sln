@@ -6,9 +6,34 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{23E864
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{7AAD1EDF-1F39-42F3-A09A-12597F72213B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiContracts", "ApiContracts\ApiContracts.csproj", "{31C44176-B239-46B2-8FC2-F967B6D1A974}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "WebAPI\WebAPI.csproj", "{D385B285-077E-4F39-9F00-D21E755988F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorApp", "BlazorApp\BlazorApp.csproj", "{6B018EE9-340F-4A88-AA7A-E001AF19A954}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{31C44176-B239-46B2-8FC2-F967B6D1A974} = {23E86414-9B91-4007-9ADC-9AA15386D8E6}
+		{D385B285-077E-4F39-9F00-D21E755988F6} = {7AAD1EDF-1F39-42F3-A09A-12597F72213B}
+		{6B018EE9-340F-4A88-AA7A-E001AF19A954} = {903F4CCC-C347-4006-9B73-BABB920F0850}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{31C44176-B239-46B2-8FC2-F967B6D1A974}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31C44176-B239-46B2-8FC2-F967B6D1A974}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31C44176-B239-46B2-8FC2-F967B6D1A974}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31C44176-B239-46B2-8FC2-F967B6D1A974}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D385B285-077E-4F39-9F00-D21E755988F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D385B285-077E-4F39-9F00-D21E755988F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D385B285-077E-4F39-9F00-D21E755988F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D385B285-077E-4F39-9F00-D21E755988F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B018EE9-340F-4A88-AA7A-E001AF19A954}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B018EE9-340F-4A88-AA7A-E001AF19A954}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B018EE9-340F-4A88-AA7A-E001AF19A954}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B018EE9-340F-4A88-AA7A-E001AF19A954}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
