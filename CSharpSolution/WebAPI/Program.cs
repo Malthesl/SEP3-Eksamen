@@ -12,9 +12,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<ProofOfConceptService.ProofOfConceptServiceClient>(sp =>
 {
-    using var channel = GrpcChannel.ForAddress("https://localhost:7042");
-    var client = new ProofOfConceptService.ProofOfConceptServiceClient(channel);
-    return client;
+    var channel = GrpcChannel.ForAddress("https://localhost:7042");
+    return new ProofOfConceptService.ProofOfConceptServiceClient(channel);
 });
 
 var app = builder.Build();
