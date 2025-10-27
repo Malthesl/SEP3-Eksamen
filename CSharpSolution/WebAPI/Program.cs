@@ -12,7 +12,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<ProofOfConceptService.ProofOfConceptServiceClient>(sp =>
 {
-    var channel = GrpcChannel.ForAddress("https://localhost:7042");
+    var channel = GrpcChannel.ForAddress("http://localhost:7042");
     return new ProofOfConceptService.ProofOfConceptServiceClient(channel);
 });
 

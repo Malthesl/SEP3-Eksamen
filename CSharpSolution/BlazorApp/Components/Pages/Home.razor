@@ -87,8 +87,7 @@ Welcome to your new app.
 
     private async Task UpdateQuestions()
     {
-        // TODO: Uncomment når api virker 
-        //_questionDtos = await QuestionService.GetAllQuestionsAsync();
+        _questionDtos = (await QuestionService.GetAllQuestionsAsync()).Questions;
     }
 
     private class QuestionSearch
