@@ -12,7 +12,7 @@ public class Database
     try {
       if (context == null) {
         context = DriverManager.getConnection("jdbc:postgresql://localhost:5432/sep3_eksamen", "sep3_eksamen", "sep3_eksamen");
-        context.setSchema("proof_of_concept");
+        context.setSchema("sep3_eksamen");
         return context;
       }
       return context;
