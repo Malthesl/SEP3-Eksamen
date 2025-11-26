@@ -30,7 +30,7 @@ public class UsersManagerDB implements UsersManager
     @Override
     public User createUser(String username, String password) {
         try {
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO sep3_eksamen.users (username, password) VALUES (?, ?) RETURNING id");
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO users (username, password) VALUES (?, ?) RETURNING id");
             statement.setString(1, username);
             statement.setString(2, password);
 
@@ -73,7 +73,7 @@ public class UsersManagerDB implements UsersManager
         if (returnUser != null) return returnUser;
 
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM users WHERE id = ?");
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM sep3_eksamen.users WHERE id = ?");
             statement.setInt(1, id);
 
             ResultSet res = statement.executeQuery();
@@ -92,7 +92,7 @@ public class UsersManagerDB implements UsersManager
     @Override
     public void updateUsername(int id, String newUsername) {
         try {
-            PreparedStatement statement = connection.prepareStatement("UPDATE users SET username = ? WHERE id = ?");
+            PreparedStatement statement = connection.prepareStatement("UPDATE sep3_eksamen.users SET username = ? WHERE id = ?");
             statement.setString(1, newUsername);
             statement.setInt(2, id);
 
@@ -105,7 +105,7 @@ public class UsersManagerDB implements UsersManager
     @Override
     public void updatePassword(int id, String password) {
         try {
-            PreparedStatement statement = connection.prepareStatement("UPDATE users SET password = ? WHERE id = ?");
+            PreparedStatement statement = connection.prepareStatement("UPDATE sep3_eksamen.users SET password = ? WHERE id = ?");
             statement.setString(1, password);
             statement.setInt(2, id);
 
@@ -118,7 +118,7 @@ public class UsersManagerDB implements UsersManager
     @Override
     public void deleteUser(int id) {
         try {
-            PreparedStatement statement = connection.prepareStatement("DELETE FROM users WHERE id = ?");
+            PreparedStatement statement = connection.prepareStatement("DELETE FROM sep3_eksamen.users WHERE id = ?");
             statement.setInt(1, id);
 
             statement.execute();
@@ -130,7 +130,7 @@ public class UsersManagerDB implements UsersManager
     @Override
     public User verifyUserCredentials(String username, String password) {
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?");
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM sep3_eksamen.users WHERE username = ? AND password = ?");
             statement.setString(1, username);
             statement.setString(2, password);
 

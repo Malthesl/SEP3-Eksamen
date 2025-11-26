@@ -42,6 +42,7 @@ public class QuizServiceImpl extends QuizServiceGrpc.QuizServiceImplBase {
             responseStreamObserver.onNext(res.build());
             responseStreamObserver.onCompleted();
         } catch (Exception e) {
+            e.printStackTrace();
             responseStreamObserver.onError(Status.NOT_FOUND
                     .withDescription("En fejl skete")
                     .augmentDescription(e.getMessage())
@@ -66,6 +67,7 @@ public class QuizServiceImpl extends QuizServiceGrpc.QuizServiceImplBase {
             responseStreamObserver.onNext(res.build());
             responseStreamObserver.onCompleted();
         } catch (Exception e) {
+            e.printStackTrace();
             responseStreamObserver.onError(Status.NOT_FOUND
                     .withDescription("En fejl skete")
                     .augmentDescription(e.getMessage())

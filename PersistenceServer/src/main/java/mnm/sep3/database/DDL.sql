@@ -2,13 +2,21 @@ DROP SCHEMA IF EXISTS sep3_eksamen cascade;
 CREATE SCHEMA sep3_eksamen;
 SET SCHEMA 'sep3_eksamen';
 
-CREATE TABLE Questions (
+ALTER SCHEMA sep3_eksamen OWNER TO sep3_eksamen;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA sep3_eksamen
+    GRANT ALL PRIVILEGES ON TABLES TO sep3_eksamen;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA sep3_eksamen
+    GRANT ALL PRIVILEGES ON SEQUENCES TO sep3_eksamen;
+
+CREATE TABLE questions (
     id SERIAL PRIMARY KEY,
     question VARCHAR NOT NULL,
     answer VARCHAR NOT NULL
 );
 
-CREATE TABLE Users (
+CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(16) UNIQUE NOT NULL,
     password VARCHAR NOT NULL

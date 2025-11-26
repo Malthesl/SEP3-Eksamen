@@ -67,6 +67,7 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
             responseStreamObserver.onNext(response.build());
             responseStreamObserver.onCompleted();
         } catch (Exception e) {
+            e.printStackTrace();
             responseStreamObserver.onError(Status.NOT_FOUND
                     .withDescription("En fejl skete")
                     .augmentDescription(e.getMessage())
@@ -93,6 +94,7 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
             responseStreamObserver.onNext(response.build());
             responseStreamObserver.onCompleted();
         } catch (Exception e) {
+            e.printStackTrace();
             responseStreamObserver.onError(Status.NOT_FOUND
                     .withDescription("En fejl skete")
                     .augmentDescription(e.getMessage())
@@ -180,6 +182,7 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
             responseStreamObserver.onNext(response.build());
             responseStreamObserver.onCompleted();
         } catch (Exception e) {
+            e.printStackTrace();
             responseStreamObserver.onError(Status.NOT_FOUND
                     .withDescription("En fejl skete")
                     .augmentDescription(e.getMessage())
