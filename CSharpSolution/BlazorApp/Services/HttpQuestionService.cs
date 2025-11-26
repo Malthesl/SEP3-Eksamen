@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using ApiContracts;
 
-namespace BlazorApp.Components.Services;
+namespace BlazorApp.Services;
 
 public class HttpQuestionService : IQuestionService
 {

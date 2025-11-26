@@ -1,6 +1,6 @@
 ﻿using ApiContracts;
 
-namespace BlazorApp.Components.Services;
+namespace BlazorApp.Services;
 
 public interface IQuestionService
 {

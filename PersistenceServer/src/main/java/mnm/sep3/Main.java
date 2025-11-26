@@ -2,7 +2,6 @@ package mnm.sep3;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import mnm.sep3.database.Database;
 import mnm.sep3.model.QuestionsManager;
 import mnm.sep3.model.QuestionsManagerDB;
 import mnm.sep3.server.ProofOfConceptImpl;
