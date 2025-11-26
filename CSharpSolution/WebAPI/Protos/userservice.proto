@@ -21,7 +21,7 @@ message CreateUserRequest {
   string password = 2;
 }
 
-message CreateUserRespone {
+message CreateUserResponse {
   UserDTO user = 1;
 }
 
@@ -30,6 +30,14 @@ message GetUserByUsernameRequest {
 }
 
 message GetUserByUsernameResponse {
+  UserDTO user = 1;
+}
+
+message GetUserByIdRequest {
+  int32 id = 1;
+}
+
+message GetUserByIdResponse {
   UserDTO user = 1;
 }
 
@@ -58,8 +66,9 @@ message VerifyUserCredentialsResponse {
 
 service UserService
 {
-  rpc CreateUser (CreateUserRequest) returns (CreateUserRespone);
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
   rpc GetUserByUsername (GetUserByUsernameRequest) returns (GetUserByUsernameResponse);
+  rpc GetUserById (GetUserByIdRequest) returns (GetUserByIdResponse);
   rpc UpdateUsername (UpdateUsernameRequest) returns (Empty);
   rpc UpdatePassword (UpdatePasswordRequest) returns (Empty);
   rpc DeleteUser (DeleteUserRequest) returns (Empty);

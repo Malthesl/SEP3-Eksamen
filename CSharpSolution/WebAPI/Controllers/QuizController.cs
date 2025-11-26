@@ -1,18 +1,18 @@
 using ApiContracts;
+using GrpcClient;
 using Microsoft.AspNetCore.Mvc;
-using GrpcProofOfConceptClient;
 using QuestionDTO = ApiContracts.QuestionDTO;
 
 namespace WebAPI.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class QuestionsController(ProofOfConceptService.ProofOfConceptServiceClient grpcClient) : ControllerBase
+public class QuizController(QuizService.QuizServiceClient quizService) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<QuestionListDTO>> GetQuestions()
     {
-        var response = await grpcClient.GetAllQuestionsAsync(new GetQuestionsRequest());
+        var response = await quizService.GetAllQuestionsAsync(new GetQuestionsRequest());
         
         return Ok(new QuestionListDTO
         {
@@ -28,7 +28,7 @@ public class QuestionsController(ProofOfConceptService.ProofOfConceptServiceClie
     [HttpGet("{questionId}")]
     public async Task<ActionResult<QuestionDTO>> GetQuestion(int questionId)
     {
-        var response = await grpcClient.GetQuestionAsync(new GetQuestionRequest { QuestionId = questionId });
+        var response = await quizService.GetQuestionAsync(new GetQuestionRequest { QuestionId = questionId });
         
         return Ok(new QuestionDTO
         {
@@ -41,7 +41,7 @@ public class QuestionsController(ProofOfConceptService.ProofOfConceptServiceClie
     [HttpPost]
     public async Task<ActionResult> CreateQuestion(CreateQuestionDTO question)
     {
-        var response = await grpcClient.CreateQuestionAsync(new CreateQuestionRequest
+        var response = await quizService.CreateQuestionAsync(new CreateQuestionRequest
         {
             Question = question.Question,
             Answer = question.Answer

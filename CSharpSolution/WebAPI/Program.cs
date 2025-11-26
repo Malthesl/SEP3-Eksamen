@@ -1,5 +1,6 @@
 using Grpc.Net.Client;
-using GrpcProofOfConceptClient;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,11 +11,32 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<ProofOfConceptService.ProofOfConceptServiceClient>(sp =>
+builder.Services.AddScoped<GrpcClient.QuizService.QuizServiceClient>(sp =>
 {
     var channel = GrpcChannel.ForAddress("http://localhost:7042");
-    return new ProofOfConceptService.ProofOfConceptServiceClient(channel);
+    return new GrpcClient.QuizService.QuizServiceClient(channel);
 });
+
+builder.Services.AddScoped<GrpcClient.UserService.UserServiceClient>(sp =>
+{
+    var channel = GrpcChannel.ForAddress("http://localhost:7042");
+    return new GrpcClient.UserService.UserServiceClient(channel);
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = false,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "QuizPlusPlus",
+            ValidAudience = "Quizzers",
+            IssuerSigningKey = new SymmetricSecurityKey("SuperSecretKeyThatIsAtMinimum32CharactersLong"u8.ToArray())
+        };
+    });
 
 var app = builder.Build();
 
@@ -26,9 +48,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
