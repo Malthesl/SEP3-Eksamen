@@ -1,9 +1,7 @@
 package mnm.sep3.server;
 
 import io.grpc.Status;
-import io.grpc.StatusException;
 import io.grpc.stub.StreamObserver;
-import mnm.sep3.*;
 import mnm.sep3.CreateUserRequest;
 import mnm.sep3.CreateUserResponse;
 import mnm.sep3.DeleteUserRequest;

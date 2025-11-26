@@ -2,7 +2,6 @@ package mnm.sep3.server;
 
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
-import mnm.sep3.*;
 import mnm.sep3.CreateQuestionRequest;
 import mnm.sep3.GetQuestionRequest;
 import mnm.sep3.GetQuestionResponse;
@@ -13,7 +12,6 @@ import mnm.sep3.QuizServiceGrpc;
 import mnm.sep3.model.Question;
 import mnm.sep3.model.QuestionsManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class QuizServiceImpl extends QuizServiceGrpc.QuizServiceImplBase {
