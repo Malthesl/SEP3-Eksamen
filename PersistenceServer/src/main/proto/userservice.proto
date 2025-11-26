@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package mnm.sep3;
+
+option csharp_namespace = "GrpcProofOfConceptClient";
+
+message Empty {
+
+}
+
+message UserDTO {
+  string username = 1;
+  string password = 2;
+  int32 id = 3;
+}
+
+message CreateUserRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message CreateUserRespone {
+  UserDTO user = 1;
+}
+
+message GetUserByUsernameRequest {
+  string username = 1;
+}
+
+message GetUserByUsernameResponse {
+  UserDTO user = 1;
+}
+
+message UpdateUsernameRequest {
+  int32 id = 1;
+  string newUsername = 2;
+}
+
+message UpdatePasswordRequest {
+  int32 id = 1;
+  string newPassword = 2;
+}
+
+message DeleteUserRequest {
+  int32 id = 1;
+}
+
+message VerifyUserCredentialsRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message VerifyUserCredentialsResponse {
+  UserDTO user = 1;
+}
+
+service UserService
+{
+  rpc CreateUser (CreateUserRequest) returns (CreateUserRespone);
+  rpc GetUserByUsername (GetUserByUsernameRequest) returns (GetUserByUsernameResponse);
+  rpc UpdateUsername (UpdateUsernameRequest) returns (Empty);
+  rpc UpdatePassword (UpdatePasswordRequest) returns (Empty);
+  rpc DeleteUser (DeleteUserRequest) returns (Empty);
+  rpc VerifyUserCredentials (VerifyUserCredentialsRequest) returns (VerifyUserCredentialsResponse);
+}
