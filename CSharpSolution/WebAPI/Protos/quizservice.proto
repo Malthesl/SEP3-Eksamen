@@ -4,7 +4,7 @@ option java_multiple_files = true;
 
 package mnm.sep3;
 
-option csharp_namespace = "GrpcProofOfConceptClient";
+option csharp_namespace = "GrpcClient";
 
 message QuestionDTO {
   string question = 1;
@@ -36,7 +36,7 @@ message CreateQuestionRequest {
   string answer = 2;
 }
 
-service ProofOfConceptService
+service QuizService
 {
   rpc GetQuestion (GetQuestionRequest) returns (GetQuestionResponse);
   rpc GetAllQuestions (GetQuestionsRequest) returns (GetQuestionsResponse);
