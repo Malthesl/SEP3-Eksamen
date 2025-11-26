@@ -33,6 +33,14 @@ message GetUserByUsernameResponse {
   UserDTO user = 1;
 }
 
+message GetUserByIdRequest {
+  int32 id = 1;
+}
+
+message GetUserByIdResponse {
+  UserDTO user = 1;
+}
+
 message UpdateUsernameRequest {
   int32 id = 1;
   string newUsername = 2;
@@ -60,6 +68,7 @@ service UserService
 {
   rpc CreateUser (CreateUserRequest) returns (CreateUserRespone);
   rpc GetUserByUsername (GetUserByUsernameRequest) returns (GetUserByUsernameResponse);
+  rpc GetUserById (GetUserByIdRequest) returns (GetUserByIdResponse);
   rpc UpdateUsername (UpdateUsernameRequest) returns (Empty);
   rpc UpdatePassword (UpdatePasswordRequest) returns (Empty);
   rpc DeleteUser (DeleteUserRequest) returns (Empty);
