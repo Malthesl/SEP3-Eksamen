@@ -97,6 +97,11 @@ public class UsersManagerDB implements UsersManager
             statement.setInt(2, id);
 
             statement.execute();
+
+            User cachedUser = users.get(id);
+            if (cachedUser != null) {
+                users.put(id, new User(id, newUsername, cachedUser.getPassword()));
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -110,6 +115,11 @@ public class UsersManagerDB implements UsersManager
             statement.setInt(2, id);
 
             statement.execute();
+
+            User cachedUser = users.get(id);
+            if (cachedUser != null) {
+                users.put(id, new User(id, cachedUser.getUsername(), password));
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -122,6 +132,8 @@ public class UsersManagerDB implements UsersManager
             statement.setInt(1, id);
 
             statement.execute();
+
+            users.remove(id);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
