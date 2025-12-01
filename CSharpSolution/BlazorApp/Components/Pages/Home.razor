@@ -1,97 +1,105 @@
 ﻿@page "/"
 @using ApiContracts
 @using BlazorApp.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @inject HttpQuestionService QuestionService
 
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+<AuthorizeView>
+    <Authorized>
+        Du er logget ind som @context.User.Identity?.Name
+    </Authorized>
+    <NotAuthorized>
+        Du er ikke logget ind.
+    </NotAuthorized>
+</AuthorizeView>
 
-<div>
-    <h3>Opret Spørgsmål</h3>
-    <EditForm Model="@_createQuestion" OnValidSubmit="@AddQuestion">
-        <label for="question">Spørgsmål:</label>
-        <InputText id="question" @bind-Value="_createQuestion.Question"/>
-            
-        <label for="answer">Svar:</label>
-        <InputText id="answer" @bind-Value="_createQuestion.Answer"/>
-            
-        <button type="submit"> Send </button>
-    </EditForm>
-</div>
-
-<div>
-    <h3>Alle spørgsmål</h3>
-    @if (_questionDtos != null)
-    {
-        <ul>
-            @foreach (QuestionDTO question in _questionDtos)
-            {
-                <li>ID: @question.Id | Spørgsmål: @question.Question | Svar: @question.Answer</li>
-            }
-        </ul>
-    }
-    else
-    {
-        <p>Loading...</p>
-    }
-</div>
-<div>
-    <h3>Spørgsmål med ID</h3>
-    
-    <EditForm Model="@_targetId" OnValidSubmit="@SearchForQuestion">
-        <InputNumber @bind-Value="@_targetId.TargetId"/>
-        <button type="submit">Find</button>
-    </EditForm>
-    
-    @if (_targetQuestion == null)
-    {
-        <p>Skriv ID og tryk find</p>
-    }
-    else
-    {
-        <ul>
-            <li>ID: @_targetQuestion.Id | Spørgsmål: @_targetQuestion.Question | Svar: @_targetQuestion.Answer</li>
-        </ul>
-    }
-</div>
-
-@code {
-
-    private CreateQuestionDTO _createQuestion = new();
-
-    private readonly QuestionSearch _targetId = new();
-    private QuestionDTO? _targetQuestion;
-    
-    private List<QuestionDTO>? _questionDtos;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await UpdateQuestions();
-    }
-
-    private async void AddQuestion()
-    {
-        await QuestionService.AddQuestionAsync(_createQuestion);
-        _createQuestion = new();
-
-        await UpdateQuestions();
-    }
-
-    private async void SearchForQuestion()
-    {
-        _targetQuestion = await QuestionService.GetQuestionByIdAsync(_targetId.TargetId);
-    }
-
-    private async Task UpdateQuestions()
-    {
-        _questionDtos = (await QuestionService.GetAllQuestionsAsync()).Questions;
-    }
-
-    private class QuestionSearch
-    {
-        public int TargetId { get; set; }
-    }
-}
+@* <div> *@
+@*     <h3>Opret Spørgsmål</h3> *@
+@*     <EditForm Model="@_createQuestion" OnValidSubmit="@AddQuestion"> *@
+@*         <label for="question">Spørgsmål:</label> *@
+@*         <InputText id="question" @bind-Value="_createQuestion.Question"/> *@
+@* *@
+@*         <label for="answer">Svar:</label> *@
+@*         <InputText id="answer" @bind-Value="_createQuestion.Answer"/> *@
+@* *@
+@*         <button type="submit"> Send </button> *@
+@*     </EditForm> *@
+@* </div> *@
+@* *@
+@* <div> *@
+@*     <h3>Alle spørgsmål</h3> *@
+@*     @if (_questionDtos != null) *@
+@*     { *@
+@*         <ul> *@
+@*             @foreach (QuestionDTO question in _questionDtos) *@
+@*             { *@
+@*                 <li>ID: @question.Id | Spørgsmål: @question.Question | Svar: @question.Answer</li> *@
+@*             } *@
+@*         </ul> *@
+@*     } *@
+@*     else *@
+@*     { *@
+@*         <p>Loading...</p> *@
+@*     } *@
+@* </div> *@
+@* <div> *@
+@*     <h3>Spørgsmål med ID</h3> *@
+@* *@
+@*     <EditForm Model="@_targetId" OnValidSubmit="@SearchForQuestion"> *@
+@*         <InputNumber @bind-Value="@_targetId.TargetId"/> *@
+@*         <button type="submit">Find</button> *@
+@*     </EditForm> *@
+@* *@
+@*     @if (_targetQuestion == null) *@
+@*     { *@
+@*         <p>Skriv ID og tryk find</p> *@
+@*     } *@
+@*     else *@
+@*     { *@
+@*         <ul> *@
+@*             <li>ID: @_targetQuestion.Id | Spørgsmål: @_targetQuestion.Question | Svar: @_targetQuestion.Answer</li> *@
+@*         </ul> *@
+@*     } *@
+@* </div> *@
+@* *@
+@* @code { *@
+@* *@
+@*     private CreateQuestionDTO _createQuestion = new(); *@
+@* *@
+@*     private readonly QuestionSearch _targetId = new(); *@
+@*     private QuestionDTO? _targetQuestion; *@
+@* *@
+@*     private List<QuestionDTO>? _questionDtos; *@
+@* *@
+@*     protected override async Task OnInitializedAsync() *@
+@*     { *@
+@*         await UpdateQuestions(); *@
+@*     } *@
+@* *@
+@*     private async void AddQuestion() *@
+@*     { *@
+@*         await QuestionService.AddQuestionAsync(_createQuestion); *@
+@*         _createQuestion = new(); *@
+@* *@
+@*         await UpdateQuestions(); *@
+@*     } *@
+@* *@
+@*     private async void SearchForQuestion() *@
+@*     { *@
+@*         _targetQuestion = await QuestionService.GetQuestionByIdAsync(_targetId.TargetId); *@
+@*     } *@
+@* *@
+@*     private async Task UpdateQuestions() *@
+@*     { *@
+@*         _questionDtos = (await QuestionService.GetAllQuestionsAsync()).Questions; *@
+@*     } *@
+@* *@
+@*     private class QuestionSearch *@
+@*     { *@
+@*         public int TargetId { get; set; } *@
+@*     } *@
+@* } *@

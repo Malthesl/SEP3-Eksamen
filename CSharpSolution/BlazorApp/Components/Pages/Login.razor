@@ -1,0 +1,31 @@
+@page "/Login"
+@using BlazorClient.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthService AuthService;
+@inject AuthenticationStateProvider AuthStateProvider;
+@inject NavigationManager Nav;
+<h3>Log ind</h3>
+
+<label for="username">Brugernavn:</label>
+<input type="text" id="username" @bind="Username">
+<label for="password">Adgangskode:</label>
+<input type="password" id="password" @bind="Password">
+
+<button @onclick="Signin">Log ind</button>
+
+@code {
+    
+    private string Username { get; set; } = "";
+    private string Password { get; set; } = "";
+
+    private async Task Signin()
+    {
+        if (AuthStateProvider is TokenAuthenticationStateProvider provider)
+        {
+            await provider.SignIn(await AuthService.LoginAndReturnToken(Username, Password));
+            
+            Nav.NavigateTo("/");
+        }
+    }
+    
+}
