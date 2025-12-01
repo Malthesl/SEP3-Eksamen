@@ -20,6 +20,8 @@ public class Main {
             .addService(new UserServiceImpl(usersManager)).build();
     try {
       System.out.println("grpc server starter");
+
+      questionsManager.moveQuestion(5, 2);
       server.start();
       server.awaitTermination();
     } catch (Exception e) {
