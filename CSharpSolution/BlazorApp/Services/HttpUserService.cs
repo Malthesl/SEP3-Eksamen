@@ -2,7 +2,7 @@ using ApiContracts;
 
 namespace BlazorApp.Services;
 
-public class UserService(HttpClient httpClient) : IUserService
+public class HttpUserService(HttpClient httpClient) : IUserService
 {
     public async Task<UserDTO> CreateUser(string username, string password)
     {

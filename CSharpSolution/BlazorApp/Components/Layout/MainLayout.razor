@@ -1,7 +1,59 @@
-﻿@inherits LayoutComponentBase
+﻿@using BlazorClient.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthStateProvider;
 
 <div class="page">
     <main>
+        <div class="nav">
+            <div class="nav-center">
+                <AuthorizeView>
+                    <Authorized>
+                        <NavLink href="/">
+                            <div class="nav-logo">
+                                <span>Kahoot++</span>
+                            </div>
+                        </NavLink>
+                        <div class="nav-left">
+                            <NavLink href="/quizzes">
+                                <div class="nav-button"><span>Find Quizzer</span></div>
+                            </NavLink>
+                            <NavLink href="/my-quizzes">
+                                <div class="nav-button"><span>Mine Quizzer</span></div>
+                            </NavLink>
+                        </div>
+                        <div class="nav-right">
+                            <NavLink href="/account">
+                                <div class="nav-button">
+                                    <span>@context.User.Identity?.Name</span>
+                                </div>
+                            </NavLink>
+                            <button @onclick="() => { if (AuthStateProvider is TokenAuthenticationStateProvider auth) auth.SignOut(); }">
+                                Log ud
+                            </button>
+                        </div>
+                    </Authorized>
+                    <NotAuthorized>
+                        <NavLink href="/">
+                            <div class="nav-logo"><span>Kahoot++</span></div>
+                        </NavLink>
+                        <div class="nav-left">
+                            <NavLink href="/quizzes">
+                                <div class="nav-button"><span>Find Quizzer</span></div>
+                            </NavLink>
+                        </div>
+                        <div class="nav-right">
+                            <NavLink href="/login">
+                                <div class="nav-button"><span>Log ind</span></div>
+                            </NavLink>
+                            <NavLink href="/signup">
+                                <div class="nav-button"><span>Opret dig</span></div>
+                            </NavLink>
+                        </div>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
         <article class="content px-4">
             @Body
         </article>
