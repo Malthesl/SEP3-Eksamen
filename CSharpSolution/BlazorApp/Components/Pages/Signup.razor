@@ -1,7 +1,9 @@
 @page "/Signup"
+@using BlazorApp.Services
 @using BlazorClient.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthService AuthService;
+@inject UserService UserService;
 @inject AuthenticationStateProvider AuthStateProvider;
 @inject NavigationManager Nav;
 <h3>Opret dig</h3>
@@ -20,7 +22,7 @@
 
     private async Task RegisterAccount()
     {
-        await AuthService.RegisterAccount(Username, Password);
+        await UserService.CreateUser(Username, Password);
 
         if (AuthStateProvider is TokenAuthenticationStateProvider provider)
         {
