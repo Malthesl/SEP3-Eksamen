@@ -57,7 +57,9 @@ public class TokenAuthenticationStateProvider(ProtectedLocalStorage ls)
         var user = new ClaimsPrincipal(identity);
 
         _state = new AuthenticationState(user);
-        NotifyAuthenticationStateChanged(Task.FromResult(_state));
+        
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+        // NotifyAuthenticationStateChanged(Task.FromResult(_state));
     }
 
     public async Task SignOut()
@@ -67,7 +69,7 @@ public class TokenAuthenticationStateProvider(ProtectedLocalStorage ls)
 
         // Log brugeren ud
         _state = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
-        NotifyAuthenticationStateChanged(Task.FromResult(_state));
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
     private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
