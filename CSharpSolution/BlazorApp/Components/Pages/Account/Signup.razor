@@ -1,0 +1,42 @@
+@page "/signup"
+@using BlazorApp.Services
+@using BlazorClient.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthService AuthService;
+@inject IUserService UserService;
+@inject AuthenticationStateProvider AuthStateProvider;
+@inject NavigationManager Nav;
+
+<div class="fullscreen-center">
+    <div class="centered-box">
+        <h3>Opret dig</h3>
+
+        <label for="username">Brugernavn:</label>
+        <input type="text" id="username" @bind="Username">
+        <label for="password">Adgangskode:</label>
+        <input type="password" id="password" @bind="Password">
+        <span id="error" class="error-label">Fejl her</span>
+        <button @onclick="RegisterAccount">Opret dig</button>
+        <p>Har du allerde en bruger?</p>
+        <button @onclick='() => Nav.NavigateTo("/login")'>Log ind</button>
+    </div>
+</div>
+
+@code {
+
+    private string Username { get; set; } = "";
+    private string Password { get; set; } = "";
+
+    private async Task RegisterAccount()
+    {
+        await UserService.CreateUser(Username, Password);
+
+        if (AuthStateProvider is TokenAuthenticationStateProvider provider)
+        {
+            await provider.SignIn(await AuthService.LoginAndReturnToken(Username, Password));
+
+            Nav.NavigateTo("/");
+        }
+    }
+
+}

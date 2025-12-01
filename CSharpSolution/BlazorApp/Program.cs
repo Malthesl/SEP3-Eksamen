@@ -1,5 +1,8 @@
 ﻿using BlazorApp.Components;
 using BlazorApp.Services;
+using BlazorClient.Services;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,13 +10,26 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddScoped<ProtectedSessionStorage>();
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<AuthenticationStateProvider, TokenAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<AuthTokenHandler>();
 
-builder.Services.AddScoped(sp => new HttpClient()
+builder.Services.AddScoped(sp =>
 {
-    BaseAddress = new Uri("http://localhost:5171/")
+    var handler = sp.GetRequiredService<AuthTokenHandler>();
+    handler.InnerHandler = new HttpClientHandler();
+    
+    return new HttpClient(handler)
+    {
+        BaseAddress = new Uri("http://localhost:5171")
+    };
 });
 
-builder.Services.AddScoped<HttpQuestionService>();
+builder.Services.AddScoped<IQuestionService, HttpQuestionService>();
+builder.Services.AddScoped<IUserService, HttpUserService>();
 
 var app = builder.Build();
 
