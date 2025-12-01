@@ -63,8 +63,11 @@ public class QuestionsManagerDB implements QuestionsManager {
             Question question = getQuestionById(questionId);
             int startIndex = question.getIndex();
 
+            // Ik gør noget hvis indekset er det samme
+            if (startIndex == toIndex) return;
+
             PreparedStatement statement;
-            if (startIndex > toIndex) {
+            if (startIndex < toIndex) {
                 statement = connection.prepareStatement("UPDATE questions SET index = index - 1 WHERE in_quiz_id = ? AND index > ? AND index <= ?");
                 statement.setInt(1, question.getQuizId());
                 statement.setInt(2, startIndex);
