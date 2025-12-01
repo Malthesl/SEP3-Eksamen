@@ -17,20 +17,23 @@ public class QuestionsManagerDB implements QuestionsManager
 
   private final Map<Integer, Question> questions = new HashMap<>();
 
-  @Override public int addQuestion(String question, String answer)
+  @Override
+  public int addQuestion(int quizId, String title)
   {
     try
     {
       PreparedStatement statement = connection.prepareStatement(
-          "INSERT INTO questions (question, answer) VALUES (?, ?) RETURNING questions.id as id");
-      statement.setString(1, question);
-      statement.setString(2, answer);
+          "INSERT INTO questions (in_quiz_id, title, index) VALUES (?, ?, ?) RETURNING questions.id as id");
+      statement.setInt(1, quizId);
+      statement.setString(2, title);
+      int index = getAllQuestionsInQuiz(quizId).size();
+      statement.setInt(3, index);
 
       ResultSet res = statement.executeQuery();
       if (res.next())
       {
         int id = res.getInt("id");
-        questions.put(id, new Question(id, question, answer));
+        questions.put(id, new Question(id, quizId, title, index));
         return id;
 
       }
@@ -45,26 +48,42 @@ public class QuestionsManagerDB implements QuestionsManager
     }
   }
 
-  @Override public List<Question> getAllQuestions()
+  @Override
+  public void updateQuestion(Question question) {
+
+  }
+
+  @Override
+  public void moveQuestion(int questionId, int toIndex) {
+
+  }
+
+  @Override
+  public void deleteQuestion(int questionId) {
+
+  }
+
+  @Override public List<Question> getAllQuestionsInQuiz(int quizId)
   {
-    List<Question> list = new ArrayList<>();
+    List<Question> returnList = new ArrayList<>();
     try
     {
-      PreparedStatement statement = connection.prepareStatement(
-          "SELECT * FROM questions");
+      PreparedStatement statement = connection.prepareStatement("SELECT * FROM questions WHERE in_quiz_id = ?");
+      statement.setInt(1, quizId);
+
       ResultSet res = statement.executeQuery();
 
       while (res.next())
       {
         int id = res.getInt("id");
-        String question = res.getString("question");
-        String answer = res.getString("answer");
+        String title = res.getString("title");
+        int index = res.getInt("index");
 
-        Question question1 = new Question(id, question, answer);
-        questions.put(id, question1);
-        list.add(question1);
+        Question question = new Question(id, quizId, title, index);
+        questions.put(id, question);
+        returnList.add(question);
       }
-      return list;
+      return returnList;
     }
     catch (SQLException e)
     {
@@ -85,10 +104,11 @@ public class QuestionsManagerDB implements QuestionsManager
       ResultSet res = statement.executeQuery();
 
       if (res.next()) {
-        String question_1 = res.getString("question");
-        String answer = res.getString("answer");
+        String title = res.getString("question");
+        int inQuizId = res.getInt("in_quiz_id");
+        int index = res.getInt("index");
 
-        question = new Question(id,  question_1, answer);
+        question = new Question(id, inQuizId, title, index);
         questions.put(id, question);
         return question;
       } else {

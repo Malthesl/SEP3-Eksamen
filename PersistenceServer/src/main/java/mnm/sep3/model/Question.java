@@ -3,29 +3,31 @@ package mnm.sep3.model;
 public class Question
 {
   private int id;
-  private String question;
-  private String answer;
+  private int quizId;
+  private String title;
+  private int index;
 
-  public Question(int id, String question, String answer)
+  public Question(int id, int quizId, String title, int index)
   {
     this.id = id;
-    this.question = question;
-    this.answer = answer;
+    this.quizId = quizId;
+    this.title = title;
+    this.index = index;
   }
 
-  public int getId()
-  {
+  public int getId() {
     return id;
   }
 
-  public String getQuestion()
-  {
-    return question;
+  public int getQuizId() {
+    return quizId;
   }
 
-  public String getAnswer()
-  {
-    return answer;
+  public String getTitle() {
+    return title;
+  }
 
+  public int getIndex() {
+    return index;
   }
 }
