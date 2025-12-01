@@ -1,5 +1,7 @@
 package mnm.sep3.model;
 
+import mnm.sep3.model.entities.User;
+
 public interface UsersManager {
     /**
      * Opretter ny bruger

@@ -1,4 +1,4 @@
-package mnm.sep3.model;
+package mnm.sep3.model.entities;
 
 public class Question
 {

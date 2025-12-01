@@ -1,5 +1,7 @@
 package mnm.sep3.model;
 
+import mnm.sep3.model.entities.Question;
+
 import java.util.List;
 
 public interface QuestionsManager {

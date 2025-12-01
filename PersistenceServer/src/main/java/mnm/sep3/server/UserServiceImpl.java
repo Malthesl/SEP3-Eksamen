@@ -16,10 +16,8 @@ import mnm.sep3.UserDTO;
 import mnm.sep3.UserServiceGrpc;
 import mnm.sep3.VerifyUserCredentialsRequest;
 import mnm.sep3.VerifyUserCredentialsResponse;
-import mnm.sep3.model.User;
+import mnm.sep3.model.entities.User;
 import mnm.sep3.model.UsersManager;
-
-import java.util.List;
 
 public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     private final UsersManager usersManager;

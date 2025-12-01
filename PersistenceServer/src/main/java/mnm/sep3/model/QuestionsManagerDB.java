@@ -1,6 +1,7 @@
 package mnm.sep3.model;
 
 import mnm.sep3.database.Database;
+import mnm.sep3.model.entities.Question;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
