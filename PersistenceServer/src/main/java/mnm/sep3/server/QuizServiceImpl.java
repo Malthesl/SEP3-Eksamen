@@ -47,22 +47,22 @@ public class QuizServiceImpl extends QuizzesServiceGrpc.QuizzesServiceImplBase {
     @Override
     public void addQuiz(AddQuizRequest request,
                         StreamObserver<AddQuizResponse> responseStreamObserver) {
-//        AddQuizResponse.Builder response = AddQuizResponse.newBuilder();
-//
-//        int quizId = quizzesManager.addQuiz(request.getTitle(),
-//                request.getCreatorId());
-//
-//        QuizDTO dto = QuizDTO.newBuilder()
-//                .setId(quizId)
-//                .setTitle(request.getTitle())
-//                .setVisibility("private")
-//                .setCreatorId(request.getCreatorId())
-//                .build();
-//
-//        response.setQuizDto(QuizDTO.newBuilder());
-//
-//        responseStreamObserver.onNext(response.build());
-//        responseStreamObserver.onCompleted();
+        AddQuizResponse.Builder response = AddQuizResponse.newBuilder();
+
+        int quizId = quizzesManager.addQuiz(request.getTitle(),
+                request.getCreatorId());
+
+        QuizDTO dto = QuizDTO.newBuilder()
+                .setId(quizId)
+                .setTitle(request.getTitle())
+                .setVisibility("private")
+                .setCreatorId(request.getCreatorId())
+                .build();
+
+        response.setQuizDto(QuizDTO.newBuilder());
+
+        responseStreamObserver.onNext(response.build());
+        responseStreamObserver.onCompleted();
     }
 
     @Override
