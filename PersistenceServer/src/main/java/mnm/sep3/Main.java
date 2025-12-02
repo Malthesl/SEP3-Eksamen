@@ -4,7 +4,9 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import mnm.sep3.model.*;
 import mnm.sep3.server.AnswersServiceImpl;
+import mnm.sep3.model.*;
 import mnm.sep3.server.QuestionsServiceImpl;
+import mnm.sep3.server.QuizServiceImpl;
 import mnm.sep3.server.UserServiceImpl;
 
 public class Main {
@@ -12,10 +14,12 @@ public class Main {
   {
     QuestionsManager questionsManager = new QuestionsManagerDB();
     UsersManager usersManager = new UsersManagerDB();
+    QuizzesManager quizzesManager = new QuizzesManagerDB();
     AnswersManager answersManager = new AnswersManagerDB();
 
     Server server = ServerBuilder.forPort(7042)
             .addService(new QuestionsServiceImpl(questionsManager))
+            .addService(new QuizServiceImpl(quizzesManager))
             .addService(new AnswersServiceImpl(answersManager))
             .addService(new UserServiceImpl(usersManager)).build();
     try {
