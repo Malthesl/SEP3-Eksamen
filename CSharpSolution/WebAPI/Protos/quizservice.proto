@@ -19,11 +19,11 @@ message GetQuizResponse {
 message AddQuizRequest {
   string title = 1;
   int32 creatorId = 2;
+
 }
 
 message AddQuizResponse {
-  string title = 1;
-  int32 creatorId = 2;
+  QuizDTO quizDto = 1;
 }
 
 message UpdateQuizRequest {
