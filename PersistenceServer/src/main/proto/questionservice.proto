@@ -6,6 +6,51 @@ package mnm.sep3;
 
 option csharp_namespace = "GrpcClient";
 
-message AddQuestionRequest {
+import "dtos.proto";
 
+message AddQuestionRequest {
+  int32 quizId = 1;
+  string title = 2;
+}
+
+message AddQuestionResponse {
+  QuestionDTO newQuestion = 1;
+}
+
+message GetQuestionByIdRequest {
+  int32 questionId = 1;
+}
+
+message GetQuestionByIdResponse {
+  QuestionDTO question = 1;
+}
+
+message UpdateQuestionRequest {
+  QuestionDTO updatedQuestion = 1;
+}
+
+message MoveQuestionRequest {
+  int32 questionId = 1;
+  int32 toIndex = 2;
+}
+
+message DeleteQuestionRequest {
+  int32 questionId = 1;
+}
+
+message GetAllQuestionsInQuizRequest {
+  int32 quizId = 1;
+}
+
+message GetAllQuestionsInQuizResponse {
+  repeated QuestionDTO questions = 1;
+}
+
+service QuestionService {
+  rpc GetQuestionById (GetQuestionByIdRequest) returns (GetQuestionByIdResponse);
+  rpc AddQuestion (AddQuestionRequest) returns (AddQuestionResponse);
+  rpc UpdateQuestion (UpdateQuestionRequest) returns (Empty);
+  rpc MoveQuestion (MoveQuestionRequest) returns (Empty);
+  rpc DeleteQuestion (DeleteQuestionRequest) returns (Empty);
+  rpc GetAllQuestionsInQuiz (GetAllQuestionsInQuizRequest) returns (GetAllQuestionsInQuizResponse);
 }

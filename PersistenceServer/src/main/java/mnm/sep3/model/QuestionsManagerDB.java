@@ -24,7 +24,8 @@ public class QuestionsManagerDB implements QuestionsManager {
                     "INSERT INTO questions (in_quiz_id, title, index) VALUES (?, ?, ?) RETURNING questions.id as id");
             statement.setInt(1, quizId);
             statement.setString(2, title);
-            int index = getAllQuestionsInQuiz(quizId).size();
+            // Finder det højeste ID og plusser 1. Hvis der ikke er noget, så fjern -1 (gør det til 0)
+            int index = getAllQuestionsInQuiz(quizId).stream().mapToInt(Question::getIndex).max().orElse(-1) + 1;
             statement.setInt(3, index);
 
             ResultSet res = statement.executeQuery();
@@ -92,9 +93,15 @@ public class QuestionsManagerDB implements QuestionsManager {
     @Override
     public void deleteQuestion(int questionId) {
         try {
-            PreparedStatement statement = connection.prepareStatement("DELETE FROM questions WHERE id = ?");
+            PreparedStatement statement = connection.prepareStatement("DELETE FROM questions WHERE id = ? RETURNING index");
             statement.setInt(1, questionId);
-            statement.execute();
+            var res = statement.executeQuery();
+
+            if (res.next()) {
+                statement = connection.prepareStatement("UPDATE questions SET index = index - 1 WHERE index > ?");
+                statement.setInt(1, res.getInt("index"));
+                statement.execute();
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -104,7 +111,7 @@ public class QuestionsManagerDB implements QuestionsManager {
     public List<Question> getAllQuestionsInQuiz(int quizId) {
         List<Question> returnList = new ArrayList<>();
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM questions WHERE in_quiz_id = ?");
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM questions WHERE in_quiz_id = ? ORDER BY index");
             statement.setInt(1, quizId);
 
             ResultSet res = statement.executeQuery();
