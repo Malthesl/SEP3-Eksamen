@@ -3,6 +3,7 @@ package mnm.sep3.model;
 import mnm.sep3.database.Database;
 import mnm.sep3.model.entities.QueryResult;
 import mnm.sep3.model.entities.Quiz;
+import mnm.sep3.model.entities.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -128,7 +129,7 @@ public class QuizzesManagerDB implements QuizzesManager {
             PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) AS count FROM quizzes WHERE " + String.join(" AND ", queryOptions));
 
             int l = queryValues.size();
-            
+
             for (int i = 1; i < l + 1; i++) {
                 statement.setObject(i, queryValues.get(i - 1));
             }
@@ -142,7 +143,7 @@ public class QuizzesManagerDB implements QuizzesManager {
             }
 
             // Siden der aldrig bliver indsat noget direkte fra klienten ind i queryen, burde det være save
-            statement = connection.prepareStatement("SELECT * FROM quizzes WHERE " + String.join(" AND ", queryOptions) + " OFFSET ? LIMIT ?");
+            statement = connection.prepareStatement("SELECT * FROM quizzes INNER JOIN users ON users.id = quizzes.creator_id WHERE " + String.join(" AND ", queryOptions) + " OFFSET ? LIMIT ?");
 
             for (int i = 1; i < l + 1; i++) {
                 statement.setObject(i, queryValues.get(i - 1));
@@ -160,7 +161,9 @@ public class QuizzesManagerDB implements QuizzesManager {
                 String title = res.getString("title");
                 String visibility = res.getString("visibility");
                 int creatorId = res.getInt("creator_id");
-                quizzes.add(new Quiz(id, title, visibility, creatorId));
+                Quiz quiz = new Quiz(id, title, visibility, creatorId);
+                quiz.setCreator(new User(creatorId, res.getString("username")));
+                quizzes.add(quiz);
             }
 
             return new QueryResult<>(quizzes, count);

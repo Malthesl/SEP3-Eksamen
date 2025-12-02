@@ -9,7 +9,7 @@
     <div>Viser @quizzes.Quizzes.Count() ud af @quizzes.Count der matcher din søgning</div>
     @foreach (var quiz in quizzes.Quizzes)
     {
-        <div>@quiz.Title af @quiz.CreatorId (@quiz.Visibility)</div>
+        <div>@quiz.Title af @quiz.Creator.Username (@quiz.Visibility)</div>
     }
 }
 

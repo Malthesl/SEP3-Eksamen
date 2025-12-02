@@ -5,6 +5,7 @@ public class Quiz {
     private String title;
     private String visibility;
     private int creatorId;
+    private User creator;
 
     public Quiz(int quizId, String title, String visibility, int creatorId) {
         this.quizId = quizId;
@@ -27,5 +28,13 @@ public class Quiz {
 
     public int getCreatorId() {
         return creatorId;
+    }
+
+    public User getCreator() {
+        return creator;
+    }
+
+    public void setCreator(User creator) {
+        this.creator = creator;
     }
 }
