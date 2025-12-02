@@ -1,7 +1,18 @@
 package mnm.sep3.server;
 
 import io.grpc.stub.StreamObserver;
-import mnm.sep3.*;
+import mnm.sep3.AddQuizRequest;
+import mnm.sep3.AddQuizResponse;
+import mnm.sep3.DeleteQuizRequest;
+import mnm.sep3.Empty;
+import mnm.sep3.GetQuizRequest;
+import mnm.sep3.GetQuizResponse;
+import mnm.sep3.QueryQuizzesRequest;
+import mnm.sep3.QueryQuizzesResponse;
+import mnm.sep3.QuizDTO;
+import mnm.sep3.QuizzesServiceGrpc;
+import mnm.sep3.UpdateQuizRequest;
+import mnm.sep3.UserInfoDTO;
 import mnm.sep3.model.QuizzesManager;
 import mnm.sep3.model.entities.QueryResult;
 import mnm.sep3.model.entities.Quiz;
@@ -84,7 +95,7 @@ public class QuizServiceImpl extends QuizzesServiceGrpc.QuizzesServiceImplBase {
     }
 
     @Override
-    public void queryQuizzes(mnm.sep3.QueryQuizzesRequest request, io.grpc.stub.StreamObserver<mnm.sep3.QueryQuizzesResponse> responseObserver) {
+    public void queryQuizzes(QueryQuizzesRequest request, StreamObserver<QueryQuizzesResponse> responseObserver) {
         QueryQuizzesResponse.Builder response = QueryQuizzesResponse.newBuilder();
 
         QueryResult<Quiz> quizzes = quizzesManager.queryQuizzes(request.getSearchQuery(), request.getByCreatorId(), request.getStart(), request.getEnd(), request.getVisibilitiesList());
