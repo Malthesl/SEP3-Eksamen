@@ -11,29 +11,47 @@ import "dtos.proto";
 message GetQuizRequest {
   int32 quizId = 1;
 }
-message GetQuizResponse{
-  QuizDTO quiz = 1;
-}
-message AddQuizRequest{
-  string title = 1;
-  int32 creatorId = 2;
-}
-message AddQuizResponse{
-  string title = 1;
-  int32 creatorId = 2;
-}
-message UpdateQuizRequest{
+
+message GetQuizResponse {
   QuizDTO quiz = 1;
 }
 
-message DeleteQuizRequest{
+message AddQuizRequest {
+  string title = 1;
+  int32 creatorId = 2;
+}
+
+message AddQuizResponse {
+  string title = 1;
+  int32 creatorId = 2;
+}
+
+message UpdateQuizRequest {
+  QuizDTO quiz = 1;
+}
+
+message DeleteQuizRequest {
   int32 quizId = 1;
 }
 
+message QueryQuizzesRequest {
+  string searchQuery = 1;
+  int32 byCreatorId = 2;
+  int32 start = 3;
+  int32 end = 4;
+  repeated string visibilities = 5;
+}
+
+message QueryQuizzesResponse {
+  repeated QuizDTO quizzes = 1;
+  int32 start = 2;
+  int32 end = 3;
+}
 
 service QuizzesService {
   rpc GetQuiz (GetQuizRequest) returns (GetQuizResponse);
   rpc AddQuiz (AddQuizRequest) returns (AddQuizResponse);
   rpc UpdateQuiz (UpdateQuizRequest) returns (Empty);
   rpc DeleteQuiz (DeleteQuizRequest) returns (Empty);
+  rpc QueryQuizzes (QueryQuizzesRequest) returns (QueryQuizzesResponse);
 }

@@ -6,15 +6,8 @@ package mnm.sep3;
 
 option csharp_namespace = "GrpcClient";
 
-message Empty {
+import "dtos.proto";
 
-}
-
-message UserDTO {
-  string username = 1;
-  string password = 2;
-  int32 id = 3;
-}
 
 message CreateUserRequest {
   string username = 1;

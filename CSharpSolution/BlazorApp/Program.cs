@@ -28,7 +28,6 @@ builder.Services.AddScoped(sp =>
     };
 });
 
-builder.Services.AddScoped<IQuestionService, HttpQuestionService>();
 builder.Services.AddScoped<IUserService, HttpUserService>();
 
 var app = builder.Build();

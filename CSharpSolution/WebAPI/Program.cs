@@ -11,10 +11,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<GrpcClient.QuizService.QuizServiceClient>(sp =>
+builder.Services.AddScoped<GrpcClient.QuizzesService.QuizzesServiceClient>(sp =>
 {
     var channel = GrpcChannel.ForAddress("http://localhost:7042");
-    return new GrpcClient.QuizService.QuizServiceClient(channel);
+    return new GrpcClient.QuizzesService.QuizzesServiceClient(channel);
+});
+
+builder.Services.AddScoped<GrpcClient.QuestionService.QuestionServiceClient>(sp =>
+{
+    var channel = GrpcChannel.ForAddress("http://localhost:7042");
+    return new GrpcClient.QuestionService.QuestionServiceClient(channel);
 });
 
 builder.Services.AddScoped<GrpcClient.UserService.UserServiceClient>(sp =>

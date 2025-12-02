@@ -6,39 +6,52 @@ package mnm.sep3;
 
 option csharp_namespace = "GrpcClient";
 
-message QuestionDTO {
-  string question = 1;
-  string answer = 2;
-  int32 id = 3;
+import "dtos.proto";
+
+message GetQuizRequest {
+  int32 quizId = 1;
 }
 
-message GetQuestionRequest
-{
-  int32 questionId = 1;
+message GetQuizResponse {
+  QuizDTO quiz = 1;
 }
 
-message GetQuestionResponse
-{
-  QuestionDTO question = 1;
+message AddQuizRequest {
+  string title = 1;
+  int32 creatorId = 2;
 }
 
-message GetQuestionsRequest
-{
+message AddQuizResponse {
+  string title = 1;
+  int32 creatorId = 2;
 }
 
-message GetQuestionsResponse
-{
-  repeated QuestionDTO question = 1;
+message UpdateQuizRequest {
+  QuizDTO quiz = 1;
 }
 
-message CreateQuestionRequest {
-  string question = 1;
-  string answer = 2;
+message DeleteQuizRequest {
+  int32 quizId = 1;
 }
 
-service QuizService
-{
-  rpc GetQuestion (GetQuestionRequest) returns (GetQuestionResponse);
-  rpc GetAllQuestions (GetQuestionsRequest) returns (GetQuestionsResponse);
-  rpc CreateQuestion (CreateQuestionRequest) returns (GetQuestionResponse);
+message QueryQuizzesRequest {
+  string searchQuery = 1;
+  int32 byCreatorId = 2;
+  int32 start = 3;
+  int32 end = 4;
+  repeated string visibilities = 5;
+}
+
+message QueryQuizzesResponse {
+  repeated QuizDTO quizzes = 1;
+  int32 start = 2;
+  int32 end = 3;
+}
+
+service QuizzesService {
+  rpc GetQuiz (GetQuizRequest) returns (GetQuizResponse);
+  rpc AddQuiz (AddQuizRequest) returns (AddQuizResponse);
+  rpc UpdateQuiz (UpdateQuizRequest) returns (Empty);
+  rpc DeleteQuiz (DeleteQuizRequest) returns (Empty);
+  rpc QueryQuizzes (QueryQuizzesRequest) returns (QueryQuizzesResponse);
 }

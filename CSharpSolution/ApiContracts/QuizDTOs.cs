@@ -1,19 +1,16 @@
 ﻿namespace ApiContracts;
 
-public class QuestionDTO
+public class QuizDTO
 {
-    public int Id { get; init; }
-    public string Question { get; set; }
-    public string Answer { get; set; }
+    public required int Id { get; init; }
+    public required string Title { get; init; }
+    public required string Visibility { get; init; }
+    public required int CreatorId { get; init; }
 }
 
-public class QuestionListDTO
+public class QuizQueryDTO
 {
-    public List<QuestionDTO> Questions { get; set; }
-}
-
-public class CreateQuestionDTO
-{
-    public string Question { get; set; }
-    public string Answer { get; set; }
+    public required IEnumerable<QuizDTO> Quizzes { get; init; }
+    public required int Start { get; init; }
+    public required int Count { get; init; }
 }
