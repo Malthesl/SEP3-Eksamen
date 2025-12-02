@@ -8,3 +8,45 @@ option csharp_namespace = "GrpcClient";
 
 import "dtos.proto";
 
+message GetAnswerRequest {
+  int32 id = 1;
+}
+
+message GetAnswerResponse {
+  AnswerDTO answer = 1;
+}
+
+message AddAnswerRequest {
+  int32 questionId = 1;
+  string title = 2;
+  bool isCorrect = 3;
+  int32 index = 4;
+}
+
+message AddAnswerResponse {
+  AnswerDTO answer = 1;
+}
+
+message UpdateAnswerRequest {
+  AnswerDTO newAnswer = 1;
+}
+
+message DeleteAnswerRequest {
+  int32 answerId = 1;
+}
+
+message GetAllAnswersInQuestionRequest {
+  int32 questionId = 1;
+}
+
+message GetAllAnswersInQuestionResponse {
+  repeated AnswerDTO answers = 1;
+}
+
+service AnswersService {
+  rpc GetAnswer (GetAnswerRequest) returns (GetAnswerResponse);
+  rpc AddAnswer (AddAnswerRequest) returns (AddAnswerResponse);
+  rpc UpdateAnswer (UpdateAnswerRequest) returns (Empty);
+  rpc DeleteAnswer (DeleteAnswerRequest) returns (Empty);
+  rpc GetAllAnswersInQuestion (GetAllAnswersInQuestionRequest) returns (GetAllAnswersInQuestionResponse);
+}

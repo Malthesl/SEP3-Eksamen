@@ -45,9 +45,10 @@ public class QuestionsManagerDB implements QuestionsManager {
     @Override
     public void updateQuestion(Question question) {
         try {
-            PreparedStatement statement = connection.prepareStatement("UPDATE questions SET title=? WHERE id=?");
+            PreparedStatement statement = connection.prepareStatement("UPDATE questions SET title=? WHERE id=? AND in_quiz_id = ?");
             statement.setString(1, question.getTitle());
             statement.setInt(2, question.getId());
+            statement.setInt(3, question.getQuizId());
 
             statement.execute();
 
@@ -109,6 +110,7 @@ public class QuestionsManagerDB implements QuestionsManager {
 
     @Override
     public List<Question> getAllQuestionsInQuiz(int quizId) {
+        System.out.println("Der var sq nogen som leder efter spørgsmål med ID: " + quizId);
         List<Question> returnList = new ArrayList<>();
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM questions WHERE in_quiz_id = ? ORDER BY index");

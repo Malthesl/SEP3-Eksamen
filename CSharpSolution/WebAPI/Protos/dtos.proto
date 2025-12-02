@@ -35,4 +35,5 @@ message AnswerDTO {
   string title = 2;
   int32 index = 3;
   int32 questionId = 4; // Evt lav en repeated AnswerDTO variable på question i stedet for
+  bool isCorrect = 5;
 }
