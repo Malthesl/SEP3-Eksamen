@@ -71,10 +71,11 @@ public class AnswersManagerDB implements AnswersManager {
         if (answer.getTitle().isBlank()) throw new IllegalArgumentException("Titel må ikke være blank");
 
         try {
-            PreparedStatement statement = connection.prepareStatement("UPDATE answers SET title = ?, is_correct = ? WHERE id = ?");
+            PreparedStatement statement = connection.prepareStatement("UPDATE answers SET title = ?, is_correct = ? WHERE id = ? AND question_id = ?");
             statement.setString(1, answer.getTitle());
             statement.setBoolean(2, answer.isCorrect());
             statement.setInt(3, answer.getAnswerId());
+            statement.setInt(4, answer.getQuestionId());
             statement.execute();
 
             answers.put(answer.getAnswerId(), answer);

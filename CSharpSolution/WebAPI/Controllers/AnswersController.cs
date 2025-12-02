@@ -1,19 +1,27 @@
-﻿using AnswerDTO = ApiContracts.AnswerDTO;
+﻿using System.Security.Claims;
+using AnswerDTO = ApiContracts.AnswerDTO;
 using ApiContracts;
 using GrpcClient;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
-public class AnswersController(AnswersService.AnswersServiceClient answersService) : ControllerBase
+public class AnswersController(
+    AnswersService.AnswersServiceClient answersService,
+    QuestionService.QuestionServiceClient questionService,
+    QuizzesService.QuizzesServiceClient quizService) : ControllerBase
 {
     [HttpGet("FromQuestion/{questionId:int}")]
     public async Task<ActionResult<List<AnswerDTO>>> GetAnswers([FromRoute] int questionId)
     {
         try
         {
+            if (!await IsAuthorizedToAccess(questionId, User)) return Unauthorized();
+            
             var answers = await answersService.GetAllAnswersInQuestionAsync(new GetAllAnswersInQuestionRequest()
             {
                 QuestionId = questionId
@@ -45,6 +53,8 @@ public class AnswersController(AnswersService.AnswersServiceClient answersServic
     {
         try
         {
+            if (!await IsAuthorizedToAdd(createAnswerDto.QuestionId, User)) return Unauthorized(); 
+            
             var res = await answersService.AddAnswerAsync(new AddAnswerRequest()
             {  
                 Index = createAnswerDto.Index,
@@ -73,13 +83,15 @@ public class AnswersController(AnswersService.AnswersServiceClient answersServic
     {
         try
         {
+            if (!await IsAuthorizedToChange(answerId, User))
+            
             answersService.UpdateAnswer(new UpdateAnswerRequest()
             {
                 NewAnswer = new GrpcClient.AnswerDTO()
                 {
                     Index = answerDto.Index,
                     Title = answerDto.Title,
-                    Id = answerDto.AnswerId,
+                    Id = answerId,
                     IsCorrect = answerDto.IsCorrect,
                     QuestionId = answerDto.QuestionId
                 }
@@ -98,6 +110,8 @@ public class AnswersController(AnswersService.AnswersServiceClient answersServic
     {
         try
         {
+            if (!await IsAuthorizedToChange(answerId, User)) return Unauthorized();
+            
             answersService.DeleteAnswer(new DeleteAnswerRequest()
             {
                 AnswerId = answerId
@@ -109,5 +123,39 @@ public class AnswersController(AnswersService.AnswersServiceClient answersServic
         {
             return BadRequest(e.Message);
         }
+    }
+
+    private async Task<bool> IsAuthorizedToChange(int answerId, ClaimsPrincipal user)
+    {
+        int questionId = (await answersService.GetAnswerAsync(new GetAnswerRequest { Id = answerId })).Answer.QuestionId;
+        var question = await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest{QuestionId = questionId});
+        int userId = int.Parse(user.FindFirst("Id")!.Value);
+        int quizCreatorId = (await quizService.GetQuizAsync(new GetQuizRequest()
+        {
+            QuizId = question.Question.QuizId
+        })).Quiz.CreatorId;
+        
+        return quizCreatorId == userId;
+    }
+
+    private async Task<bool> IsAuthorizedToAdd(int questionId, ClaimsPrincipal user)
+    {
+        int userId = int.Parse(user.FindFirst("Id")!.Value);
+        int quizId = (await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest { QuestionId = questionId })).Question.QuizId;
+        int quizCreatorId = (await quizService.GetQuizAsync(new GetQuizRequest()
+        {
+            QuizId = quizId
+        })).Quiz.CreatorId;
+        
+        return quizCreatorId == userId;
+    }
+    
+    private async Task<bool> IsAuthorizedToAccess(int questionId, ClaimsPrincipal user)
+    {
+        int quizId = (await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest { QuestionId = questionId })).Question.QuizId;
+        var quiz = (await quizService.GetQuizAsync(new GetQuizRequest{QuizId = quizId})).Quiz;
+        int userId = int.Parse(user.FindFirst("Id")!.Value);
+        
+        return quiz.CreatorId == userId || quiz.Visibility == "public";
     }
 }
