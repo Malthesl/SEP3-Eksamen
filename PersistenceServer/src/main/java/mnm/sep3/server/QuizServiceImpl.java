@@ -98,6 +98,10 @@ public class QuizServiceImpl extends QuizzesServiceGrpc.QuizzesServiceImplBase {
                 .setTitle(quiz.getTitle())
                 .setVisibility(quiz.getVisibility())
                 .setCreatorId(quiz.getCreatorId())
+                .setCreator(UserInfoDTO.newBuilder()
+                        .setId(quiz.getCreator().getId())
+                        .setUsername(quiz.getCreator().getUsername())
+                        .build())
                 .build()
         ).toList());
 

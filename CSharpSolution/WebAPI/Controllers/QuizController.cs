@@ -2,6 +2,7 @@ using ApiContracts;
 using GrpcClient;
 using Microsoft.AspNetCore.Mvc;
 using QuizDTO = ApiContracts.QuizDTO;
+using UserDTO = ApiContracts.UserDTO;
 
 namespace WebAPI.Controllers;
 
@@ -38,6 +39,11 @@ public class QuizController(QuizzesService.QuizzesServiceClient quizService) : C
                 Id = quiz.Id,
                 Title = quiz.Title,
                 CreatorId = quiz.CreatorId,
+                Creator = new UserDTO
+                {
+                    Id = quiz.CreatorId,
+                    Username = quiz.Creator.Username
+                },
                 Visibility = quiz.Visibility
             })
         });

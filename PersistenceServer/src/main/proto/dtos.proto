@@ -10,6 +10,11 @@ message Empty {
 
 }
 
+message UserInfoDTO {
+  string username = 1;
+  int32 id = 2;
+}
+
 message UserDTO {
   string username = 1;
   string password = 2;
@@ -20,7 +25,8 @@ message QuizDTO {
   int32 id = 1;
   string title = 2;
   int32 creatorId = 3;
-  string visibility = 4;
+  UserInfoDTO creator = 4;
+  string visibility = 5;
 }
 
 message QuestionDTO {
