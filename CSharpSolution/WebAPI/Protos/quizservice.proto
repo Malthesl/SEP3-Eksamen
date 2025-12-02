@@ -39,7 +39,7 @@ message QueryQuizzesRequest {
   int32 byCreatorId = 2;
   int32 start = 3;
   int32 end = 4;
-  int32 visibilities = 5;
+  repeated string visibilities = 5;
 }
 
 message QueryQuizzesResponse {
