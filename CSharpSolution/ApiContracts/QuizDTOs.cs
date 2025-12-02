@@ -6,11 +6,13 @@ public class QuizDTO
     public required string Title { get; init; }
     public required string Visibility { get; init; }
     public required int CreatorId { get; init; }
+    public UserDTO? Creator { get; init; }
 }
 
 public class QuizQueryDTO
 {
     public required IEnumerable<QuizDTO> Quizzes { get; init; }
     public required int Start { get; init; }
+    public required int End { get; init; }
     public required int Count { get; init; }
 }

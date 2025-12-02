@@ -3,84 +3,110 @@ package mnm.sep3.server;
 import io.grpc.stub.StreamObserver;
 import mnm.sep3.*;
 import mnm.sep3.model.QuizzesManager;
+import mnm.sep3.model.entities.QueryResult;
 import mnm.sep3.model.entities.Quiz;
 
-public class QuizServiceImpl extends QuizzesServiceGrpc.QuizzesServiceImplBase
-{
-  private QuizzesManager quizzesManager;
+public class QuizServiceImpl extends QuizzesServiceGrpc.QuizzesServiceImplBase {
+    private QuizzesManager quizzesManager;
 
-  public QuizServiceImpl(QuizzesManager quizzesManager)
-  {
-    this.quizzesManager = quizzesManager;
-  }
+    public QuizServiceImpl(QuizzesManager quizzesManager) {
+        this.quizzesManager = quizzesManager;
+    }
 
-  public void getQuiz(GetQuizRequest request,
-      StreamObserver<GetQuizResponse> responseStreamObserver)
-  {
-    GetQuizResponse.Builder response = GetQuizResponse.newBuilder();
+    @Override
+    public void getQuiz(GetQuizRequest request,
+                        StreamObserver<GetQuizResponse> responseStreamObserver) {
+        GetQuizResponse.Builder response = GetQuizResponse.newBuilder();
 
-    Quiz quiz = quizzesManager.getQuiz(request.getQuizId());
+        Quiz quiz = quizzesManager.getQuiz(request.getQuizId());
 
-    QuizDTO dto = QuizDTO.newBuilder()
-        .setId(request.getQuizId())
-        .setTitle(quiz.getTitle())
-        .setVisibility(quiz.getVisibility())
-        .setCreatorId(quiz.getCreatorId())
-        .build();
+        QuizDTO dto = QuizDTO.newBuilder()
+                .setId(request.getQuizId())
+                .setTitle(quiz.getTitle())
+                .setVisibility(quiz.getVisibility())
+                .setCreatorId(quiz.getCreatorId())
+                .build();
 
-    response.setQuiz(dto);
+        response.setQuiz(dto);
 
-    responseStreamObserver.onNext(response.build());
-    responseStreamObserver.onCompleted();
-  }
+        responseStreamObserver.onNext(response.build());
+        responseStreamObserver.onCompleted();
+    }
 
-  public void addQuiz(AddQuizRequest request,
-      StreamObserver<AddQuizResponse> responseStreamObserver)
-  {
-    AddQuizResponse.Builder response = AddQuizResponse.newBuilder();
+    @Override
+    public void addQuiz(AddQuizRequest request,
+                        StreamObserver<AddQuizResponse> responseStreamObserver) {
+        AddQuizResponse.Builder response = AddQuizResponse.newBuilder();
 
-    int quizId = quizzesManager.addQuiz(request.getTitle(),
-        request.getCreatorId());
+        int quizId = quizzesManager.addQuiz(request.getTitle(),
+                request.getCreatorId());
 
-    QuizDTO dto = QuizDTO.newBuilder()
-        .setId(quizId)
-        .setTitle(request.getTitle())
-        .setVisibility("private")
-        .setCreatorId(request.getCreatorId())
-        .build();
+        QuizDTO dto = QuizDTO.newBuilder()
+                .setId(quizId)
+                .setTitle(request.getTitle())
+                .setVisibility("private")
+                .setCreatorId(request.getCreatorId())
+                .build();
 
-    response.setCreatorId(dto.getCreatorId());
+        response.setCreatorId(dto.getCreatorId());
 
-    responseStreamObserver.onNext(response.build());
-    responseStreamObserver.onCompleted();
-  }
+        responseStreamObserver.onNext(response.build());
+        responseStreamObserver.onCompleted();
+    }
 
-  public void updateQuiz (UpdateQuizRequest request, StreamObserver<Empty> responseStreamObserver){
-    UpdateQuizRequest.Builder response = UpdateQuizRequest.newBuilder();
-    quizzesManager.updateQuiz(new Quiz(request.getQuiz().getId(),request.getQuiz().getTitle(),request.getQuiz().getVisibility(),request.getQuiz().getCreatorId()));
+    @Override
+    public void updateQuiz(UpdateQuizRequest request, StreamObserver<Empty> responseStreamObserver) {
+        UpdateQuizRequest.Builder response = UpdateQuizRequest.newBuilder();
+        quizzesManager.updateQuiz(new Quiz(request.getQuiz().getId(), request.getQuiz().getTitle(), request.getQuiz().getVisibility(), request.getQuiz().getCreatorId()));
 
-    QuizDTO dto = QuizDTO.newBuilder()
-        .build();
+        QuizDTO dto = QuizDTO.newBuilder()
+                .build();
 
-    response.setQuiz(dto);
+        response.setQuiz(dto);
 
-    responseStreamObserver.onNext(Empty.newBuilder().build());
-    responseStreamObserver.onCompleted();
-  }
+        responseStreamObserver.onNext(Empty.newBuilder().build());
+        responseStreamObserver.onCompleted();
+    }
 
-  public void DeleteQuiz(DeleteQuizRequest request, StreamObserver<Empty> responseStreamObserver)
-  {
-    DeleteQuizRequest.Builder response = DeleteQuizRequest.newBuilder();
-    quizzesManager.deleteQuiz(request.getQuizId());
+    @Override
+    public void deleteQuiz(DeleteQuizRequest request, StreamObserver<Empty> responseStreamObserver) {
+        DeleteQuizRequest.Builder response = DeleteQuizRequest.newBuilder();
+        quizzesManager.deleteQuiz(request.getQuizId());
 
-    QuizDTO dto = QuizDTO.newBuilder()
-        .setId(request.getQuizId())
-        .build();
+        QuizDTO dto = QuizDTO.newBuilder()
+                .setId(request.getQuizId())
+                .build();
 
-    response.setQuizId(dto.getId());
+        response.setQuizId(dto.getId());
 
-    responseStreamObserver.onNext(Empty.newBuilder().build());
-    responseStreamObserver.onCompleted();
-  }
+        responseStreamObserver.onNext(Empty.newBuilder().build());
+        responseStreamObserver.onCompleted();
+    }
+
+    @Override
+    public void queryQuizzes(mnm.sep3.QueryQuizzesRequest request, io.grpc.stub.StreamObserver<mnm.sep3.QueryQuizzesResponse> responseObserver) {
+        QueryQuizzesResponse.Builder response = QueryQuizzesResponse.newBuilder();
+
+        QueryResult<Quiz> quizzes = quizzesManager.queryQuizzes(request.getSearchQuery(), request.getByCreatorId(), request.getStart(), request.getEnd(), request.getVisibilitiesList());
+
+        response.setStart(request.getStart());
+        response.setEnd(request.getStart() + quizzes.results.size());
+        response.setCount(quizzes.count);
+
+        response.addAllQuizzes(quizzes.results.stream().map(quiz -> QuizDTO.newBuilder()
+                .setId(quiz.getQuizId())
+                .setTitle(quiz.getTitle())
+                .setVisibility(quiz.getVisibility())
+                .setCreatorId(quiz.getCreatorId())
+                .setCreator(UserInfoDTO.newBuilder()
+                        .setId(quiz.getCreator().getId())
+                        .setUsername(quiz.getCreator().getUsername())
+                        .build())
+                .build()
+        ).toList());
+
+        responseObserver.onNext(response.build());
+        responseObserver.onCompleted();
+    }
 
 }

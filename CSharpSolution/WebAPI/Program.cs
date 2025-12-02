@@ -29,6 +29,12 @@ builder.Services.AddScoped<GrpcClient.UserService.UserServiceClient>(sp =>
     return new GrpcClient.UserService.UserServiceClient(channel);
 });
 
+builder.Services.AddScoped<GrpcClient.AnswersService.AnswersServiceClient>(sp =>
+{
+    var channel = GrpcChannel.ForAddress("http://localhost:7042");
+    return new GrpcClient.AnswersService.AnswersServiceClient(channel);
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

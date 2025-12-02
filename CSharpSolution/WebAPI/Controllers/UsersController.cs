@@ -1,5 +1,6 @@
 using ApiContracts;
 using GrpcClient;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserDTO = ApiContracts.UserDTO;
 
@@ -37,6 +38,7 @@ public class UsersController(UserService.UserServiceClient userService) : Contro
         });
     }
 
+    [Authorize]
     [HttpPost("{userId:int}")]
     public async Task<ActionResult<UserDTO>> UpdateUser(int userId, [FromBody] UpdateUserDTO userChanges)
     {
@@ -64,6 +66,7 @@ public class UsersController(UserService.UserServiceClient userService) : Contro
         return BadRequest("Ingen username eller password");
     }
 
+    [Authorize]
     [HttpDelete("{userId:int}")]
     public async Task<ActionResult> DeleteUser(int userId)
     {

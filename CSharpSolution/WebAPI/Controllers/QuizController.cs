@@ -2,6 +2,7 @@ using ApiContracts;
 using GrpcClient;
 using Microsoft.AspNetCore.Mvc;
 using QuizDTO = ApiContracts.QuizDTO;
+using UserDTO = ApiContracts.UserDTO;
 
 namespace WebAPI.Controllers;
 
@@ -18,25 +19,31 @@ public class QuizController(QuizzesService.QuizzesServiceClient quizService) : C
     {
         var req = new QueryQuizzesRequest
         {
-            SearchQuery = query,
+            SearchQuery = query ?? "",
             ByCreatorId = creatorId ?? -1,
             Start = start,
-            End = start + count,
+            End = start + count
         };
 
-        req.Visibilities.AddRange(visibility.Split(','));
+        req.Visibilities.AddRange(visibility?.Split(',') ?? []);
 
         var res = quizService.QueryQuizzes(req);
 
         return Ok(new QuizQueryDTO
         {
             Start = res.Start,
-            Count = res.Start - res.End,
+            End = res.End,
+            Count = res.Count,
             Quizzes = res.Quizzes.Select(quiz => new QuizDTO
             {
                 Id = quiz.Id,
                 Title = quiz.Title,
                 CreatorId = quiz.CreatorId,
+                Creator = new UserDTO
+                {
+                    Id = quiz.CreatorId,
+                    Username = quiz.Creator.Username
+                },
                 Visibility = quiz.Visibility
             })
         });

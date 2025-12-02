@@ -1,0 +1,25 @@
+@page "/Quizzes"
+@using ApiContracts
+@using BlazorApp.Services
+@inject IQuizService QuizService
+<h3>Find Quizzer</h3>
+
+@if (quizzes is not null)
+{
+    <div>Viser @quizzes.Quizzes.Count() ud af @quizzes.Count der matcher din søgning</div>
+    @foreach (var quiz in quizzes.Quizzes)
+    {
+        <div>@quiz.Title af @quiz.Creator.Username (@quiz.Visibility)</div>
+    }
+}
+
+@code {
+
+    private QuizQueryDTO? quizzes;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        quizzes = await QuizService.QueryMany(null, null, null, 0, 20);
+    }
+
+}
