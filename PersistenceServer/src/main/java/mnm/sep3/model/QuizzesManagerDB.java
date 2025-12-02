@@ -1,6 +1,7 @@
 package mnm.sep3.model;
 
 import mnm.sep3.database.Database;
+import mnm.sep3.model.entities.QueryResult;
 import mnm.sep3.model.entities.Quiz;
 
 import java.sql.Connection;
@@ -97,11 +98,9 @@ public class QuizzesManagerDB implements QuizzesManager {
     }
 
     @Override
-    public List<Quiz> queryQuizzes(String searchQuery, int byCreator, int start, int end, List<String> visibilities) {
-
+    public QueryResult<Quiz> queryQuizzes(String searchQuery, int byCreator, int start, int end, List<String> visibilities) {
         try {
             ResultSet res;
-            String sql = "SELECT * FROM quizzes WHERE ";
             List<String> queryOptions = new ArrayList<>();
             List<Object> queryValues = new ArrayList<>();
 
@@ -126,15 +125,24 @@ public class QuizzesManagerDB implements QuizzesManager {
             queryOptions.add("visibility IN (?)");
             queryValues.add(String.join(", ", visibilities));
 
-            sql += String.join(" AND ", queryOptions);
-
-            sql += " OFFSET ? LIMIT ?";
-
-            System.out.println(sql);
-
-            PreparedStatement statement = connection.prepareStatement(sql);
+            PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) AS count FROM quizzes WHERE " + String.join(" AND ", queryOptions));
 
             int l = queryValues.size();
+            
+            for (int i = 1; i < l + 1; i++) {
+                statement.setObject(i, queryValues.get(i - 1));
+            }
+
+            res = statement.executeQuery();
+
+            int count = 0;
+
+            if (res.next()) {
+                count = res.getInt("count");
+            }
+
+            // Siden der aldrig bliver indsat noget direkte fra klienten ind i queryen, burde det være save
+            statement = connection.prepareStatement("SELECT * FROM quizzes WHERE " + String.join(" AND ", queryOptions) + " OFFSET ? LIMIT ?");
 
             for (int i = 1; i < l + 1; i++) {
                 statement.setObject(i, queryValues.get(i - 1));
@@ -155,7 +163,7 @@ public class QuizzesManagerDB implements QuizzesManager {
                 quizzes.add(new Quiz(id, title, visibility, creatorId));
             }
 
-            return quizzes;
+            return new QueryResult<>(quizzes, count);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
