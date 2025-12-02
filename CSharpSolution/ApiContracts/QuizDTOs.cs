@@ -12,5 +12,6 @@ public class QuizQueryDTO
 {
     public required IEnumerable<QuizDTO> Quizzes { get; init; }
     public required int Start { get; init; }
+    public required int End { get; init; }
     public required int Count { get; init; }
 }

@@ -31,7 +31,8 @@ public class QuizController(QuizzesService.QuizzesServiceClient quizService) : C
         return Ok(new QuizQueryDTO
         {
             Start = res.Start,
-            Count = res.End - res.Start,
+            End = res.End,
+            Count = res.Count,
             Quizzes = res.Quizzes.Select(quiz => new QuizDTO
             {
                 Id = quiz.Id,

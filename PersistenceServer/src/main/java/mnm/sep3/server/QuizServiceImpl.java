@@ -3,9 +3,8 @@ package mnm.sep3.server;
 import io.grpc.stub.StreamObserver;
 import mnm.sep3.*;
 import mnm.sep3.model.QuizzesManager;
+import mnm.sep3.model.entities.QueryResult;
 import mnm.sep3.model.entities.Quiz;
-
-import java.util.List;
 
 public class QuizServiceImpl extends QuizzesServiceGrpc.QuizzesServiceImplBase {
     private QuizzesManager quizzesManager;
@@ -88,12 +87,13 @@ public class QuizServiceImpl extends QuizzesServiceGrpc.QuizzesServiceImplBase {
     public void queryQuizzes(mnm.sep3.QueryQuizzesRequest request, io.grpc.stub.StreamObserver<mnm.sep3.QueryQuizzesResponse> responseObserver) {
         QueryQuizzesResponse.Builder response = QueryQuizzesResponse.newBuilder();
 
-        List<Quiz> quizzes = quizzesManager.queryQuizzes(request.getSearchQuery(), request.getByCreatorId(), request.getStart(), request.getEnd(), request.getVisibilitiesList());
+        QueryResult<Quiz> quizzes = quizzesManager.queryQuizzes(request.getSearchQuery(), request.getByCreatorId(), request.getStart(), request.getEnd(), request.getVisibilitiesList());
 
         response.setStart(request.getStart());
-        response.setEnd(request.getStart() + quizzes.size());
+        response.setEnd(request.getStart() + quizzes.results.size());
+        response.setCount(quizzes.count);
 
-        response.addAllQuizzes(quizzes.stream().map(quiz -> QuizDTO.newBuilder()
+        response.addAllQuizzes(quizzes.results.stream().map(quiz -> QuizDTO.newBuilder()
                 .setId(quiz.getQuizId())
                 .setTitle(quiz.getTitle())
                 .setVisibility(quiz.getVisibility())

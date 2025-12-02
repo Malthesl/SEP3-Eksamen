@@ -46,6 +46,7 @@ message QueryQuizzesResponse {
   repeated QuizDTO quizzes = 1;
   int32 start = 2;
   int32 end = 3;
+  int32 count = 4;
 }
 
 service QuizzesService {

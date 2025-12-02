@@ -1,5 +1,6 @@
 package mnm.sep3.model;
 
+import mnm.sep3.model.entities.QueryResult;
 import mnm.sep3.model.entities.Quiz;
 
 import java.util.List;
@@ -42,5 +43,5 @@ public interface QuizzesManager {
      *                     En tom liste returner kun offentlige quizzer.
      *                     For at returner private quizzer, skal en byCreator inkluderes.
      */
-    List<Quiz> queryQuizzes(String searchQuery, int byCreator, int start, int end, List<String> visibilities);
+    QueryResult<Quiz> queryQuizzes(String searchQuery, int byCreator, int start, int end, List<String> visibilities);
 }
