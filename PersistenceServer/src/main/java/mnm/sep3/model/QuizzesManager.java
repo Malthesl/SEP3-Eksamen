@@ -17,7 +17,7 @@ public interface QuizzesManager
    * @param title titlen på quizzet
    * @return navnet på den nye quiz
    */
-  int addQuiz(String title);
+  int addQuiz(String title, int creatorId);
   /**
    * opdatere quizzet
    */
