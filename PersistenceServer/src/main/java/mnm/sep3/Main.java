@@ -6,7 +6,6 @@ import mnm.sep3.model.QuestionsManager;
 import mnm.sep3.model.QuestionsManagerDB;
 import mnm.sep3.model.UsersManager;
 import mnm.sep3.model.UsersManagerDB;
-import mnm.sep3.server.QuizServiceImpl;
 import mnm.sep3.server.UserServiceImpl;
 
 public class Main {
@@ -16,12 +15,9 @@ public class Main {
     UsersManager usersManager = new UsersManagerDB();
 
     Server server = ServerBuilder.forPort(7042)
-            .addService(new QuizServiceImpl(questionsManager))
             .addService(new UserServiceImpl(usersManager)).build();
     try {
       System.out.println("grpc server starter");
-
-      questionsManager.moveQuestion(5, 2);
       server.start();
       server.awaitTermination();
     } catch (Exception e) {

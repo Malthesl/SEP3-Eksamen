@@ -6,5 +6,6 @@ package mnm.sep3;
 
 option csharp_namespace = "GrpcClient";
 
-import "dtos.proto";
+message AddQuestionRequest {
 
+}
