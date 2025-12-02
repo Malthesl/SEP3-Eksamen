@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class QuizzesManagerDB implements QuizzesManager {
     private final Connection connection = Database.getConnection();
@@ -123,16 +124,12 @@ public class QuizzesManagerDB implements QuizzesManager {
             if (visibilities.contains("private") && byCreator == -1)
                 throw new RuntimeException("Fejl i queryQuizzes: Når private bruges i visibilities, skal en byCreator inkluderes");
 
-            queryOptions.add("visibility IN (?)");
-            queryValues.add(String.join(", ", visibilities));
+            queryOptions.add("visibility IN (" + visibilities.stream().map(v -> "?").collect(Collectors.joining(",")) + ")");
+            queryValues.add(visibilities);
 
             PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) AS count FROM quizzes WHERE " + String.join(" AND ", queryOptions));
 
-            int l = queryValues.size();
-
-            for (int i = 1; i < l + 1; i++) {
-                statement.setObject(i, queryValues.get(i - 1));
-            }
+            addQueryValues(queryValues, statement);
 
             res = statement.executeQuery();
 
@@ -148,9 +145,7 @@ public class QuizzesManagerDB implements QuizzesManager {
                     "FROM quizzes INNER JOIN users ON users.id = quizzes.creator_id WHERE " +
                     String.join(" AND ", queryOptions) + " OFFSET ? LIMIT ?");
 
-            for (int i = 1; i < l + 1; i++) {
-                statement.setObject(i, queryValues.get(i - 1));
-            }
+            int l = addQueryValues(queryValues, statement);
 
             statement.setInt(l + 1, start);
             statement.setInt(l + 2, end - start);
@@ -174,5 +169,28 @@ public class QuizzesManagerDB implements QuizzesManager {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Tilføjer query værdier ud fra en liste i rækkefølge til et statement
+     * Hvis der stødes på en liste i listen, så indsætter den den subliste i rækkefølge
+     * @return sidste indsatte indeks
+     */
+    private int addQueryValues(List<Object> values, PreparedStatement statement) throws SQLException {
+        int j = 0;
+
+        for (int i = 1; i < values.size() + 1; i++) {
+            var val = values.get(i - 1);
+            if (val instanceof List) {
+                List<Object> list = (List<Object>) val;
+                for (Object o : list) {
+                    statement.setObject(++j, o);
+                }
+            } else {
+                statement.setObject(++j, val);
+            }
+        }
+
+        return j;
     }
 }

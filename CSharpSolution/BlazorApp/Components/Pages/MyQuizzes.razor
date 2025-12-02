@@ -1,0 +1,61 @@
+@page "/My-Quizzes"
+@using ApiContracts
+@using BlazorApp.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IQuizService QuizService
+@inject AuthenticationStateProvider AuthStateProvider;
+<h3>Mine Quizzer</h3>
+
+<input type="text" placeholder="Søg efter titel" @bind="query">
+<button @onclick="UpdateResults">Søg</button>
+
+@if (quizzes is not null)
+{
+    <button @onclick="PreviousPage">Forrige side</button>
+    <span>Side @(pageIndex + 1) ud af @pages</span>
+    <button @onclick="NextPage">Næste side</button>
+    <div>Viser @quizzes.Quizzes.Count() ud af @quizzes.Count der matcher din søgning</div>
+    @foreach (var quiz in quizzes.Quizzes)
+    {
+        <div>@quiz.Title (@quiz.Visibility) af @quiz.Creator.Username med @quiz.QuestionCount spørgsmål</div>
+    }
+}
+
+@code {
+
+    private QuizQueryDTO? quizzes;
+
+    private String query;
+
+    private int pageIndex = 0;
+    private int pageSize = 20;
+
+    private int pages => (int)Math.Ceiling((double)quizzes.Count / pageSize);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await UpdateResults();
+    }
+
+    private async Task UpdateResults()
+    {
+        quizzes = await QuizService.QueryMany(query, ["public", "private"], int.Parse((await AuthStateProvider.GetAuthenticationStateAsync()).User.FindFirst("Id")!.Value), pageIndex * pageSize, pageSize);
+    }
+
+    private async Task PreviousPage()
+    {
+        pageIndex -= 1;
+        if (pageIndex < 0) pageIndex = 0;
+        await UpdateResults();
+        StateHasChanged();
+    }
+
+    private async Task NextPage()
+    {
+        pageIndex += 1;
+        if (pageIndex > pages - 1) pageIndex = pages - 1;
+        await UpdateResults();
+        StateHasChanged();
+    }
+
+}
