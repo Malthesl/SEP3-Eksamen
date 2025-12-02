@@ -18,20 +18,20 @@ public class QuizController(QuizzesService.QuizzesServiceClient quizService) : C
     {
         var req = new QueryQuizzesRequest
         {
-            SearchQuery = query,
+            SearchQuery = query ?? "",
             ByCreatorId = creatorId ?? -1,
             Start = start,
-            End = start + count,
+            End = start + count
         };
 
-        req.Visibilities.AddRange(visibility.Split(','));
+        req.Visibilities.AddRange(visibility?.Split(',') ?? []);
 
         var res = quizService.QueryQuizzes(req);
 
         return Ok(new QuizQueryDTO
         {
             Start = res.Start,
-            Count = res.Start - res.End,
+            Count = res.End - res.Start,
             Quizzes = res.Quizzes.Select(quiz => new QuizDTO
             {
                 Id = quiz.Id,
