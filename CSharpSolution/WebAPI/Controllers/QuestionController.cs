@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class QuestionController(
@@ -18,6 +19,8 @@ public class QuestionController(
     {
         try
         {
+            if (!await IsAuthorizedToAccess(quizId, User)) return Unauthorized();
+            
             var questionsDto = await questionService.GetAllQuestionsInQuizAsync(new GetAllQuestionsInQuizRequest()
             {
                 QuizId = quizId
@@ -44,12 +47,13 @@ public class QuestionController(
         }
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<ActionResult<QuestionDTO>> AddQuestion([FromBody] CreateQuestionDTO questionDto)
     {
         try
         {
+            if (!await IsAuthorizedToAdd(questionDto.QuizId, User)) return Unauthorized();
+            
             var res = await questionService.AddQuestionAsync(new AddQuestionRequest()
             {
                 QuizId = questionDto.QuizId,
@@ -70,7 +74,6 @@ public class QuestionController(
         }
     }
 
-    [Authorize]
     [HttpPost("{questionId:int}")]
     public async Task<ActionResult<QuestionDTO>> UpdateQuestion([FromBody] QuestionDTO questionDto)
     {
@@ -97,7 +100,6 @@ public class QuestionController(
         }
     }
 
-    [Authorize]
     [HttpDelete("{questionId:int}")]
     public async Task<ActionResult> DeleteQuestion([FromRoute] int questionId)
     {
@@ -114,7 +116,6 @@ public class QuestionController(
         }
     }
 
-    [Authorize]
     [HttpGet("{questionId:int}")]
     public async Task<ActionResult<QuestionDTO>> GetQuestion([FromRoute] int questionId)
     {
@@ -122,6 +123,8 @@ public class QuestionController(
         {
             var res = await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest()
                 { QuestionId = questionId });
+            
+            if (!await IsAuthorizedToAccess(res.Question.QuizId, User)) return Unauthorized();
 
             return Ok(new QuestionDTO()
             {
@@ -160,15 +163,10 @@ public class QuestionController(
         return quizCreatorId == userId;
     }
 
-    private async Task<bool> IsAuthorizedToAccess(int questionId, ClaimsPrincipal user)
+    private async Task<bool> IsAuthorizedToAccess(int quizId, ClaimsPrincipal user)
     {
-        
-        var question = await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest{QuestionId = questionId});
+        var quiz = (await quizService.GetQuizAsync(new GetQuizRequest{QuizId = quizId})).Quiz;
         int userId = int.Parse(user.FindFirst("Id")!.Value);
-        var quiz = (await quizService.GetQuizAsync(new GetQuizRequest()
-        {
-            QuizId = question.Question.QuizId
-        })).Quiz;
         
         return quiz.CreatorId == userId || quiz.Visibility == "public";
     }
