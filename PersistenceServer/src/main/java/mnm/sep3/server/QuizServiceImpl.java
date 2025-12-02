@@ -102,6 +102,7 @@ public class QuizServiceImpl extends QuizzesServiceGrpc.QuizzesServiceImplBase {
                         .setId(quiz.getCreator().getId())
                         .setUsername(quiz.getCreator().getUsername())
                         .build())
+                .setQuestionCount(quiz.getQuestionsCount())
                 .build()
         ).toList());
 

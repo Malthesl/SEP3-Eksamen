@@ -143,14 +143,17 @@ public class QuizzesManagerDB implements QuizzesManager {
             }
 
             // Siden der aldrig bliver indsat noget direkte fra klienten ind i queryen, burde det være save
-            statement = connection.prepareStatement("SELECT * FROM quizzes INNER JOIN users ON users.id = quizzes.creator_id WHERE " + String.join(" AND ", queryOptions) + " OFFSET ? LIMIT ?");
+            statement = connection.prepareStatement("SELECT *, " +
+                    "(SELECT COUNT(*) FROM questions WHERE questions.in_quiz_id = quizzes.id) AS question_count " +
+                    "FROM quizzes INNER JOIN users ON users.id = quizzes.creator_id WHERE " +
+                    String.join(" AND ", queryOptions) + " OFFSET ? LIMIT ?");
 
             for (int i = 1; i < l + 1; i++) {
                 statement.setObject(i, queryValues.get(i - 1));
             }
 
             statement.setInt(l + 1, start);
-            statement.setInt(l + 2, end);
+            statement.setInt(l + 2, end - start);
 
             res = statement.executeQuery();
 
@@ -163,6 +166,7 @@ public class QuizzesManagerDB implements QuizzesManager {
                 int creatorId = res.getInt("creator_id");
                 Quiz quiz = new Quiz(id, title, visibility, creatorId);
                 quiz.setCreator(new User(creatorId, res.getString("username")));
+                quiz.setQuestionsCount(res.getInt("question_count"));
                 quizzes.add(quiz);
             }
 

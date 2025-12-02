@@ -7,6 +7,7 @@ public class QuizDTO
     public required string Visibility { get; init; }
     public required int CreatorId { get; init; }
     public UserDTO? Creator { get; init; }
+    public int? QuestionCount { get; init; }
 }
 
 public class QuizQueryDTO

@@ -44,7 +44,8 @@ public class QuizController(QuizzesService.QuizzesServiceClient quizService) : C
                     Id = quiz.CreatorId,
                     Username = quiz.Creator.Username
                 },
-                Visibility = quiz.Visibility
+                Visibility = quiz.Visibility,
+                QuestionCount = quiz.QuestionCount
             })
         });
     }

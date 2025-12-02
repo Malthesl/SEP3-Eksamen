@@ -27,6 +27,7 @@ message QuizDTO {
   int32 creatorId = 3;
   UserInfoDTO creator = 4;
   string visibility = 5;
+  int32 questionCount = 6;
 }
 
 message QuestionDTO {
