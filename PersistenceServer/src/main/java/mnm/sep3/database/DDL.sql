@@ -22,14 +22,14 @@ CREATE TABLE quizzes (
     id SERIAL PRIMARY KEY,
     title VARCHAR NOT NULL,
     visibility visibility,
-    creator_id INT NOT NULL REFERENCES users (id)
+    creator_id INT REFERENCES users (id) ON DELETE SET NULL
 );
 
 CREATE TABLE questions (
     id SERIAL PRIMARY KEY,
     title VARCHAR NOT NULL,
     index INT NOT NULL,
-    in_quiz_id INT NOT NULL REFERENCES quizzes (id)
+    in_quiz_id INT NOT NULL REFERENCES quizzes (id) ON DELETE CASCADE
 );
 
 CREATE TABLE answers (
@@ -37,7 +37,7 @@ CREATE TABLE answers (
     title VARCHAR NOT NULL,
     index INT NOT NULL,
     is_correct BOOLEAN NOT NULL,
-    question_id INT NOT NULL REFERENCES questions (id)
+    question_id INT NOT NULL REFERENCES questions (id) ON DELETE CASCADE
 );
 
 -- Dummy data
