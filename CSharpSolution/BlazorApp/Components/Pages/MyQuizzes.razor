@@ -1,25 +1,33 @@
 @page "/My-Quizzes"
 @using ApiContracts
+@using BlazorApp.Components.Lib
 @using BlazorApp.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IQuizService QuizService
 @inject AuthenticationStateProvider AuthStateProvider;
-<h3>Mine Quizzer</h3>
 
-<input type="text" placeholder="Søg efter titel" @bind="query">
-<button @onclick="UpdateResults">Søg</button>
+<div class="centered-page">
+    <div class="content-page">
+        <h3>Mine Quizzer</h3>
 
-@if (quizzes is not null)
-{
-    <button @onclick="PreviousPage">Forrige side</button>
-    <span>Side @(pageIndex + 1) ud af @pages</span>
-    <button @onclick="NextPage">Næste side</button>
-    <div>Viser @quizzes.Quizzes.Count() ud af @quizzes.Count der matcher din søgning</div>
-    @foreach (var quiz in quizzes.Quizzes)
-    {
-        <div>@quiz.Title (@quiz.Visibility) af @quiz.Creator.Username med @quiz.QuestionCount spørgsmål</div>
-    }
-}
+        <input type="text" placeholder="Søg efter titel" @bind="query">
+        <button @onclick="UpdateResults">Søg</button>
+
+        @if (quizzes is not null)
+        {
+            <button @onclick="PreviousPage">Forrige side</button>
+            <span>Side @(pageIndex + 1) ud af @pages</span>
+            <button @onclick="NextPage">Næste side</button>
+            <div>Viser @quizzes.Quizzes.Count() ud af @quizzes.Count der matcher din søgning</div>
+            <div class="cards-list">
+                @foreach (var quiz in quizzes.Quizzes)
+                {
+                    <QuizCard Quiz="@quiz" />
+                }
+            </div>
+        }
+    </div>
+</div>
 
 @code {
 

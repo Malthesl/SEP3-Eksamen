@@ -1,0 +1,24 @@
+@using ApiContracts
+@using Microsoft.AspNetCore.Components.Authorization
+
+<div class="card">
+    <div class="title">@Quiz.Title</div>
+    <div class="author">by @Quiz.Creator.Username</div>
+    <div class="questions">@Quiz.QuestionCount spørgsmål</div>
+    <div class="buttons">
+        <NavLink href=@("/quiz/" + Quiz.Id + "/play")><button>Spil nu</button></NavLink>
+        <NavLink href=@("/quiz/" + Quiz.Id)><button>Om quiz</button></NavLink>
+        <AuthorizeView>
+            <Authorized>
+                @if (context.User.FindFirst("Id")!.Value == Quiz.CreatorId.ToString())
+                {
+                    <NavLink href=@("/quiz/" + Quiz.Id + "/edit")><button>Rediger quiz</button></NavLink>
+                }
+            </Authorized>
+        </AuthorizeView>
+    </div>
+</div>
+
+@code {
+    [Parameter] public QuizDTO Quiz { get; set; }
+}

@@ -1,0 +1,26 @@
+.card {
+  background: #eee;
+  padding: 20px;
+  overflow: hidden;
+  position: relative;
+  
+  .title {
+    font-weight: 500;
+    font-size: 1.5rem;
+  }
+  
+  .questions {
+    margin-top: 20px;
+  }
+  
+  .buttons {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    
+    button {
+      padding: 12px 16px;
+      font-size: 0.8rem;
+    }
+  }
+}

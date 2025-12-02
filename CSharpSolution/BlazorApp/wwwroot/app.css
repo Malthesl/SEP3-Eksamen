@@ -6,6 +6,16 @@ body {
   margin: 0;
 }
 
+.centered-page {
+  display: flex;
+  justify-content: center;
+}
+
+.content-page {
+  width: 100%;
+  max-width: 1000px;
+}
+
 /* Globale styles --- Knapper */
 button {
   background: #fff;
