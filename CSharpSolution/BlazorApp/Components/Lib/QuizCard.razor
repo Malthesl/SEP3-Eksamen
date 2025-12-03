@@ -6,13 +6,19 @@
     <div class="author">by @Quiz.Creator.Username</div>
     <div class="questions">@Quiz.QuestionCount spørgsmål</div>
     <div class="buttons">
-        <NavLink href=@("/quiz/" + Quiz.Id + "/play")><button>Spil nu</button></NavLink>
-        <NavLink href=@("/quiz/" + Quiz.Id)><button>Om quiz</button></NavLink>
+        <NavLink href=@("/quiz/" + Quiz.Id)>
+            <button>Om quiz</button>
+        </NavLink>
         <AuthorizeView>
             <Authorized>
+                <NavLink href=@("/quiz/" + Quiz.Id + "/play")>
+                    <button>Spil nu</button>
+                </NavLink>
                 @if (context.User.FindFirst("Id")!.Value == Quiz.CreatorId.ToString())
                 {
-                    <NavLink href=@("/quiz/" + Quiz.Id + "/edit")><button>Rediger quiz</button></NavLink>
+                    <NavLink href=@("/quiz/" + Quiz.Id + "/edit")>
+                        <button>Rediger quiz</button>
+                    </NavLink>
                 }
             </Authorized>
         </AuthorizeView>

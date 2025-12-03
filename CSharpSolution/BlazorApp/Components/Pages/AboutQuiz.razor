@@ -1,6 +1,7 @@
 @page "/quiz/{id:int}"
 @using ApiContracts
 @using BlazorApp.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @inject IQuizService QuizService;
 @inject IQuestionService QuestionService;
 
@@ -8,18 +9,42 @@
 {
     <h3>@Quiz.Title</h3>
     <h6>Lavet af @Quiz.Creator.Username</h6>
+
+    <p>Indeholder @Quiz.QuestionCount spørgsmål:</p>
+    <ul>
+        @foreach (var question in Questions)
+        {
+            <li>@question.Title</li>
+        }
+    </ul>
+
+    <AuthorizeView>
+        <Authorized>
+            <NavLink href=@("/quiz/" + Quiz.Id + "/play")>
+                <button>Spil nu</button>
+            </NavLink>
+            <NavLink href=@("/quiz/" + Quiz.Id + "/edit")>
+                <button>Rediger quiz</button>
+            </NavLink>
+        </Authorized>
+    </AuthorizeView>
+}
+else
+{
+    <p><em>Quiz ikke fundet :(</em></p>
 }
 
 @code {
 
-    [Parameter]
-    public int Id { get; set; }
-    
-    public QuizDTO Quiz { get; set; }
+    [Parameter] public int Id { get; set; }
+
+    private QuizDTO Quiz { get; set; }
+    private List<QuestionDTO> Questions { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
         Quiz = await QuizService.GetQuiz(Id);
+        Questions = await QuestionService.GetQuestionsFromQuiz(Id);
     }
 
 }
