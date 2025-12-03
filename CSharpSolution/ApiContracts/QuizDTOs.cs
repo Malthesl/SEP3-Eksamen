@@ -13,7 +13,6 @@ public class QuizDTO
 public class CreateQuizDTO
 {
     public required string Title { get; set; }
-    public required string Visibility { get; set; }
 }
 
 public class UpdateQuizDTO

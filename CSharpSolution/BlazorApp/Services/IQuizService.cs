@@ -5,4 +5,8 @@ namespace BlazorApp.Services;
 public interface IQuizService
 {
     Task<QuizQueryDTO> QueryMany(string? query, List<string>? visibility, int? creatorId, int start = 0, int count = 20);
+    Task<QuizDTO> CreateQuiz(string title);
+    Task<QuizDTO> UpdateQuiz(int id, string newTitle, string newVisibility);
+    Task DeleteQuiz(int id);
+    Task<QuizDTO> GetQuiz(int id);
 }
