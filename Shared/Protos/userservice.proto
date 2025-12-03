@@ -8,7 +8,6 @@ option csharp_namespace = "GrpcClient";
 
 import "dtos.proto";
 
-
 message CreateUserRequest {
   string username = 1;
   string password = 2;

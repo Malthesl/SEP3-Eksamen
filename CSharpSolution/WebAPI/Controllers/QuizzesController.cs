@@ -8,7 +8,7 @@ namespace WebAPI.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class QuizController(QuizzesService.QuizzesServiceClient quizService) : ControllerBase
+public class QuizzesController(QuizService.QuizServiceClient quizService) : ControllerBase
 {
     [HttpPost]
     public async Task<ActionResult<QuizDTO>> CreateQuiz([FromBody] CreateQuizDTO quizDto)

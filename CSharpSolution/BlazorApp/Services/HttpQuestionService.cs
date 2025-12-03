@@ -2,11 +2,11 @@
 
 namespace BlazorApp.Services;
 
-public class HttpQuestionsService(HttpClient httpClient) : IQuestionsService
+public class HttpQuestionService(HttpClient httpClient) : IQuestionService
 {
     public async Task<List<QuestionDTO>> GetQuestionsFromQuiz(int quizId)
     {
-        var res = await httpClient.GetAsync($"Question/FromQuiz/{quizId}");
+        var res = await httpClient.GetAsync($"questions/?quizId={quizId}");
         if (!res.IsSuccessStatusCode) throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
         
         var content = await res.Content.ReadFromJsonAsync<List<QuestionDTO>>();
@@ -16,7 +16,7 @@ public class HttpQuestionsService(HttpClient httpClient) : IQuestionsService
 
     public async Task<QuestionDTO> AddQuestion(CreateQuestionDTO question)
     {
-        var res = await httpClient.PostAsJsonAsync($"Question", question);
+        var res = await httpClient.PostAsJsonAsync($"questions", question);
         if (!res.IsSuccessStatusCode) throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
         
         var content = await res.Content.ReadFromJsonAsync<QuestionDTO>();
@@ -26,19 +26,19 @@ public class HttpQuestionsService(HttpClient httpClient) : IQuestionsService
 
     public async Task UpdateQuestion(QuestionDTO question)
     {
-        var res = await httpClient.PostAsJsonAsync($"Question/{question.QuestionId}", question);
+        var res = await httpClient.PostAsJsonAsync($"questions/{question.QuestionId}", question);
         if (!res.IsSuccessStatusCode) throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
     }
 
     public async Task DeleteQuestion(int questionId)
     {
-        var res = await httpClient.DeleteAsync($"Question/{questionId}");
+        var res = await httpClient.DeleteAsync($"questions/{questionId}");
         if (!res.IsSuccessStatusCode) throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
     }
 
     public async Task<QuestionDTO> GetQuestion(int questionId)
     {
-        var res = await httpClient.GetAsync($"Question/{questionId}");
+        var res = await httpClient.GetAsync($"questions/{questionId}");
         if (!res.IsSuccessStatusCode) throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
         
         var content = await res.Content.ReadFromJsonAsync<QuestionDTO>();

@@ -10,14 +10,14 @@ import mnm.sep3.GetQuizResponse;
 import mnm.sep3.QueryQuizzesRequest;
 import mnm.sep3.QueryQuizzesResponse;
 import mnm.sep3.QuizDTO;
-import mnm.sep3.QuizzesServiceGrpc;
+import mnm.sep3.QuizServiceGrpc;
 import mnm.sep3.UpdateQuizRequest;
 import mnm.sep3.UserInfoDTO;
 import mnm.sep3.model.QuizzesManager;
 import mnm.sep3.model.entities.QueryResult;
 import mnm.sep3.model.entities.Quiz;
 
-public class QuizServiceImpl extends QuizzesServiceGrpc.QuizzesServiceImplBase {
+public class QuizServiceImpl extends QuizServiceGrpc.QuizServiceImplBase {
     private QuizzesManager quizzesManager;
 
     public QuizServiceImpl(QuizzesManager quizzesManager) {

@@ -1,28 +1,24 @@
 package mnm.sep3.server;
 
 import io.grpc.stub.StreamObserver;
-import mnm.sep3.*;
 import mnm.sep3.AddAnswerRequest;
 import mnm.sep3.AddAnswerResponse;
 import mnm.sep3.AnswerDTO;
-import mnm.sep3.AnswersServiceGrpc;
+import mnm.sep3.AnswerServiceGrpc;
 import mnm.sep3.DeleteAnswerRequest;
 import mnm.sep3.Empty;
 import mnm.sep3.GetAllAnswersInQuestionRequest;
 import mnm.sep3.GetAllAnswersInQuestionResponse;
-import mnm.sep3.GetAllQuestionsInQuizRequest;
 import mnm.sep3.GetAnswerRequest;
 import mnm.sep3.GetAnswerResponse;
 import mnm.sep3.UpdateAnswerRequest;
 import mnm.sep3.model.AnswersManager;
 import mnm.sep3.model.entities.Answer;
 
-import java.util.List;
-
-public class AnswersServiceImpl extends AnswersServiceGrpc.AnswersServiceImplBase {
+public class AnswerServiceImpl extends AnswerServiceGrpc.AnswerServiceImplBase {
     private final AnswersManager answersManager;
 
-    public AnswersServiceImpl(AnswersManager answersManager) {
+    public AnswerServiceImpl(AnswersManager answersManager) {
         this.answersManager = answersManager;
     }
 

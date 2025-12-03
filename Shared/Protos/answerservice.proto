@@ -43,7 +43,7 @@ message GetAllAnswersInQuestionResponse {
   repeated AnswerDTO answers = 1;
 }
 
-service AnswersService {
+service AnswerService {
   rpc GetAnswer (GetAnswerRequest) returns (GetAnswerResponse);
   rpc AddAnswer (AddAnswerRequest) returns (AddAnswerResponse);
   rpc UpdateAnswer (UpdateAnswerRequest) returns (Empty);

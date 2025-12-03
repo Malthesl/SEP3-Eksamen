@@ -11,41 +11,34 @@ namespace WebAPI.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class AnswersController(
-    AnswersService.AnswersServiceClient answersService,
+    AnswerService.AnswerServiceClient answersService,
     QuestionService.QuestionServiceClient questionService,
-    QuizzesService.QuizzesServiceClient quizService) : ControllerBase
+    QuizService.QuizServiceClient quizService) : ControllerBase
 {
-    [HttpGet("FromQuestion/{questionId:int}")]
-    public async Task<ActionResult<List<AnswerDTO>>> GetAnswers([FromRoute] int questionId)
+    [HttpGet]
+    public async Task<ActionResult<List<AnswerDTO>>> GetAnswers([FromQuery] int questionId)
     {
-        try
-        {
-            if (!await IsAuthorizedToAccess(questionId, User)) return Unauthorized();
+        if (!await IsAuthorizedToAccess(questionId, User)) return Unauthorized();
 
-            var answers = await answersService.GetAllAnswersInQuestionAsync(new GetAllAnswersInQuestionRequest()
+        var answers = await answersService.GetAllAnswersInQuestionAsync(new GetAllAnswersInQuestionRequest()
+        {
+            QuestionId = questionId
+        });
+
+        List<AnswerDTO> returnList = new List<AnswerDTO>();
+        foreach (var answer in answers.Answers)
+        {
+            returnList.Add(new AnswerDTO()
             {
-                QuestionId = questionId
+                Index = answer.Index,
+                Title = answer.Title,
+                AnswerId = answer.Id,
+                IsCorrect = answer.IsCorrect,
+                QuestionId = answer.QuestionId,
             });
-
-            List<AnswerDTO> returnList = new List<AnswerDTO>();
-            foreach (var answer in answers.Answers)
-            {
-                returnList.Add(new AnswerDTO()
-                {
-                    Index = answer.Index,
-                    Title = answer.Title,
-                    AnswerId = answer.Id,
-                    IsCorrect = answer.IsCorrect,
-                    QuestionId = answer.QuestionId,
-                });
-            }
-
-            return Ok(returnList);
         }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
+
+        return Ok(returnList);
     }
 
     [HttpPost]
@@ -74,49 +67,34 @@ public class AnswersController(
     [HttpPost("{answerId:int}")]
     public async Task<ActionResult> UpdateAnswer([FromRoute] int answerId, [FromBody] AnswerDTO answerDto)
     {
-        Console.WriteLine("Der er sq nogen som forsøger at ændre i nogle svar");
-        try
-        {
-            if (!await IsAuthorizedToChange(answerId, User)) return Unauthorized();
+        if (!await IsAuthorizedToChange(answerId, User)) return Unauthorized();
 
-            answersService.UpdateAnswer(new UpdateAnswerRequest()
+        answersService.UpdateAnswer(new UpdateAnswerRequest()
+        {
+            NewAnswer = new GrpcClient.AnswerDTO()
             {
-                NewAnswer = new GrpcClient.AnswerDTO()
-                {
-                    Index = answerDto.Index,
-                    Title = answerDto.Title,
-                    Id = answerId,
-                    IsCorrect = answerDto.IsCorrect,
-                    QuestionId = answerDto.QuestionId
-                }
-            });
+                Index = answerDto.Index,
+                Title = answerDto.Title,
+                Id = answerId,
+                IsCorrect = answerDto.IsCorrect,
+                QuestionId = answerDto.QuestionId
+            }
+        });
 
-            return Ok(answerDto);
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
+        return Ok(answerDto);
     }
 
     [HttpDelete("{answerId:int}")]
     public async Task<ActionResult> DeleteAnswer([FromRoute] int answerId)
     {
-        try
-        {
-            if (!await IsAuthorizedToChange(answerId, User)) return Unauthorized();
+        if (!await IsAuthorizedToChange(answerId, User)) return Unauthorized();
 
-            answersService.DeleteAnswer(new DeleteAnswerRequest()
-            {
-                AnswerId = answerId
-            });
-
-            return Ok();
-        }
-        catch (Exception e)
+        answersService.DeleteAnswer(new DeleteAnswerRequest()
         {
-            return BadRequest(e.Message);
-        }
+            AnswerId = answerId
+        });
+
+        return Ok();
     }
 
     private async Task<bool> IsAuthorizedToChange(int answerId, ClaimsPrincipal user)

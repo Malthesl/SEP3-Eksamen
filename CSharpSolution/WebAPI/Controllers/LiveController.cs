@@ -7,9 +7,9 @@ namespace WebAPI.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class LiveController(
-    QuizzesService.QuizzesServiceClient quizService,
+    QuizService.QuizServiceClient quizService,
     QuestionService.QuestionServiceClient questionService,
-    AnswersService.AnswersServiceClient answerService) : ControllerBase
+    AnswerService.AnswerServiceClient answerService) : ControllerBase
 {
     // Host
     [Authorize]
@@ -66,9 +66,9 @@ public class LiveController(
 public class LiveGame(
     int quizId,
     int userId,
-    QuizzesService.QuizzesServiceClient quizService,
+    QuizService.QuizServiceClient quizService,
     QuestionService.QuestionServiceClient questionService,
-    AnswersService.AnswersServiceClient answerService)
+    AnswerService.AnswerServiceClient answerService)
 {
     public string GameId { get; init; } = Guid.NewGuid().ToString();
     public int HostUserId { get; } = userId;

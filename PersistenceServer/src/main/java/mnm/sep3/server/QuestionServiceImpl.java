@@ -16,10 +16,10 @@ import mnm.sep3.UpdateQuestionRequest;
 import mnm.sep3.model.QuestionsManager;
 import mnm.sep3.model.entities.Question;
 
-public class QuestionsServiceImpl extends QuestionServiceGrpc.QuestionServiceImplBase {
+public class QuestionServiceImpl extends QuestionServiceGrpc.QuestionServiceImplBase {
     private final QuestionsManager questionsManager;
 
-    public QuestionsServiceImpl(QuestionsManager questionsManager) {
+    public QuestionServiceImpl(QuestionsManager questionsManager) {
         this.questionsManager = questionsManager;
     }
 

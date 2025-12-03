@@ -3,9 +3,8 @@ package mnm.sep3;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import mnm.sep3.model.*;
-import mnm.sep3.server.AnswersServiceImpl;
-import mnm.sep3.model.*;
-import mnm.sep3.server.QuestionsServiceImpl;
+import mnm.sep3.server.AnswerServiceImpl;
+import mnm.sep3.server.QuestionServiceImpl;
 import mnm.sep3.server.QuizServiceImpl;
 import mnm.sep3.server.UserServiceImpl;
 
@@ -18,9 +17,9 @@ public class Main {
     AnswersManager answersManager = new AnswersManagerDB();
 
     Server server = ServerBuilder.forPort(7042)
-            .addService(new QuestionsServiceImpl(questionsManager))
+            .addService(new QuestionServiceImpl(questionsManager))
             .addService(new QuizServiceImpl(quizzesManager))
-            .addService(new AnswersServiceImpl(answersManager))
+            .addService(new AnswerServiceImpl(answersManager))
             .addService(new UserServiceImpl(usersManager)).build();
     try {
       System.out.println("grpc server starter");

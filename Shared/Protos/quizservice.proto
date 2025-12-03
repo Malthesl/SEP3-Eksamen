@@ -49,7 +49,7 @@ message QueryQuizzesResponse {
   int32 count = 4;
 }
 
-service QuizzesService {
+service QuizService {
   rpc GetQuiz (GetQuizRequest) returns (GetQuizResponse);
   rpc AddQuiz (AddQuizRequest) returns (AddQuizResponse);
   rpc UpdateQuiz (UpdateQuizRequest) returns (Empty);

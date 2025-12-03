@@ -2,7 +2,7 @@
 
 namespace BlazorApp.Services;
 
-public interface IQuestionsService
+public interface IQuestionService
 {
     Task<List<QuestionDTO>> GetQuestionsFromQuiz(int quizId);
     Task<QuestionDTO> AddQuestion(CreateQuestionDTO question);

@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Protobuf Include="Protos\**\*.proto" ProtoRoot="Protos">
+      <Protobuf Include="..\..\Shared\Protos\**\*.proto" ProtoRoot="..\..\Shared\Protos" GrpcServices="Client">
         <Generator>MSBuild:Compile</Generator>
       </Protobuf>
     </ItemGroup>
