@@ -1,0 +1,148 @@
+﻿@page "/quiz/{QuizId:int}/edit"
+@using ApiContracts
+@using BlazorApp.Services
+@using Microsoft.AspNetCore.Mvc.Infrastructure
+@inject IQuestionsService QuestionService
+@inject IAnswerService AnswerService
+
+<PageTitle>Kahoot++ | Quiz Editor</PageTitle>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <button>Tilføj</button>
+        </div>
+        <div class="overview">
+            @for (int i = 0; i < _questions.Count; i++)
+            {
+                int index = i; // Goofy ahh
+                <button @onclick="() => ChangeQuestion(index)">@index. @_questions[index].Title</button>
+            }
+        </div>
+    </div>
+    <div class="content">
+        @if (_selectedQuestion != null)
+        {
+            <div class="content-header">
+                <input class="question-input" placeholder="Skriv dit spørgsmål her" @bind="QuestionText" type="text"/>
+            </div>
+            <h2 class="options-title">Svarmuligheder:</h2>
+            <div class="answers-container">
+                @for (int i = 0; i < 4; i++)
+                {
+                    int index = i; // Bro hvorfor skal den her være der?!?!
+                    <div class="answer color-@i @(String.IsNullOrWhiteSpace(_answers[index])? "empty-answer" : "")">
+                        <input class="answer-title" placeholder="Svarmulighed..." @bind="_answers[index]"/>
+                        <input class="correct-answer" type="checkbox" @bind="_answersIsCorrect[index]"/>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="select-quiz-error">
+                <h1>Vælg venligst en quiz...</h1>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int QuizId { get; set; }
+
+    private List<QuestionDTO> _questions = [];
+
+    private string? _questionText = "";
+    
+    private string? QuestionText
+    {
+        get => _questionText;
+        set
+        {
+            _questionText = value;
+            OnQuestionFinished();
+        }
+    }
+
+    private static readonly int MaxQuestions = 4;
+    private readonly string[] _answers = new string[MaxQuestions];
+    private readonly bool[] _answersIsCorrect = new bool[MaxQuestions];
+
+    private QuestionDTO? _selectedQuestion;
+    private List<AnswerDTO>? _selectedQuestionAnswers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _questions = await QuestionService.GetQuestionsFromQuiz(QuizId);
+        _selectedQuestion = _questions[0];
+
+        await Refresh();
+    }
+
+    private async Task Refresh()
+    {
+        if (_selectedQuestion != null)
+        {
+            _questionText = _selectedQuestion.Title;
+            _selectedQuestionAnswers = await AnswerService.GetAnswersFromQuestionAsync(_selectedQuestion.QuestionId);
+            foreach (var answer in _selectedQuestionAnswers)
+            {
+                if (answer.Index > MaxQuestions || answer.Index < 0) continue;
+                
+                _answers[answer.Index - 1] = answer.Title;
+                _answersIsCorrect[answer.Index - 1] = answer.IsCorrect;
+            }
+        }
+        
+        StateHasChanged();
+    }
+
+    private async void ChangeQuestion(int index)
+    {
+        _selectedQuestion = _questions[index];
+
+        await Refresh();
+    }
+
+    private void OnQuestionFinished()
+    {
+        if (_selectedQuestion is null || QuestionText is null) return;
+        
+        _selectedQuestion.Title = QuestionText;
+        QuestionService.UpdateQuestion(_selectedQuestion);
+    }
+
+    private void OnAnswerFinished(int index)
+    {
+        if (String.IsNullOrWhiteSpace(_answers[index]))
+        {
+            // Delete answer nigger
+        }
+        else
+        {
+            AnswerDTO? answer = _selectedQuestionAnswers.Find(a => a.Index == index);
+            if (answer == null)
+            {
+                // Create new answer nigger
+                CreateAnswerDTO createdAnswer = new CreateAnswerDTO
+                {
+                    Index = index,
+                    Title = _answers[index],
+                    IsCorrect = _answersIsCorrect[index],
+                    QuestionId = _selectedQuestion!.QuizId
+                };
+                AnswerService.AddAnswerAsync(createdAnswer);
+            }
+            else
+            {
+                // Update answer nigger
+                answer.Title = _answers[index];
+                answer.IsCorrect = _answersIsCorrect[index];
+                AnswerService.UpdateAnswerAsync(answer);
+            }
+            
+        }
+    }
+
+}

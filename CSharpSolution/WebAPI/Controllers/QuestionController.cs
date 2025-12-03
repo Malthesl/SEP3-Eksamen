@@ -43,6 +43,7 @@ public class QuestionController(
         }
         catch (Exception e)
         {
+            Console.WriteLine(e.Message);
             return BadRequest(e.Message);
         }
     }
@@ -75,11 +76,11 @@ public class QuestionController(
     }
 
     [HttpPost("{questionId:int}")]
-    public async Task<ActionResult<QuestionDTO>> UpdateQuestion([FromBody] QuestionDTO questionDto)
+    public async Task<ActionResult<QuestionDTO>> UpdateQuestion([FromRoute] int questionId, [FromBody] QuestionDTO questionDto)
     {
         try
         {
-            if (!await IsAuthorizedToChange(questionDto.QuizId, User)) return Unauthorized();
+            if (!await IsAuthorizedToChange(questionDto.QuestionId, User)) return Unauthorized();
 
             await questionService.UpdateQuestionAsync(new UpdateQuestionRequest()
             {
@@ -87,7 +88,7 @@ public class QuestionController(
                 {
                     QuizId = questionDto.QuizId,
                     Index = questionDto.Index,
-                    Id = questionDto.QuestionId,
+                    Id = questionId,
                     Title = questionDto.Title,
                 }
             });
