@@ -59,7 +59,7 @@ public class QuizServiceImpl extends QuizzesServiceGrpc.QuizzesServiceImplBase {
                 .setCreatorId(request.getCreatorId())
                 .build();
 
-        response.setQuizDto(QuizDTO.newBuilder());
+        response.setQuizDto(dto);
 
         responseStreamObserver.onNext(response.build());
         responseStreamObserver.onCompleted();
