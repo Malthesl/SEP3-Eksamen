@@ -19,8 +19,8 @@ public class UpdateQuizDTO
 {
     public string? Title { get; set; }
     public string? Visibility { get; set; }
-    public int? quizId { get; set; }
 }
+
 public class QuizQueryDTO
 {
     public required IEnumerable<QuizDTO> Quizzes { get; init; }

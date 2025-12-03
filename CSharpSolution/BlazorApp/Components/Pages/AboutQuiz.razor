@@ -1,9 +1,11 @@
 @page "/quiz/{id:int}"
 @using ApiContracts
+@using BlazorApp.Components.Modals
 @using BlazorApp.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IQuizService QuizService;
 @inject IQuestionService QuestionService;
+@inject NavigationManager Nav;
 
 @if (Quiz is not null)
 {
@@ -26,6 +28,8 @@
             <NavLink href=@("/quiz/" + Quiz.Id + "/edit")>
                 <button>Rediger quiz</button>
             </NavLink>
+            <button @onclick="() => _renameModal.Show()">Omdøb quiz</button>
+            <button style="color: red" @onclick="() => _deleteModal.Show()">Slet quiz</button>
         </Authorized>
     </AuthorizeView>
 }
@@ -34,7 +38,20 @@ else
     <p><em>Quiz ikke fundet :(</em></p>
 }
 
+<ConfirmModal @ref="_deleteModal"
+              Title="Bekræft sletning"
+              Message="Er du sikker på, at du vil slette quizzen?"
+              OnClose="HandleDeleteConfirmation" />
+
+<RenameModal @ref="_renameModal"
+              Title="@($"Omdøb{Quiz?.Title}")"
+              Message="Er du sikker på, at du vil slette quizzen?"
+              Name="@Quiz?.Title"
+              OnClose="HandleRename" />
+
 @code {
+    private ConfirmModal? _deleteModal;
+    private RenameModal? _renameModal;
 
     [Parameter] public int Id { get; set; }
 
@@ -45,6 +62,23 @@ else
     {
         Quiz = await QuizService.GetQuiz(Id);
         Questions = await QuestionService.GetQuestionsFromQuiz(Id);
+    }
+
+    private async Task HandleDeleteConfirmation(bool confirmed)
+    {
+        if (confirmed)
+        {
+            await QuizService.DeleteQuiz(Quiz.Id);
+            Nav.NavigateTo("/my-quizzes");
+        }
+    }
+
+    private async Task HandleRename(string? newName)
+    {
+        if (newName != null && Quiz.Title != newName)
+        {
+            Quiz = await QuizService.UpdateQuiz(Id, newName, Quiz.Visibility);
+        }
     }
 
 }

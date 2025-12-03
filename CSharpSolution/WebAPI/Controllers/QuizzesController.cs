@@ -31,19 +31,19 @@ public class QuizzesController(QuizService.QuizServiceClient quizService) : Cont
     }
 
     [HttpPost("{quizId:int}")]
-    public async Task<ActionResult<QuizDTO>> UpdateQuiz([FromBody] QuizDTO quizDto)
+    public async Task<ActionResult<QuizDTO>> UpdateQuiz([FromRoute] int quizId, [FromBody] UpdateQuizDTO quizDto)
     {
-        await quizService.UpdateQuizAsync(new UpdateQuizRequest()
+        await quizService.UpdateQuizAsync(new UpdateQuizRequest
         {
             Quiz = new GrpcClient.QuizDTO
             {
                 Title = quizDto.Title,
                 Visibility = quizDto.Visibility,
-                Id = quizDto.Id
+                Id = quizId
             }
         });
 
-        return Ok();
+        return await GetQuiz(quizId);
     }
 
     [HttpDelete("{quizId:int}")]

@@ -36,7 +36,7 @@ public class HttpQuizService(HttpClient httpClient) : IQuizService
 
     public async Task<QuizDTO> UpdateQuiz(int id, string newTitle, string newVisibility)
     {
-        var response = await   httpClient.PostAsJsonAsync($"quizzes/{id}", new { Title = newTitle, Visibility = newVisibility });
+        var response = await httpClient.PostAsJsonAsync($"quizzes/{id}", new UpdateQuizDTO { Title = newTitle, Visibility = newVisibility });
         if (!response.IsSuccessStatusCode) throw new Exception("Kunne ikke opdatere quiz. " + response.StatusCode);
 
         return (await response.Content.ReadFromJsonAsync<QuizDTO>())!;

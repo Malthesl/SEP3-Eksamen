@@ -1,0 +1,41 @@
+@if (IsVisible)
+{
+    <div class="modal-backdrop">
+        <div class="modal-window">
+            <h3>@Title</h3>
+            <p>@Message</p>
+
+            <div class="modal-actions">
+                <button class="btn btn-danger" @onclick="Confirm">Ja</button>
+                <button class="btn btn-secondary" @onclick="Cancel">Nej</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Message { get; set; } = "";
+    [Parameter] public EventCallback<bool> OnClose { get; set; }
+
+    public bool IsVisible { get; set; }
+
+    public void Show()
+    {
+        IsVisible = true;
+        StateHasChanged();
+    }
+
+    private async Task Confirm()
+    {
+        IsVisible = false;
+        await OnClose.InvokeAsync(true);
+    }
+
+    private async Task Cancel()
+    {
+        IsVisible = false;
+        await OnClose.InvokeAsync(false);
+    }
+
+}
