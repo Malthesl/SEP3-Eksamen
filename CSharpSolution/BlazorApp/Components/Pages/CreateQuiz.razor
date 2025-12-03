@@ -1,0 +1,29 @@
+﻿@page "/CreateQuiz"
+@using ApiContracts
+@inject IQuizService QuizService
+@inject NavigationManager Nav
+@using BlazorApp.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+
+<PageTitle>Kahoot++ | Create Quiz</PageTitle>
+<div>
+    <h1>CreateQuiz</h1>
+</div>
+<div>
+    <label for="quiz-name">Name your Quiz</label>
+    <input id="quiz-name" placeholder="Enter quiz name here" @bind="Title">
+</div>
+<div>
+    <button class="button" @onclick="Create">Create</button> 
+</div>
+
+@code {
+    private string Title { get; set; }
+
+    private async Task Create()
+    {
+        QuizDTO quiz = await QuizService.CreateQuiz(Title);
+        Nav.NavigateTo("/quiz/"+quiz.Id);
+    }
+}

@@ -25,4 +25,35 @@ public class HttpQuizService(HttpClient httpClient) : IQuizService
 
         return (await response.Content.ReadFromJsonAsync<QuizQueryDTO>())!;
     }
+
+    public async Task<QuizDTO> CreateQuiz(string title)
+    {
+        var response = await httpClient.PostAsJsonAsync("quiz", new { Title = title });
+        if (!response.IsSuccessStatusCode) throw new Exception("Kunne ikke oprette quiz. " + response.StatusCode);
+
+        return (await response.Content.ReadFromJsonAsync<QuizDTO>())!;
+    }
+
+    public async Task<QuizDTO> UpdateQuiz(int id, string newTitle, string newVisibility)
+    {
+        var response = await   httpClient.PostAsJsonAsync("quiz/" + id, new { Title = newTitle, Visibility = newVisibility });
+        if (!response.IsSuccessStatusCode) throw new Exception("Kunne ikke opdatere quiz. " + response.StatusCode);
+
+        return (await response.Content.ReadFromJsonAsync<QuizDTO>())!;
+    }
+
+    public async Task DeleteQuiz(int id)
+    {
+        var respone = await httpClient.DeleteAsync("quiz/" + id);
+        if (!respone.IsSuccessStatusCode) throw new Exception("Kunne ikke slette quiz. " + respone.StatusCode);
+    }
+
+    public async Task<QuizDTO> GetQuiz(int id)
+    {
+        var response = await httpClient.GetAsync("quiz/" + id);
+        if (!response.IsSuccessStatusCode) throw new Exception("Kunne ikke hente quiz. " + response.StatusCode);
+        
+        return (await response.Content.ReadFromJsonAsync<QuizDTO>())!;
+    }
+
 }

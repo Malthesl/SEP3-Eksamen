@@ -14,34 +14,28 @@ public class QuizController(QuizzesService.QuizzesServiceClient quizService) : C
     [HttpPost]
     public async Task<ActionResult<QuizDTO>> CreateQuiz([FromBody] CreateQuizDTO quizDto)
     {
-        try
-        {
-            int userId = int.Parse(User.FindFirst("Id")!.Value);
+        int userId = int.Parse(User.FindFirst("Id")!.Value);
 
-            var res = await quizService.AddQuizAsync(new AddQuizRequest
-            {
-                Title = quizDto.Title,
-                CreatorId = userId
-            });
-
-            return Created($"Quiz/{res.QuizDto.Id}", new QuizDTO()
-            {
-                Id = res.QuizDto.Id,
-                Title = res.QuizDto.Title,
-                Visibility = res.QuizDto.Visibility,
-                CreatorId = res.QuizDto.CreatorId,
-                Creator = new UserDTO
-                {
-                    Id = res.QuizDto.CreatorId,
-                    Username = res.QuizDto.Creator.Username
-                },
-                QuestionCount = res.QuizDto.QuestionCount
-            });
-        } 
-        catch (Exception e)
+        var res = await quizService.AddQuizAsync(new AddQuizRequest
         {
-            return BadRequest(e.Message);
-        }
+            Title = quizDto.Title,
+            CreatorId = userId
+        });
+
+        return Created($"Quiz/{res.QuizDto.Id}", new QuizDTO()
+        {
+            Id = res.QuizDto.Id,
+            Title = res.QuizDto.Title,
+            Visibility = res.QuizDto.Visibility,
+            CreatorId = res.QuizDto.CreatorId,
+            Creator = new UserDTO
+            {
+                Id = res.QuizDto.CreatorId,
+                Username = res.QuizDto.Creator.Username
+            },
+            QuestionCount = res.QuizDto.QuestionCount
+        });
+
     }
 
     [HttpPost("{quizId:int}")]
