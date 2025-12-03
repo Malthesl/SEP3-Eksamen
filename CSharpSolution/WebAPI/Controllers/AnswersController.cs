@@ -21,7 +21,7 @@ public class AnswersController(
         try
         {
             if (!await IsAuthorizedToAccess(questionId, User)) return Unauthorized();
-            
+
             var answers = await answersService.GetAllAnswersInQuestionAsync(new GetAllAnswersInQuestionRequest()
             {
                 QuestionId = questionId
@@ -39,7 +39,7 @@ public class AnswersController(
                     QuestionId = answer.QuestionId,
                 });
             }
-            
+
             return Ok(returnList);
         }
         catch (Exception e)
@@ -51,40 +51,34 @@ public class AnswersController(
     [HttpPost]
     public async Task<ActionResult<AnswerDTO>> AddAnswer([FromBody] CreateAnswerDTO createAnswerDto)
     {
-        try
+        if (!await IsAuthorizedToAdd(createAnswerDto.QuestionId, User)) return Unauthorized();
+
+        var res = await answersService.AddAnswerAsync(new AddAnswerRequest()
         {
-            if (!await IsAuthorizedToAdd(createAnswerDto.QuestionId, User)) return Unauthorized(); 
-            
-            var res = await answersService.AddAnswerAsync(new AddAnswerRequest()
-            {  
-                Index = createAnswerDto.Index,
-                Title = createAnswerDto.Title,
-                IsCorrect = createAnswerDto.IsCorrect,
-                QuestionId = createAnswerDto.QuestionId,
-            });
-            
-            return Ok(new AnswerDTO()
-            {
-                Index = res.Answer.Index,
-                Title = res.Answer.Title,
-                AnswerId = res.Answer.Id,
-                IsCorrect = res.Answer.IsCorrect,
-                QuestionId = res.Answer.QuestionId,
-            });
-        }
-        catch (Exception e)
+            Index = createAnswerDto.Index,
+            Title = createAnswerDto.Title,
+            IsCorrect = createAnswerDto.IsCorrect,
+            QuestionId = createAnswerDto.QuestionId,
+        });
+
+        return Ok(new AnswerDTO()
         {
-            return BadRequest(e.Message);
-        }
+            Index = res.Answer.Index,
+            Title = res.Answer.Title,
+            AnswerId = res.Answer.Id,
+            IsCorrect = res.Answer.IsCorrect,
+            QuestionId = res.Answer.QuestionId,
+        });
     }
 
     [HttpPost("{answerId:int}")]
     public async Task<ActionResult> UpdateAnswer([FromRoute] int answerId, [FromBody] AnswerDTO answerDto)
     {
+        Console.WriteLine("Der er sq nogen som forsøger at ændre i nogle svar");
         try
         {
-            if (!await IsAuthorizedToChange(answerId, User))
-            
+            if (!await IsAuthorizedToChange(answerId, User)) return Unauthorized();
+
             answersService.UpdateAnswer(new UpdateAnswerRequest()
             {
                 NewAnswer = new GrpcClient.AnswerDTO()
@@ -96,7 +90,7 @@ public class AnswersController(
                     QuestionId = answerDto.QuestionId
                 }
             });
-            
+
             return Ok(answerDto);
         }
         catch (Exception e)
@@ -111,7 +105,7 @@ public class AnswersController(
         try
         {
             if (!await IsAuthorizedToChange(answerId, User)) return Unauthorized();
-            
+
             answersService.DeleteAnswer(new DeleteAnswerRequest()
             {
                 AnswerId = answerId
@@ -127,35 +121,41 @@ public class AnswersController(
 
     private async Task<bool> IsAuthorizedToChange(int answerId, ClaimsPrincipal user)
     {
-        int questionId = (await answersService.GetAnswerAsync(new GetAnswerRequest { Id = answerId })).Answer.QuestionId;
-        var question = await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest{QuestionId = questionId});
+        int questionId = (await answersService.GetAnswerAsync(new GetAnswerRequest { Id = answerId })).Answer
+            .QuestionId;
+        var question =
+            await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest { QuestionId = questionId });
         int userId = int.Parse(user.FindFirst("Id")!.Value);
         int quizCreatorId = (await quizService.GetQuizAsync(new GetQuizRequest()
         {
             QuizId = question.Question.QuizId
         })).Quiz.CreatorId;
-        
+
         return quizCreatorId == userId;
     }
 
     private async Task<bool> IsAuthorizedToAdd(int questionId, ClaimsPrincipal user)
     {
         int userId = int.Parse(user.FindFirst("Id")!.Value);
-        int quizId = (await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest { QuestionId = questionId })).Question.QuizId;
+        int quizId =
+            (await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest { QuestionId = questionId }))
+            .Question.QuizId;
         int quizCreatorId = (await quizService.GetQuizAsync(new GetQuizRequest()
         {
             QuizId = quizId
         })).Quiz.CreatorId;
-        
+
         return quizCreatorId == userId;
     }
-    
+
     private async Task<bool> IsAuthorizedToAccess(int questionId, ClaimsPrincipal user)
     {
-        int quizId = (await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest { QuestionId = questionId })).Question.QuizId;
-        var quiz = (await quizService.GetQuizAsync(new GetQuizRequest{QuizId = quizId})).Quiz;
+        int quizId =
+            (await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest { QuestionId = questionId }))
+            .Question.QuizId;
+        var quiz = (await quizService.GetQuizAsync(new GetQuizRequest { QuizId = quizId })).Quiz;
         int userId = int.Parse(user.FindFirst("Id")!.Value);
-        
+
         return quiz.CreatorId == userId || quiz.Visibility == "public";
     }
 }

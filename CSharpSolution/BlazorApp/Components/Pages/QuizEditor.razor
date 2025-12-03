@@ -1,7 +1,6 @@
 ﻿@page "/quiz/{QuizId:int}/edit"
 @using ApiContracts
 @using BlazorApp.Services
-@using Microsoft.AspNetCore.Mvc.Infrastructure
 @inject IQuestionsService QuestionService
 @inject IAnswerService AnswerService
 
@@ -10,19 +9,21 @@
 <div class="layout">
     <div class="sidebar">
         <div class="sidebar-header">
-            <button>Tilføj</button>
+            <button class="add-question-button" @onclick="AddQuestion">Tilføj</button>
         </div>
-        <div class="overview">
+        <div class="sidebar-content">
             @for (int i = 0; i < _questions.Count; i++)
             {
                 int index = i; // Goofy ahh
-                <button @onclick="() => ChangeQuestion(index)">@index. @_questions[index].Title</button>
+                QuestionDTO question = _questions[index];
+                <button class="question-button @(question.Equals(_selectedQuestion)? "marked" : "")" @onclick="() => ChangeQuestion(index)">@question.Title</button>
             }
         </div>
     </div>
     <div class="content">
         @if (_selectedQuestion != null)
         {
+            <button class="delete-button"></button>
             <div class="content-header">
                 <input class="question-input" placeholder="Skriv dit spørgsmål her" @bind="QuestionText" type="text"/>
             </div>
@@ -31,9 +32,9 @@
                 @for (int i = 0; i < 4; i++)
                 {
                     int index = i; // Bro hvorfor skal den her være der?!?!
-                    <div class="answer color-@i @(String.IsNullOrWhiteSpace(_answers[index])? "empty-answer" : "")">
-                        <input class="answer-title" placeholder="Svarmulighed..." @bind="_answers[index]"/>
-                        <input class="correct-answer" type="checkbox" @bind="_answersIsCorrect[index]"/>
+                    <div class="answer color-@index @(String.IsNullOrWhiteSpace(_answers[index])? "empty-answer" : "")">
+                        <input class="answer-title" placeholder="Svarmulighed..." value="@_answers[index]" @onchange="e => HandleAnswerChange(index, e.Value?.ToString())"/>
+                        <input class="correct-answer" type="checkbox" checked="@_answersIsCorrect[index]" value="@_answersIsCorrect[index]" @onchange="e => HandleCorrectChange(index, (bool)e.Value!)"/>
                     </div>
                 }
             </div>
@@ -48,13 +49,12 @@
 </div>
 
 @code {
-    [Parameter]
-    public int QuizId { get; set; }
+    [Parameter] public int QuizId { get; set; }
 
     private List<QuestionDTO> _questions = [];
 
     private string? _questionText = "";
-    
+
     private string? QuestionText
     {
         get => _questionText;
@@ -75,26 +75,34 @@
     protected override async Task OnInitializedAsync()
     {
         _questions = await QuestionService.GetQuestionsFromQuiz(QuizId);
-        _selectedQuestion = _questions[0];
+        _selectedQuestion = _questions.Count > 0? _questions[0] : null;
 
         await Refresh();
     }
 
     private async Task Refresh()
     {
+        _questions = await QuestionService.GetQuestionsFromQuiz(QuizId);
         if (_selectedQuestion != null)
         {
             _questionText = _selectedQuestion.Title;
             _selectedQuestionAnswers = await AnswerService.GetAnswersFromQuestionAsync(_selectedQuestion.QuestionId);
-            foreach (var answer in _selectedQuestionAnswers)
+            for (int i = 0; i < MaxQuestions; i++)
             {
-                if (answer.Index > MaxQuestions || answer.Index < 0) continue;
-                
-                _answers[answer.Index - 1] = answer.Title;
-                _answersIsCorrect[answer.Index - 1] = answer.IsCorrect;
+                try
+                {
+                    var answer = _selectedQuestionAnswers[i];
+                    _answers[answer.Index - 1] = answer.Title;
+                    _answersIsCorrect[answer.Index - 1] = answer.IsCorrect;
+                }
+                catch (Exception e)
+                {
+                    _answers[i] = "";
+                    _answersIsCorrect[i] = false;
+                }
             }
         }
-        
+
         StateHasChanged();
     }
 
@@ -108,41 +116,68 @@
     private void OnQuestionFinished()
     {
         if (_selectedQuestion is null || QuestionText is null) return;
-        
+
         _selectedQuestion.Title = QuestionText;
         QuestionService.UpdateQuestion(_selectedQuestion);
     }
 
-    private void OnAnswerFinished(int index)
+    private void HandleAnswerChange(int index, string? value)
     {
+        _answers[index] = value ?? String.Empty;
+        OnAnswerFinished(index);
+    }
+
+    private void HandleCorrectChange(int index, bool value)
+    {
+        _answersIsCorrect[index] = value;
+        OnAnswerFinished(index);
+    }
+
+    private async void OnAnswerFinished(int index)
+    {
+        if (_selectedQuestion is null || _selectedQuestionAnswers is null) return;
+        
+        AnswerDTO? answer = _selectedQuestionAnswers.Find(a => a.Index == index + 1);
         if (String.IsNullOrWhiteSpace(_answers[index]))
         {
-            // Delete answer nigger
+            if (answer == null) return;
+
+            await AnswerService.DeleteAnswerAsync(answer.AnswerId);
         }
         else
         {
-            AnswerDTO? answer = _selectedQuestionAnswers.Find(a => a.Index == index);
             if (answer == null)
             {
-                // Create new answer nigger
-                CreateAnswerDTO createdAnswer = new CreateAnswerDTO
+                var createdAnswer = new CreateAnswerDTO
                 {
-                    Index = index,
+                    Index = index + 1,
                     Title = _answers[index],
                     IsCorrect = _answersIsCorrect[index],
-                    QuestionId = _selectedQuestion!.QuizId
+                    QuestionId = _selectedQuestion.QuestionId
                 };
-                AnswerService.AddAnswerAsync(createdAnswer);
+                await AnswerService.AddAnswerAsync(createdAnswer);
             }
             else
             {
-                // Update answer nigger
                 answer.Title = _answers[index];
                 answer.IsCorrect = _answersIsCorrect[index];
-                AnswerService.UpdateAnswerAsync(answer);
+                await AnswerService.UpdateAnswerAsync(answer);
             }
-            
+
         }
+
+        await Refresh();
+    }
+
+    private async void AddQuestion()
+    {
+        await QuestionService.AddQuestion(new CreateQuestionDTO
+        {
+            Title = "New Question",
+            QuizId = QuizId
+        });
+
+        await Refresh();
     }
 
 }

@@ -14,9 +14,14 @@ public class HttpQuestionsService(HttpClient httpClient) : IQuestionsService
         return content;
     }
 
-    public Task<QuestionDTO> AddQuestion(QuestionDTO question)
+    public async Task<QuestionDTO> AddQuestion(CreateQuestionDTO question)
     {
-        throw new NotImplementedException();
+        var res = await httpClient.PostAsJsonAsync($"Question", question);
+        if (!res.IsSuccessStatusCode) throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
+        
+        var content = await res.Content.ReadFromJsonAsync<QuestionDTO>();
+        if (content == null) throw new NullReferenceException($"Response is null");
+        return content;
     }
 
     public async Task UpdateQuestion(QuestionDTO question)
@@ -25,13 +30,19 @@ public class HttpQuestionsService(HttpClient httpClient) : IQuestionsService
         if (!res.IsSuccessStatusCode) throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
     }
 
-    public Task DeleteQuestion(int questionId)
+    public async Task DeleteQuestion(int questionId)
     {
-        throw new NotImplementedException();
+        var res = await httpClient.DeleteAsync($"Question/{questionId}");
+        if (!res.IsSuccessStatusCode) throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
     }
 
-    public Task<QuestionDTO> GetQuestion(int questionId)
+    public async Task<QuestionDTO> GetQuestion(int questionId)
     {
-        throw new NotImplementedException();
+        var res = await httpClient.GetAsync($"Question/{questionId}");
+        if (!res.IsSuccessStatusCode) throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
+        
+        var content = await res.Content.ReadFromJsonAsync<QuestionDTO>();
+        if (content == null) throw new NullReferenceException($"Response is null");
+        return content;
     }
 }

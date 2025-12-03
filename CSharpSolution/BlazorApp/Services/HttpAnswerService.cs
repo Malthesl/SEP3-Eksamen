@@ -14,19 +14,25 @@ public class HttpAnswerService(HttpClient httpClient) : IAnswerService
         return content;
     }
 
-    public Task<AnswerDTO> AddAnswerAsync(CreateAnswerDTO answer)
+    public async Task<AnswerDTO> AddAnswerAsync(CreateAnswerDTO answer)
     {
-        throw new NotImplementedException();
+        var res = await httpClient.PostAsJsonAsync($"Answers", answer);
+        if (!res.IsSuccessStatusCode) throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
+        
+        var content = await res.Content.ReadFromJsonAsync<AnswerDTO>();
+        if (content == null) throw new NullReferenceException($"Response is null");
+        return content;
     }
 
     public async Task UpdateAnswerAsync(AnswerDTO answer)
     {
-        var res = await httpClient.PutAsJsonAsync($"Answers/{answer.AnswerId}", answer);
-        if (!res.IsSuccessStatusCode) throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
+        var res = await httpClient.PostAsJsonAsync($"Answers/{answer.AnswerId}", answer);
+        if (!res.IsSuccessStatusCode) throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.StatusCode}");
     }
 
-    public Task DeleteAnswerAsync(int answerId)
+    public async Task DeleteAnswerAsync(int answerId)
     {
-        throw new NotImplementedException();
+        var res = await httpClient.DeleteAsync($"Answers/{answerId}");
+        if (!res.IsSuccessStatusCode) throw new HttpRequestException($"Http status code {(int)res.StatusCode}");
     }
 }
