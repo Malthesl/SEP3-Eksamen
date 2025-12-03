@@ -22,12 +22,12 @@ public class QuizzesManagerDB implements QuizzesManager {
 
     @Override
     public Quiz getQuiz(int quizId) {
-        Quiz quiz = quizzes.get(quizId);
-        if (quiz != null)
-            return quiz;
+//        Quiz quiz = quizzes.get(quizId);
+//        if (quiz != null)
+//            return quiz;
 
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM quizzes WHERE id=?");
+            PreparedStatement statement = connection.prepareStatement("SELECT *, (SELECT COUNT(*) FROM questions WHERE questions.in_quiz_id = quizzes.id) AS question_count FROM quizzes INNER JOIN users ON users.id = quizzes.creator_id WHERE quizzes.id = ?");
             statement.setInt(1, quizId);
 
             ResultSet res = statement.executeQuery();
@@ -36,9 +36,10 @@ public class QuizzesManagerDB implements QuizzesManager {
                 String title = res.getString("title");
                 String visibility = res.getString("visibility");
                 int creatorId = res.getInt("creator_id");
-
-                quiz = new Quiz(quizId, title, visibility, creatorId);
-                quizzes.put(quizId, quiz);
+                Quiz quiz = new Quiz(quizId, title, visibility, creatorId);
+                quiz.setCreator(new User(creatorId, res.getString("username")));
+                quiz.setQuestionsCount(res.getInt("question_count"));
+//                quizzes.put(quizId, quiz);
                 return quiz;
             } else {
                 throw new RuntimeException("Quiz does not exist");
@@ -61,7 +62,7 @@ public class QuizzesManagerDB implements QuizzesManager {
             ResultSet res = statement.executeQuery();
             if (res.next()) {
                 int id = res.getInt("id");
-                quizzes.put(id, new Quiz(id, title, "private", creatorId));
+//                quizzes.put(id, new Quiz(id, title, "private", creatorId));
                 return id;
             } else {
                 throw new RuntimeException("Kunne ikke tilføjes");
@@ -81,7 +82,7 @@ public class QuizzesManagerDB implements QuizzesManager {
 
             statement.execute();
 
-            quizzes.put(quiz.getQuizId(), quiz);
+//            quizzes.put(quiz.getQuizId(), quiz);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

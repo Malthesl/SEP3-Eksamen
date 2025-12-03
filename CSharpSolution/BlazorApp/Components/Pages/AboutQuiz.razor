@@ -1,0 +1,24 @@
+@page "/quiz/{id:int}"
+@using ApiContracts
+@using BlazorApp.Services
+@inject IQuizService QuizService;
+
+@if (Quiz is not null)
+{
+    <h3>@Quiz.Title</h3>
+    <h6>Lavet af @Quiz.Creator.Username</h6>
+}
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+    
+    public QuizDTO Quiz { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Quiz = await QuizService.GetQuiz(Id);
+    }
+
+}

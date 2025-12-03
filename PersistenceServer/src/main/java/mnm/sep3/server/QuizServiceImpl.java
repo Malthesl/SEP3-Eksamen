@@ -36,6 +36,11 @@ public class QuizServiceImpl extends QuizzesServiceGrpc.QuizzesServiceImplBase {
                 .setTitle(quiz.getTitle())
                 .setVisibility(quiz.getVisibility())
                 .setCreatorId(quiz.getCreatorId())
+                .setCreator(UserInfoDTO.newBuilder()
+                        .setId(quiz.getCreatorId())
+                        .setUsername(quiz.getCreator().getUsername())
+                        .build())
+                .setQuestionCount(quiz.getQuestionsCount())
                 .build();
 
         response.setQuiz(dto);
