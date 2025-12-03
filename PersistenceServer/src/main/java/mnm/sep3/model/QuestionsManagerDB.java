@@ -110,7 +110,6 @@ public class QuestionsManagerDB implements QuestionsManager {
 
     @Override
     public List<Question> getAllQuestionsInQuiz(int quizId) {
-        System.out.println("Der var sq nogen som leder efter spørgsmål med ID: " + quizId);
         List<Question> returnList = new ArrayList<>();
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM questions WHERE in_quiz_id = ? ORDER BY index");
