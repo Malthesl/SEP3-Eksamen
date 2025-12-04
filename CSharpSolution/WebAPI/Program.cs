@@ -1,6 +1,7 @@
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using WebAPI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,25 +12,25 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<GrpcClient.QuizService.QuizServiceClient>(sp =>
+builder.Services.AddSingleton<GrpcClient.QuizService.QuizServiceClient>(sp =>
 {
     var channel = GrpcChannel.ForAddress("http://localhost:7042");
     return new GrpcClient.QuizService.QuizServiceClient(channel);
 });
 
-builder.Services.AddScoped<GrpcClient.QuestionService.QuestionServiceClient>(sp =>
+builder.Services.AddSingleton<GrpcClient.QuestionService.QuestionServiceClient>(sp =>
 {
     var channel = GrpcChannel.ForAddress("http://localhost:7042");
     return new GrpcClient.QuestionService.QuestionServiceClient(channel);
 });
 
-builder.Services.AddScoped<GrpcClient.UserService.UserServiceClient>(sp =>
+builder.Services.AddSingleton<GrpcClient.UserService.UserServiceClient>(sp =>
 {
     var channel = GrpcChannel.ForAddress("http://localhost:7042");
     return new GrpcClient.UserService.UserServiceClient(channel);
 });
 
-builder.Services.AddScoped<GrpcClient.AnswerService.AnswerServiceClient>(sp =>
+builder.Services.AddSingleton<GrpcClient.AnswerService.AnswerServiceClient>(sp =>
 {
     var channel = GrpcChannel.ForAddress("http://localhost:7042");
     return new GrpcClient.AnswerService.AnswerServiceClient(channel);
@@ -49,6 +50,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey("SuperSecretKeyThatIsAtMinimum32CharactersLong"u8.ToArray())
         };
     });
+
+builder.Services.AddSingleton<LiveGameService>();
 
 var app = builder.Build();
 
