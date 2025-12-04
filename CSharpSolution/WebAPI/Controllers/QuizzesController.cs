@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using ApiContracts;
 using GrpcClient;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuizDTO = ApiContracts.QuizDTO;
 using UserDTO = ApiContracts.UserDTO;
@@ -10,6 +12,7 @@ namespace WebAPI.Controllers;
 [Route("[controller]")]
 public class QuizzesController(QuizService.QuizServiceClient quizService) : ControllerBase
 {
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<QuizDTO>> CreateQuiz([FromBody] CreateQuizDTO quizDto)
     {
@@ -30,9 +33,12 @@ public class QuizzesController(QuizService.QuizServiceClient quizService) : Cont
         });
     }
 
+    [Authorize]
     [HttpPost("{quizId:int}")]
     public async Task<ActionResult<QuizDTO>> UpdateQuiz([FromRoute] int quizId, [FromBody] UpdateQuizDTO quizDto)
     {
+        if (!await IsAuthorizedToChange(quizId, User)) return Unauthorized();
+        
         await quizService.UpdateQuizAsync(new UpdateQuizRequest
         {
             Quiz = new GrpcClient.QuizDTO
@@ -49,17 +55,23 @@ public class QuizzesController(QuizService.QuizServiceClient quizService) : Cont
     [HttpDelete("{quizId:int}")]
     public async Task<ActionResult> DeleteQuiz([FromRoute] int quizId)
     {
+        if (!await IsAuthorizedToChange(quizId, User)) return Unauthorized();
+        
         await quizService.DeleteQuizAsync(new DeleteQuizRequest() { QuizId = quizId });
+        
         return Ok();
     }
 
     [HttpGet("{quizId:int}")]
     public async Task<ActionResult<QuizDTO>> GetQuiz([FromRoute] int quizId)
     {
+        if (!await IsAuthorizedToAccess(quizId, User)) return Unauthorized();
+        
         var res = await quizService.GetQuizAsync(new GetQuizRequest()
         {
             QuizId = quizId
         });
+        
         return Ok(new QuizDTO
         {
             Id = res.Quiz.Id,
@@ -113,5 +125,26 @@ public class QuizzesController(QuizService.QuizServiceClient quizService) : Cont
                 QuestionCount = quiz.QuestionCount
             })
         });
+    }
+
+    private async Task<bool> IsAuthorizedToChange(int quizId, ClaimsPrincipal user)
+    {
+        int userId = int.Parse(user.FindFirst("Id")!.Value);
+        
+        int quizCreatorId = (await quizService.GetQuizAsync(new GetQuizRequest()
+        {
+            QuizId = quizId
+        })).Quiz.CreatorId;
+
+        return quizCreatorId == userId;
+    }
+
+    private async Task<bool> IsAuthorizedToAccess(int quizId, ClaimsPrincipal user)
+    {
+        var quiz = (await quizService.GetQuizAsync(new GetQuizRequest { QuizId = quizId })).Quiz;
+        
+        int userId = int.Parse(user.FindFirst("Id")!.Value);
+
+        return quiz.CreatorId == userId || quiz.Visibility == "public";
     }
 }

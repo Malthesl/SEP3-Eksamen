@@ -1,0 +1,51 @@
+@if (IsVisible)
+{
+    <div class="modal-backdrop">
+        <div class="modal-window">
+            <h3>@Title</h3>
+            <p>@Message</p>
+
+            <select @bind="Value">
+                @for (int i = 0; i < Options.Count; i++)
+                {
+                    <option value="@OptionValues[i]">@Options[i]</option>
+                }
+            </select>
+
+            <div class="modal-actions">
+                <button class="btn btn-danger" @onclick="Confirm">Ja</button>
+                <button class="btn btn-secondary" @onclick="Cancel">Nej</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Message { get; set; } = "";
+    [Parameter] public List<string> Options { get; set; } = [];
+    [Parameter] public List<string> OptionValues { get; set; } = [];
+    [Parameter] public string? Value { get; set; } = null;
+    [Parameter] public EventCallback<string?> OnClose { get; set; }
+
+    public bool IsVisible { get; set; }
+
+    public void Show()
+    {
+        IsVisible = true;
+        StateHasChanged();
+    }
+
+    private async Task Confirm()
+    {
+        IsVisible = false;
+        await OnClose.InvokeAsync(Value);
+    }
+
+    private async Task Cancel()
+    {
+        IsVisible = false;
+        await OnClose.InvokeAsync(null);
+    }
+
+}

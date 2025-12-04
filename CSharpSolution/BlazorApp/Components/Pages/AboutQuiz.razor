@@ -10,6 +10,7 @@
 @if (Quiz is not null)
 {
     <h3>@Quiz.Title</h3>
+    <p>@Quiz.Visibility</p>
     <h6>Lavet af @Quiz.Creator.Username</h6>
 
     <p>Indeholder @Quiz.QuestionCount spørgsmål:</p>
@@ -25,11 +26,15 @@
             <NavLink href=@("/quiz/" + Quiz.Id + "/play")>
                 <button>Spil nu</button>
             </NavLink>
-            <NavLink href=@("/quiz/" + Quiz.Id + "/edit")>
-                <button>Rediger quiz</button>
-            </NavLink>
-            <button @onclick="() => _renameModal.Show()">Omdøb quiz</button>
-            <button style="color: red" @onclick="() => _deleteModal.Show()">Slet quiz</button>
+            @if (context.User.FindFirst("Id")!.Value == Quiz.CreatorId.ToString())
+            {
+                <NavLink href=@("/quiz/" + Quiz.Id + "/edit")>
+                    <button>Rediger quiz</button>
+                </NavLink>
+                <button @onclick="() => _visibilityModal.Show()">Ændre synlighed quiz</button>
+                <button @onclick="() => _renameModal.Show()">Omdøb quiz</button>
+                <button style="color: red" @onclick="() => _deleteModal.Show()">Slet quiz</button>
+            }
         </Authorized>
     </AuthorizeView>
 }
@@ -44,14 +49,23 @@ else
               OnClose="HandleDeleteConfirmation" />
 
 <RenameModal @ref="_renameModal"
-              Title="@($"Omdøb{Quiz?.Title}")"
-              Message="Er du sikker på, at du vil slette quizzen?"
-              Name="@Quiz?.Title"
-              OnClose="HandleRename" />
+             Title="@($"Omdøb{Quiz?.Title}")"
+             Message="Hvad skal quizzen omdøbes til?"
+             Name="@Quiz?.Title"
+             OnClose="HandleRename" />
+
+<OptionsModal @ref="_visibilityModal"
+              Title="Vælg synlighed for din quiz"
+              Message="Vælg en synlighed for din quiz:"
+              Value="@Quiz?.Visibility"
+              Options="@(["Offentlig", "Privat"])"
+              OptionValues="@(["public", "private"])"
+              OnClose="HandleVisibility" />
 
 @code {
     private ConfirmModal? _deleteModal;
     private RenameModal? _renameModal;
+    private OptionsModal? _visibilityModal;
 
     [Parameter] public int Id { get; set; }
 
@@ -78,6 +92,14 @@ else
         if (newName != null && Quiz.Title != newName)
         {
             Quiz = await QuizService.UpdateQuiz(Id, newName, Quiz.Visibility);
+        }
+    }
+
+    private async Task HandleVisibility(string? newVisibility)
+    {
+        if (newVisibility != null && Quiz.Visibility != newVisibility)
+        {
+            Quiz = await QuizService.UpdateQuiz(Id, Quiz.Title, newVisibility);
         }
     }
 

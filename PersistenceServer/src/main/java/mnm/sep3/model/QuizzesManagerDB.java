@@ -76,9 +76,10 @@ public class QuizzesManagerDB implements QuizzesManager {
     public void updateQuiz(Quiz quiz) {
         try {
             PreparedStatement statement = connection.prepareStatement(
-                    "UPDATE quizzes SET title=? WHERE id=?");
+                    "UPDATE quizzes SET title=?, visibility=? WHERE id=?");
             statement.setString(1, quiz.getTitle());
-            statement.setInt(2, quiz.getQuizId());
+            statement.setString(2, quiz.getVisibility());
+            statement.setInt(3, quiz.getQuizId());
 
             statement.execute();
 
