@@ -27,7 +27,7 @@ public class UsersController(UserService.UserServiceClient userService) : Contro
     }
 
     [HttpGet("{userId:int}")]
-    public async Task<ActionResult<UserDTO>> GetUser(int userId)
+    public async Task<ActionResult<UserDTO>> GetUser([FromRoute] int userId)
     {
         var response = await userService.GetUserByIdAsync(new GetUserByIdRequest { Id = userId });
 
@@ -40,7 +40,7 @@ public class UsersController(UserService.UserServiceClient userService) : Contro
 
     [Authorize]
     [HttpPost("{userId:int}")]
-    public async Task<ActionResult<UserDTO>> UpdateUser(int userId, [FromBody] UpdateUserDTO userChanges)
+    public async Task<ActionResult<UserDTO>> UpdateUser([FromRoute] int userId, [FromBody] UpdateUserDTO userChanges)
     {
         string userIdClaim = User.FindFirst("Id")!.Value;
         int currentUserId = int.Parse(userIdClaim);
@@ -68,7 +68,7 @@ public class UsersController(UserService.UserServiceClient userService) : Contro
 
     [Authorize]
     [HttpDelete("{userId:int}")]
-    public async Task<ActionResult> DeleteUser(int userId)
+    public async Task<ActionResult> DeleteUser([FromRoute] int userId)
     {
         string userIdClaim = User.FindFirst("Id")!.Value;
         int currentUserId = int.Parse(userIdClaim);
