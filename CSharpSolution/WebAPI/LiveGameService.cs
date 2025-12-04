@@ -108,6 +108,7 @@ public class LiveGame
     {
         var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         var result = new char[6];
+        string joinCode;
 
         do
         {
@@ -115,11 +116,14 @@ public class LiveGame
             {
                 result[i] = chars[Random.Shared.Next(chars.Length)];
             }
-        } while (JoinCodesInUse.Contains(new string(result)));
 
-        JoinCodesInUse.Add(new string(result));
+            joinCode = new string(result);
+            
+        } while (JoinCodesInUse.Contains(joinCode));
+
+        JoinCodesInUse.Add(joinCode);
         
-        return new string(result);
+        return joinCode;
     }
 }
 

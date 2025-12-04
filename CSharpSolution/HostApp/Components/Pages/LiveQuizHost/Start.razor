@@ -1,0 +1,25 @@
+@page "/quiz/{quizId:int}/play"
+@using HostApp.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Nav;
+@inject AuthenticationStateProvider AuthStateProvider;
+@inject IQuizHostService QuizHostService;
+<h3>Starter quiz...</h3>
+
+@code {
+
+    [Parameter] public int QuizId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        AuthenticationState auth = await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (auth.User.Identity is not null)
+        {
+            string gameId = await QuizHostService.HostQuiz(QuizId);
+            
+            Nav.NavigateTo($"/host?gameId={gameId}");
+        }
+    }
+
+}

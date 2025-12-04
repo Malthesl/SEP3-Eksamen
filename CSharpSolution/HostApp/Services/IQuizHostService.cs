@@ -1,0 +1,10 @@
+using ApiContracts;
+
+namespace HostApp.Services;
+
+public interface IQuizHostService
+{
+    Task<string> HostQuiz(int quizId);
+    
+    Task<LiveGameStatusDTO> GetGameInfo(string gameId, bool force = false);
+}

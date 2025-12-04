@@ -1,0 +1,36 @@
+@page "/host"
+@using ApiContracts
+@using HostApp.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IQuizHostService QuizHostService;
+
+<AuthorizeView>
+    <Authorized>
+        @if (GameStatus is not null)
+        {
+            <span>@GameStatus.Quiz.Title</span>
+            <h1>Join med denne kode: @GameStatus.JoinCode</h1>
+        }
+    </Authorized>
+    <NotAuthorized>
+        Du skal logge ind for at hoste denne quiz.
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter] [SupplyParameterFromQuery] public string GameId { get; set; }
+    public LiveGameStatusDTO? GameStatus { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        GameStatus = await QuizHostService.GetGameInfo(GameId, true);
+        GetNextStatus();
+    }
+
+    public async Task GetNextStatus()
+    {
+        GameStatus = await QuizHostService.GetGameInfo(GameId);
+        GetNextStatus();
+    }
+
+}

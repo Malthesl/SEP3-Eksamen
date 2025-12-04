@@ -32,6 +32,7 @@ builder.Services.AddScoped<IUserService, HttpUserService>();
 builder.Services.AddScoped<IQuizService, HttpQuizService>();
 builder.Services.AddScoped<IQuestionService, HttpQuestionService>();
 builder.Services.AddScoped<IAnswerService, HttpAnswerService>();
+builder.Services.AddScoped<IQuizHostService, HttpQuizHostService>();
 
 var app = builder.Build();
 
