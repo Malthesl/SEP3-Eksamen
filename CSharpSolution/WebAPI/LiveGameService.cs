@@ -19,6 +19,8 @@ public class LiveGameService(
 
         return game;
     }
+    
+    public LiveGame? GetGameFromJoinCode(string joinCode) => Games.Values.FirstOrDefault(g => g.JoinCode == joinCode);
 }
 
 public class LiveGame
@@ -27,7 +29,7 @@ public class LiveGame
     public int HostUserId { get; init; }
     public int QuizId { get; init; }
     public string JoinCode { get; init; }
-    
+
     public int CurrentQuestionId { get; private set; }
 
     /// <summary>
@@ -83,6 +85,10 @@ public class LiveGame
             .ToList();
     }
 
+    /// <summary>
+    /// Henter den nuværende game, efter en ændring er sket.
+    /// </summary>
+    /// <param name="force">Skal hente med det samme?</param>
     public async Task<LiveGame> GetGameState(bool force = false)
     {
         if (force) return this;
@@ -92,6 +98,9 @@ public class LiveGame
         return this;
     }
 
+    /// <summary>
+    /// Kald denne metode, når en ændring er sket. Så bliver klienterne opdateret!
+    /// </summary>
     public void StateUpdated()
     {
         foreach (var task in _tasks)
@@ -102,8 +111,25 @@ public class LiveGame
         _tasks.Clear();
     }
 
+    /// <summary>
+    /// Join Game
+    /// </summary>
+    public LiveGamePlayer JoinGame(string name)
+    {
+        LiveGamePlayer player = new LiveGamePlayer { PlayerId = Guid.NewGuid().ToString(), Name = name };
+
+        Players.Add(player);
+        
+        StateUpdated();
+
+        return player;
+    }
+
     private static readonly ISet<string> JoinCodesInUse = new HashSet<string>();
 
+    /// <summary>
+    /// Hjælpemetode til at generere join codes
+    /// </summary>
     private static String GenerateJoinCode()
     {
         var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -118,11 +144,10 @@ public class LiveGame
             }
 
             joinCode = new string(result);
-            
         } while (JoinCodesInUse.Contains(joinCode));
 
         JoinCodesInUse.Add(joinCode);
-        
+
         return joinCode;
     }
 }
@@ -130,6 +155,7 @@ public class LiveGame
 public class LiveGamePlayer
 {
     public required string PlayerId { get; init; } = Guid.NewGuid().ToString();
+    public string Name { get; set; }
 }
 
 public class LiveGameQuestion

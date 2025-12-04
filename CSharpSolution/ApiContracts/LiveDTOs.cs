@@ -24,6 +24,14 @@ public class LiveGameStatusDTO
     public QuizDTO Quiz { get; init; }
 
     public List<LiveGameQuestionDTO> Questions { get; init; }
+    
+    public List<LiveGamePlayerDTO> Players { get; init; }
+}
+
+public class LiveGamePlayerDTO
+{
+    public string PlayerId { get; set; }
+    public string Name { get; set; }
 }
 
 public class LiveGameQuestionDTO
@@ -38,4 +46,16 @@ public class LiveGameAnswerDTO
     public required int AnswerId { get; set; }
     public required String Title { get; set; }
     public required bool IsCorrect { get; set; }
+}
+
+public class LiveGameJoinRequestDTO
+{
+    public string JoinCode { get; set; }
+    public string Name { get; set; }
+}
+
+public class LiveGameJoinResponseDTO
+{
+    public string GameId { get; set; }
+    public string PlayerId { get; set; }
 }
