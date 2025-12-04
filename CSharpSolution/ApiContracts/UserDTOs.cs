@@ -18,6 +18,11 @@ public class UpdateUserDTO
     public string? Password { get; set; }
 }
 
+public class DeleteUserDTO
+{
+    public required int Id { get; set; }
+}
+
 public class UserCredentialsDTO
 {
     public required string Username { get; set; }

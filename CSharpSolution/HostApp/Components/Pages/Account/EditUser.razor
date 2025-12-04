@@ -13,10 +13,22 @@
 
         <label for="newUsername">Ny Brugernavn:</label>
         <input type="text" id="newUsername" @bind="Username">
+        <div>
+            <button class="button" @onclick="NewUsername">opdatere brugernavn</button> 
+        </div>
         <label for="newPassword"> Ny Adgangskode:</label>
         <input type="password" id="newPassword" @bind="Password">
+        <div>
+            <button class="button" @onclick="NewPassword">opdatere adgangskoden</button> 
+        </div>
+        <div>
+            <button class="button" @onclick="DeleteUser">Slet bruger</button> 
+        </div>
         <span id="error" class="error-label">@Error</span>
     </div>
+    
+    
+    
 </div>
 
 @code {
@@ -25,14 +37,22 @@
     private string Password { get; set; } = "";
     private string Error { get; set; } = "";
 
-    private async Task newUsername(string Username)
+    private async Task NewUsername()
     {
-        
+        int userId = int.Parse((await AuthStateProvider.GetAuthenticationStateAsync()).User.FindFirst("Id")!.Value);
+        UserDTO username = await UserService.UpdateUsername(userId, Username);
     }
 
-    private async Task newPassword(string Password)
+    private async Task NewPassword()
     {
-        
+        int userId = int.Parse((await AuthStateProvider.GetAuthenticationStateAsync()).User.FindFirst("Id")!.Value);
+        UserDTO password = await UserService.UpdatePassword(userId, Password);
+    }
+
+    private async Task DeleteUser()
+    {
+        int userId = int.Parse((await AuthStateProvider.GetAuthenticationStateAsync()).User.FindFirst("Id")!.Value); 
+        await UserService.DeleteUser(userId);
     }
 
 }
