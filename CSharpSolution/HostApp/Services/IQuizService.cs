@@ -1,6 +1,6 @@
 using ApiContracts;
 
-namespace BlazorApp.Services;
+namespace HostApp.Services;
 
 public interface IQuizService
 {

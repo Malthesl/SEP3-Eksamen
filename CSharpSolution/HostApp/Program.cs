@@ -1,5 +1,5 @@
-﻿using BlazorApp.Components;
-using BlazorApp.Services;
+﻿using HostApp.Components;
+using HostApp.Services;
 using BlazorClient.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;

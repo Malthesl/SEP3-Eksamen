@@ -1,7 +1,7 @@
 using ApiContracts;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace BlazorApp.Services;
+namespace HostApp.Services;
 
 public class HttpQuizService(HttpClient httpClient) : IQuizService
 {
