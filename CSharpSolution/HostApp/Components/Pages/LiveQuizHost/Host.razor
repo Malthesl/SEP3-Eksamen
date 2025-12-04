@@ -38,6 +38,7 @@
     public async Task GetNextStatus()
     {
         GameStatus = await QuizHostService.GetGameInfo(GameId);
+        StateHasChanged();
         GetNextStatus();
     }
 
