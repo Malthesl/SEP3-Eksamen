@@ -21,10 +21,6 @@ public class TokenAuthenticationStateProvider(ProtectedLocalStorage ls)
             if (!string.IsNullOrEmpty(token))
             {
                 var claims = ParseClaimsFromJwt(token);
-                foreach (var claim in claims)
-                {
-                    Console.WriteLine($"{claim.Type}: {claim.Value}");
-                }
                 var identity =
                     new ClaimsIdentity(claims, authenticationType: "jwt", nameType: ClaimTypes.Name, roleType: ClaimTypes.Role);
                 var user = new ClaimsPrincipal(identity);
