@@ -13,7 +13,7 @@
         <input type="text" id="username" @bind="Username">
         <label for="password">Adgangskode:</label>
         <input type="password" id="password" @bind="Password">
-        <span id="error" class="error-label">Fejl her</span>
+        <span id="error" class="error-label">@Error</span>
         <button @onclick="Signin">Log ind</button>
         <p>Har du ikke en bruger?</p>
         <button @onclick='() => Nav.NavigateTo("/signup")'>Opret dig</button>
@@ -23,14 +23,22 @@
 @code {
     private string Username { get; set; } = "";
     private string Password { get; set; } = "";
+    private string Error { get; set; } = "";
 
     private async Task Signin()
     {
-        if (AuthStateProvider is TokenAuthenticationStateProvider provider)
+        try
         {
-            await provider.SignIn(await AuthService.LoginAndReturnToken(Username, Password));
+            if (AuthStateProvider is TokenAuthenticationStateProvider provider)
+            {
+                await provider.SignIn(await AuthService.LoginAndReturnToken(Username, Password));
 
-            Nav.NavigateTo("/");
+                Nav.NavigateTo("/");
+            }
+        }
+        catch (Exception e)
+        {
+            Error = e.Message;
         }
     }
 
