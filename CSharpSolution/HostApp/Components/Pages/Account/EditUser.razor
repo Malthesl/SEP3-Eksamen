@@ -1,0 +1,38 @@
+﻿@using ApiContracts
+@using BlazorClient.Services
+@using HostApp.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthService AuthService;
+@inject IUserService UserService;
+@inject AuthenticationStateProvider AuthStateProvider;
+@inject NavigationManager Nav;
+
+<div class="fullscreen-center">
+    <div class="centered-box">
+        <h3>Redigere profil</h3>
+
+        <label for="newUsername">Ny Brugernavn:</label>
+        <input type="text" id="newUsername" @bind="Username">
+        <label for="newPassword"> Ny Adgangskode:</label>
+        <input type="password" id="newPassword" @bind="Password">
+        <span id="error" class="error-label">@Error</span>
+    </div>
+</div>
+
+@code {
+
+    private string Username { get; set; } = "";
+    private string Password { get; set; } = "";
+    private string Error { get; set; } = "";
+
+    private async Task newUsername(string Username)
+    {
+        
+    }
+
+    private async Task newPassword(string Password)
+    {
+        
+    }
+
+}
