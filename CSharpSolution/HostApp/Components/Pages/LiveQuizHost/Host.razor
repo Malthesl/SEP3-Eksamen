@@ -10,6 +10,14 @@
         {
             <span>@GameStatus.Quiz.Title</span>
             <h1>Join med denne kode: @GameStatus.JoinCode</h1>
+
+            <ul>
+
+                @foreach (var player in GameStatus.Players)
+                {
+                    <li>@player.Name</li>
+                }
+            </ul>
         }
     </Authorized>
     <NotAuthorized>
