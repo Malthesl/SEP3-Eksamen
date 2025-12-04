@@ -14,14 +14,23 @@ public class AuthController(UserService.UserServiceClient userService) : Control
     [HttpPost("login")]
     public async Task<ActionResult<UserTokenDTO>> Login([FromBody] UserCredentialsDTO credentials)
     {
-        VerifyUserCredentialsResponse verification = await userService.VerifyUserCredentialsAsync(
-            new VerifyUserCredentialsRequest
-            {
-                Username = credentials.Username,
-                Password = credentials.Password
-            });
+        VerifyUserCredentialsResponse verification;
+        
+        try
+        {
+            verification = await userService.VerifyUserCredentialsAsync(
+                new VerifyUserCredentialsRequest
+                {
+                    Username = credentials.Username,
+                    Password = credentials.Password
+                });
 
-        if (verification.User is null) return Unauthorized();
+            if (verification.User is null) return Unauthorized();
+        }
+        catch (Exception e)
+        {
+            return Unauthorized(e.Message);
+        }
 
         var claims = new[]
         {

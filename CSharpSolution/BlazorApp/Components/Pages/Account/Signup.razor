@@ -15,7 +15,7 @@
         <input type="text" id="username" @bind="Username">
         <label for="password">Adgangskode:</label>
         <input type="password" id="password" @bind="Password">
-        <span id="error" class="error-label">Fejl her</span>
+        <span id="error" class="error-label">@Error</span>
         <button @onclick="RegisterAccount">Opret dig</button>
         <p>Har du allerde en bruger?</p>
         <button @onclick='() => Nav.NavigateTo("/login")'>Log ind</button>
@@ -26,16 +26,24 @@
 
     private string Username { get; set; } = "";
     private string Password { get; set; } = "";
+    private string Error { get; set; } = "";
 
     private async Task RegisterAccount()
     {
-        await UserService.CreateUser(Username, Password);
-
-        if (AuthStateProvider is TokenAuthenticationStateProvider provider)
+        try
         {
-            await provider.SignIn(await AuthService.LoginAndReturnToken(Username, Password));
+            await UserService.CreateUser(Username, Password);
 
-            Nav.NavigateTo("/");
+            if (AuthStateProvider is TokenAuthenticationStateProvider provider)
+            {
+                await provider.SignIn(await AuthService.LoginAndReturnToken(Username, Password));
+
+                Nav.NavigateTo("/");
+            }
+        }
+        catch (Exception e)
+        {
+            Error = e.Message;
         }
     }
 
