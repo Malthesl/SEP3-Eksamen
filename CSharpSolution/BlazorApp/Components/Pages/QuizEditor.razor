@@ -3,57 +3,79 @@
 @using BlazorApp.Services
 @inject IQuestionService QuestionService
 @inject IAnswerService AnswerService
+@inject IQuizService QuizService
 
 <PageTitle>Kahoot++ | Quiz Editor</PageTitle>
 
-<div class="layout">
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <button class="add-question-button" @onclick="AddQuestion">Tilføj</button>
+@if (_quizDto == null)
+{
+    <h1>@_quizStatusText</h1>
+}
+else
+{
+    <div class="layout">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="add-question-button" @onclick="AddQuestion">Tilføj</button>
+            </div>
+            <div class="sidebar-content">
+                @for (int i = 0; i < _questions.Count; i++)
+                {
+                    int index = i; // Goofy ahh
+                    QuestionDTO question = _questions[index];
+                    <button class="question-button @(question.Equals(_selectedQuestion) ? "marked" : "")" @onclick="() => ChangeQuestion(index)">@question.Title</button>
+                }
+            </div>
         </div>
-        <div class="sidebar-content">
-            @for (int i = 0; i < _questions.Count; i++)
+        <div class="content">
+            @if (_selectedQuestion != null)
             {
-                int index = i; // Goofy ahh
-                QuestionDTO question = _questions[index];
-                <button class="question-button @(question.Equals(_selectedQuestion)? "marked" : "")" @onclick="() => ChangeQuestion(index)">@question.Title</button>
+                <div class="content-header">
+                    <button @onclick="DeleteCurrentQuestion" class="delete-button"></button>
+                </div>
+                <div class="content-title">
+                    <input class="question-input" placeholder="Skriv dit spørgsmål her" @bind="QuestionText" type="text"/>
+                    <p class="error-text">@_questionTextError</p>
+                </div>
+                <h2 class="options-title">Svarmuligheder:</h2>
+                <div class="answers-container">
+                    @for (int i = 0; i < 4; i++)
+                    {
+                        int index = i; // Bro hvorfor skal den her være der?!?!
+                        <div class="answer color-@index @(String.IsNullOrWhiteSpace(_answers[index]) ? "empty-answer" : "")">
+                            <input class="answer-title" placeholder="Svarmulighed..." value="@_answers[index]" @onchange="e => HandleAnswerChange(index, e.Value?.ToString())"/>
+                            <input class="correct-answer" type="checkbox" checked="@_answersIsCorrect[index]" value="@_answersIsCorrect[index]" @onchange="e => HandleCorrectChange(index, (bool)e.Value!)"/>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="select-quiz-error">
+                    @if (_questions.Count > 0)
+                    {
+                        <h1>Vælg venligst et spørgsmål</h1>
+                    }
+                    else
+                    {
+                        <h1>Tilføj et spørgsmål</h1>
+                    }
+                </div>
             }
         </div>
     </div>
-    <div class="content">
-        @if (_selectedQuestion != null)
-        {
-            <button class="delete-button"></button>
-            <div class="content-header">
-                <input class="question-input" placeholder="Skriv dit spørgsmål her" @bind="QuestionText" type="text"/>
-            </div>
-            <h2 class="options-title">Svarmuligheder:</h2>
-            <div class="answers-container">
-                @for (int i = 0; i < 4; i++)
-                {
-                    int index = i; // Bro hvorfor skal den her være der?!?!
-                    <div class="answer color-@index @(String.IsNullOrWhiteSpace(_answers[index])? "empty-answer" : "")">
-                        <input class="answer-title" placeholder="Svarmulighed..." value="@_answers[index]" @onchange="e => HandleAnswerChange(index, e.Value?.ToString())"/>
-                        <input class="correct-answer" type="checkbox" checked="@_answersIsCorrect[index]" value="@_answersIsCorrect[index]" @onchange="e => HandleCorrectChange(index, (bool)e.Value!)"/>
-                    </div>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="select-quiz-error">
-                <h1>Vælg venligst en quiz...</h1>
-            </div>
-        }
-    </div>
-</div>
+}
 
 @code {
     [Parameter] public int QuizId { get; set; }
+    private QuizDTO? _quizDto;
+    private string _quizStatusText = "";
 
     private List<QuestionDTO> _questions = [];
 
     private string? _questionText = "";
+    private string? _questionTextError = "";
+
 
     private string? QuestionText
     {
@@ -74,15 +96,25 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _questions = await QuestionService.GetQuestionsFromQuiz(QuizId);
-        _selectedQuestion = _questions.Count > 0? _questions[0] : null;
+        try
+        {
+            _quizDto = await QuizService.GetQuiz(QuizId);
 
-        await Refresh();
+            _questions = await QuestionService.GetQuestionsFromQuiz(QuizId);
+            _selectedQuestion = _questions.Count > 0 ? _questions[0] : null;
+
+            await Refresh();
+        }
+        catch (Exception e)
+        {
+            _quizStatusText = e.Message;
+        }
     }
 
     private async Task Refresh()
     {
         _questions = await QuestionService.GetQuestionsFromQuiz(QuizId);
+
         if (_selectedQuestion != null)
         {
             _questionText = _selectedQuestion.Title;
@@ -108,6 +140,7 @@
 
     private async void ChangeQuestion(int index)
     {
+        _questionTextError = "";
         _selectedQuestion = _questions[index];
 
         await Refresh();
@@ -115,7 +148,14 @@
 
     private void OnQuestionFinished()
     {
+        _questionTextError = "";
         if (_selectedQuestion is null || QuestionText is null) return;
+        if (String.IsNullOrWhiteSpace(_questionText))
+        {
+            _questionTextError = "Question cannot be empty";
+            StateHasChanged();
+            return;
+        }
 
         _selectedQuestion.Title = QuestionText;
         QuestionService.UpdateQuestion(_selectedQuestion);
@@ -136,7 +176,7 @@
     private async void OnAnswerFinished(int index)
     {
         if (_selectedQuestion is null || _selectedQuestionAnswers is null) return;
-        
+
         AnswerDTO? answer = _selectedQuestionAnswers.Find(a => a.Index == index + 1);
         if (String.IsNullOrWhiteSpace(_answers[index]))
         {
@@ -171,11 +211,21 @@
 
     private async void AddQuestion()
     {
-        await QuestionService.AddQuestion(new CreateQuestionDTO
+        _selectedQuestion = await QuestionService.AddQuestion(new CreateQuestionDTO
         {
             Title = "New Question",
             QuizId = QuizId
         });
+
+        await Refresh();
+    }
+
+    private async void DeleteCurrentQuestion()
+    {
+        if (_selectedQuestion is null) return;
+
+        await QuestionService.DeleteQuestion(_selectedQuestion.QuestionId);
+        _selectedQuestion = null;
 
         await Refresh();
     }
