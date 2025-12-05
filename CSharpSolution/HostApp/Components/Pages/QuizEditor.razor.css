@@ -83,23 +83,23 @@
 }
 
 .color-0 {
-  color: #00B700;
-  background: #00B700;
+  color: var(--question-1-color);
+  background: var(--question-1-color);
 }
 
 .color-1 {
-  color: #E6E63D;
-  background: #E6E63D;
+  color: var(--question-2-color);
+  background: var(--question-2-color);
 }
 
 .color-2 {
-  color: #439BFF;
-  background: #439BFF;
+  color: var(--question-3-color);
+  background: var(--question-3-color);
 }
 
 .color-3 {
-  color: #FF4949;
-  background: #FF4949;
+  color: var(--question-4-color);
+  background: var(--question-4-color);
 }
 
 .content {

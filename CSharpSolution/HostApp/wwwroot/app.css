@@ -1,4 +1,11 @@
-﻿html, body {
+﻿:root {
+  --question-1-color: #00B700;
+  --question-2-color: #E6E63D;
+  --question-3-color: #439BFF;
+  --question-4-color: #FF4949;
+}
+
+html, body {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 

@@ -12,7 +12,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        _timeLeft = (int)((End - Start) / 1000);
+        _timeLeft = (int)((End - Start + 100) / 1000);
         _timer = new System.Timers.Timer(1000);
         _timer.Elapsed += OnTimerElapsed;
         _timer.AutoReset = true;

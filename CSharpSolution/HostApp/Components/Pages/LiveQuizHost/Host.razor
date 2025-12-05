@@ -1,5 +1,7 @@
 @page "/host"
+@layout EmptyLayout
 @using ApiContracts
+@using HostApp.Components.Layout
 @using HostApp.Components.Lib
 @using HostApp.Services
 @using Microsoft.AspNetCore.Components.Authorization
@@ -7,92 +9,85 @@
 
 <AuthorizeView>
     <Authorized>
-        @switch (GameStatus?.CurrentState)
-        {
-            case "lobby":
-                <span>@GameStatus.Quiz.Title</span>
-                <h1>Join med denne kode: @GameStatus.JoinCode</h1>
-
-                <ul>
-                    @foreach (var player in GameStatus.Players)
-                    {
-                        <li>@player.Name</li>
-                    }
-                </ul>
-
-                <button @onclick="StartQuiz">Start</button>
-                <button @onclick="ContinueQuiz">Continue</button>
-                break;
-            case "question-countdown":
-                @if (CurrentQuestion is not null)
+        <div class="quiz-background">
+            <div class="quiz-body">
+                @switch (GameStatus?.CurrentState)
                 {
-                    <h1>@CurrentQuestion.Title</h1>
-                    <span>Du kan svare om <Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" /> sekunder</span>
-                }
+                    case "lobby":
+                        <h2>@GameStatus.Quiz.Title</h2>
+                        <h1>Join med denne kode: @GameStatus.JoinCode</h1>
 
-                break;
-            case "question-answering":
-                @if (CurrentQuestion is not null)
-                {
-                    <h1>@CurrentQuestion.Title</h1>
-                    <span>Du har <Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" /> sekunder til at svare</span>
-                    <fieldset>
-                        <legend>Svarmuligheder</legend>
                         <ul>
-                            @foreach (var answer in CurrentQuestion.Answers)
+                            @foreach (var player in GameStatus.Players)
                             {
-                                <li>@answer.Title</li>
+                                <li>@player.Name</li>
                             }
                         </ul>
-                    </fieldset>
-                }
 
-                <button @onclick="ContinueQuiz">Continue</button>
+                        <button @onclick="StartQuiz">Start</button>
+                        break;
+                    case "question-countdown":
+                        @if (CurrentQuestion is not null)
+                        {
+                            <div class="center-vertical">
+                                <h1 class="question-title">@CurrentQuestion.Title</h1>
+                                <span class="question-countdown">Du kan svare om <Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" /> sekunder!</span>
+                            </div>
+                        }
 
-                break;
-            case "question-answer":
-                @if (CurrentQuestion is not null)
-                {
-                    <h1>@CurrentQuestion.Title</h1>
-                    <p>og det korrekt svar var...</p>
-                    <fieldset>
-                        <legend>Svarmuligheder</legend>
-                        <ul>
-                            @foreach (var answer in CurrentQuestion.Answers)
-                            {
-                                <li>
-                                    @if (answer.IsCorrect)
-                                    {
-                                        <strong>@answer.Title</strong>
-                                    }
-                                    else
-                                    {
+                        break;
+                    case "question-answering":
+                        @if (CurrentQuestion is not null)
+                        {
+                            <div class="question-title-sm">@CurrentQuestion.Title</div>
+                            <div class="question-answering-time"><Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" /> sekunder!</div>
+                            <div class="answers">
+                                @foreach (var answer in CurrentQuestion.Answers)
+                                {
+                                    <div class="answer answer-@answer.Index">
                                         @answer.Title
-                                    }
-                                </li>
-                            }
-                        </ul>
-                    </fieldset>
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        <button class="fixed-continue-button" @onclick="ContinueQuiz">Continue</button>
+
+                        break;
+                    case "question-answer":
+                        @if (CurrentQuestion is not null)
+                        {
+                            <div class="question-title-sm">@CurrentQuestion.Title</div>
+                            <div class="answers answers-highlight-correct">
+                                @foreach (var answer in CurrentQuestion.Answers)
+                                {
+                                    <div class="answer answer-@answer.Index @(answer.IsCorrect ? "answer-correct" : "")">
+                                        @answer.Title
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        <button class="fixed-continue-button" @onclick="ContinueQuiz">Continue</button>
+
+                        break;
+                    case "leaderboard":
+                        @if (CurrentQuestion is not null)
+                        {
+                            <p>Her er hvem der fører...</p>
+                            <span>Fortsætter om <Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" /> sekunder</span>
+                        }
+
+                        <button class="fixed-continue-button" @onclick="ContinueQuiz">Continue</button>
+
+                        break;
+                    default:
+                        <p>Hmmm</p>
+                        <button @onclick="ContinueQuiz">Continue</button>
+                        break;
                 }
-
-                <button @onclick="ContinueQuiz">Continue</button>
-
-                break;
-            case "leaderboard":
-                @if (CurrentQuestion is not null)
-                {
-                    <p>Her er hvem der fører...</p>
-                    <span>Fortsætter om <Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" /> sekunder</span>
-                }
-
-                <button @onclick="ContinueQuiz">Continue</button>
-
-                break;
-            default:
-                <p>Hmmm</p>
-                <button @onclick="ContinueQuiz">Continue</button>
-                break;
-        }
+            </div>
+        </div>
     </Authorized>
     <NotAuthorized>
         Du skal logge ind for at hoste denne quiz.
