@@ -1,0 +1,59 @@
+﻿@page "/game"
+@using ParticipantApp.Services
+@inject IPlayerService PlayerService
+@inject NavigationManager Nav
+
+<div class="body">
+    @if (GameId is null)
+    {
+        <p>Brormand du er ikke joinet et game! >:((((</p>
+    }
+    else
+    {
+        switch (GameState)
+        {
+            case "waiting":
+                <div class="centered-box center-content-veritcally">
+                    <h1>Velkommen til @UserId!</h1>
+                    <div class="content-inline">
+                        <h2>Venter på vært starter</h2>
+                        <div class="loader-container">
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                    <button class="leave-button" @onclick="Leave">Forlad</button>
+                </div>
+                break;
+            default:
+                <div class="centered-box content-inline">
+                    <h1>Loading...</h1>
+                    <div class="loader-container">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+                break;
+                
+        }
+    }
+</div>
+
+@code {
+
+    private string? GameId { get; set; }
+    private string? UserId { get; set; }
+
+    private string GameState { get; set; } = "waiting";
+
+    protected async override Task OnInitializedAsync()
+    {
+        GameId = await PlayerService.GetGameIdAsync();
+        UserId = await PlayerService.GetPlayerIdAsync();
+    }
+
+    private async void Leave()
+    {
+        await PlayerService.Clear();
+        Nav.NavigateTo("play");
+    }
+
+}
