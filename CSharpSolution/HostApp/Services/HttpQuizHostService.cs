@@ -17,7 +17,7 @@ public class HttpQuizHostService(HttpClient httpClient) : IQuizHostService
         return content.GameId;
     }
 
-    public async Task<LiveGameStatusDTO> GetGameInfo(string gameId, bool force = false)
+    public async Task<LiveGameHostStatusDTO> GetGameInfo(string gameId, bool force = false)
     {
         var res = await httpClient.GetAsync($"/live/status?gameId={gameId}&force={force}");
 
@@ -26,7 +26,7 @@ public class HttpQuizHostService(HttpClient httpClient) : IQuizHostService
             Console.WriteLine(await res.Content.ReadAsStringAsync());
             throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
         }
-        var content = (await res.Content.ReadFromJsonAsync<LiveGameStatusDTO>())!;
+        var content = (await res.Content.ReadFromJsonAsync<LiveGameHostStatusDTO>())!;
         return content;
     }
 

@@ -31,6 +31,8 @@ public class LiveGame
     public string JoinCode { get; init; }
 
     public int CurrentQuestionId { get; private set; }
+    
+    public LiveGameQuestion? CurrentQuestion => Questions.Find(q => q.QuestionId == CurrentQuestionId);
 
     /// <summary>
     /// Det nuværende state af quizzen.
@@ -249,7 +251,7 @@ public class LiveGame
 
     public void Answer(int questionId, int answerId, string playerId)
     {
-        LiveGameQuestion? question = Questions.Find(q => q.QuestionId == questionId);
+        LiveGameQuestion? question = CurrentQuestion;
         if (question is null) throw new Exception("Question not found");
         LiveGameAnswer? answer = question.Answers.Find(a => a.AnswerId == answerId);
         if (answer is null) throw new Exception("Answer not found");
