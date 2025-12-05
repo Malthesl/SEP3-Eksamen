@@ -1,0 +1,27 @@
+﻿@page "/"
+@using ParticipantApp.Services
+@inject NavigationManager Nav;
+@inject IPlayerService PlayerService;
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+
+@code {
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (await PlayerService.GetGameIdAsync() is null)
+        {
+            Nav.NavigateTo("play");
+        }
+        else
+        {
+            Nav.NavigateTo("game");
+        }
+    }
+
+}

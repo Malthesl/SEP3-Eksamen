@@ -1,0 +1,80 @@
+﻿@page "/play"
+@using ParticipantApp.Services
+@inject IParticipateService ParticipateService;
+@inject NavigationManager Nav;
+
+<div class="body">
+    <div class="centered-content">
+        @if (State == "join")
+        {
+            <h1>Kahoot++</h1>
+
+            <div class="content-container">
+                <input @bind="GameCode" oninput="this.value=this.value.toUpperCase()" class="code-input text-input" placeholder="ABC123" maxlength="6"/>
+                <button class="start-button" @onclick="GoToNameState">Start</button>
+            </div>
+        } else if (State == "name")
+        {
+            <div class="content-container">
+                <h2>Indtast dit navn</h2>
+                <input @bind="NameString" class="name-input text-input" placeholder="Ex. Bob..."/>
+                <button class="start-button" @onclick="Join">Tilslut</button>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="error-text-container @(String.IsNullOrEmpty(ErrorText)? "hide" : "")">
+    <p class="error-text">@ErrorText</p>
+    <button class="close-button" @onclick="CloseErrorMessage">x</button>
+</div>
+
+@code {
+
+    private string GameCode { get; set; } = "";
+    private string NameString { get; set; } = "";
+    private string ErrorText { get; set; } = "";
+
+    private string State { get; set; } = "join";
+    
+    private void GoToNameState()
+    {
+        try
+        {
+            if (GameCode.Length != 6) throw new Exception("Koden skal være 6 tegn");
+            
+            State = "name";
+
+        }
+        catch (Exception e)
+        {
+            ErrorText = e.Message;
+        }
+    }
+
+    private async void Join()
+    {
+        try
+        {
+            if (String.IsNullOrWhiteSpace(NameString)) throw new ArgumentException("Ugyldigt navn");
+
+            await ParticipateService.JoinAsync(GameCode, NameString);
+            
+            Nav.NavigateTo("game");
+        }
+        catch (ArgumentException e)
+        {
+            ErrorText = e.Message;
+        }
+        catch (Exception e)
+        {
+            ErrorText = e.Message;
+            State = "join";
+        }
+    }
+
+    private void CloseErrorMessage()
+    {
+        ErrorText = "";
+    }
+}
