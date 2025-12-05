@@ -103,7 +103,8 @@ public class LiveController(
                 {
                     Title = answer.Title,
                     AnswerId = answer.AnswerId,
-                    IsCorrect = answer.IsCorrect
+                    IsCorrect = answer.IsCorrect,
+                    Index = answer.Index
                 }).ToList()
             }).ToList(),
             Players = state.Players.Select(player => new LiveGamePlayerDTO

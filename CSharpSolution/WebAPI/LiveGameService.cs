@@ -80,7 +80,8 @@ public class LiveGame
                     {
                         AnswerId = a.Id,
                         Title = a.Title,
-                        IsCorrect = a.IsCorrect
+                        IsCorrect = a.IsCorrect,
+                        Index = a.Index
                     })
                     .ToList()
             })
@@ -259,4 +260,5 @@ public class LiveGameAnswer
     public required int AnswerId { get; set; }
     public required String Title { get; set; }
     public required bool IsCorrect { get; set; }
+    public required int Index { get; set; }
 }

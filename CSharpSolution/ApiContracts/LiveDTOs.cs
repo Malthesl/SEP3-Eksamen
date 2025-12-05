@@ -49,6 +49,7 @@ public class LiveGameAnswerDTO
     public required int AnswerId { get; set; }
     public required String Title { get; set; }
     public required bool IsCorrect { get; set; }
+    public required int Index { get; set; }
 }
 
 public class LiveGameJoinRequestDTO
