@@ -108,5 +108,5 @@ public class LiveGameAnswerRequestDTO
     public required string GameId { get; set; }
     public required string PlayerId { get; set; }
     public required int QuestionId { get; set; }
-    public required int AnswerId { get; set; }
+    public required int AnswerIndex { get; set; }
 } 

@@ -189,7 +189,7 @@ public class LiveController(
 
         if (game is null) return NotFound($"Spillet findes ikke.");
 
-        game.Answer(request.QuestionId, request.AnswerId, request.PlayerId);
+        game.Answer(request.QuestionId, request.AnswerIndex, request.PlayerId);
 
         return Ok();
     }

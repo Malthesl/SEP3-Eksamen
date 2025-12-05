@@ -249,23 +249,23 @@ public class LiveGame
         callback();
     }
 
-    public void Answer(int questionId, int answerId, string playerId)
+    public void Answer(int questionId, int answerIndex, string playerId)
     {
         LiveGameQuestion? question = CurrentQuestion;
         if (question is null) throw new Exception("Question not found");
-        LiveGameAnswer? answer = question.Answers.Find(a => a.AnswerId == answerId);
+        LiveGameAnswer? answer = question.Answers[answerIndex];
         if (answer is null) throw new Exception("Answer not found");
         LiveGamePlayer? player = Players.Find(p => p.PlayerId == playerId);
         if (player is null) throw new Exception("Player not found");
         
         if (player.Answers.Any(a => a.QuestionId == questionId)) throw new Exception("Player already answered question");
         
-        player.Answers.Add(new LiveGamePlayerAnswer { QuestionId = questionId, AnswerId = answerId });
+        player.Answers.Add(new LiveGamePlayerAnswer { QuestionId = questionId, AnswerId = answer.AnswerId });
 
         int score = answer.IsCorrect ? 1000 : 0;
 
         player.Score += score;
-        player.LatestAnswerId = answerId;
+        player.LatestAnswerId = answer.AnswerId;
         player.LatestScoreChange = score;
         
         if (Players.All(p => p.LatestAnswerId is not null)) SetStateAnswer(questionId);
