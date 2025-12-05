@@ -3,12 +3,17 @@ using HostApp.Services;
 using BlazorClient.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("keys"))
+    .SetApplicationName("HostApp");
 
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddAuthorizationCore();
