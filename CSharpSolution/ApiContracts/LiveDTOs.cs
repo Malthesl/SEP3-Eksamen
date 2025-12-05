@@ -53,6 +53,7 @@ public class LiveGamePlayerStatusDTO
     public required string PlayerId { get; set; }
     public required string Name { get; set; }
     public required int Score { get; set; }
+    public required int Ranking { get; set; }
     public int? LatestScoreChange { get; set; }
     public int? LatestAnswerId { get; set; }
     public bool? LatestAnswerCorrect { get; set; }
