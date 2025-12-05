@@ -103,13 +103,13 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        GameStatus = await QuizHostService.GetGameInfo(GameId, true);
+        GameStatus = await QuizHostService.GetGameInfo(GameId);
         GetNextStatus();
     }
 
     private async Task GetNextStatus()
     {
-        GameStatus = await QuizHostService.GetGameInfo(GameId);
+        GameStatus = await QuizHostService.GetGameInfo(GameId, GameStatus?.UpdateNo ?? 0);
         StateHasChanged();
         GetNextStatus();
     }

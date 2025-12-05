@@ -6,7 +6,7 @@ public interface IQuizHostService
 {
     Task<string> HostQuiz(int quizId);
     
-    Task<LiveGameHostStatusDTO> GetGameInfo(string gameId, bool force = false);
+    Task<LiveGameHostStatusDTO> GetGameInfo(string gameId, int lastUpdateNo = 0);
     
     Task StartQuiz(string gameId);
     

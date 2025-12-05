@@ -73,13 +73,13 @@ public class LiveController(
     public async Task<ActionResult<dynamic>> Status(
         [FromQuery] string gameId,
         [FromQuery] string? playerId,
-        [FromQuery] bool force = false)
+        [FromQuery] int lastUpdateNo = 0)
     {
         LiveGame? game = gameService.GetGame(gameId);
 
         if (game is null) return BadRequest("Game not found");
 
-        LiveGame state = await game.GetGameState(force);
+        LiveGame state = await game.GetGameState(lastUpdateNo);
 
         string? userIdString = User.FindFirst("Id")?.Value;
 
@@ -90,6 +90,7 @@ public class LiveController(
 
             return new LiveGameHostStatusDTO
             {
+                UpdateNo = lastUpdateNo,
                 RelTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 CountdownToTime = state.NextEventTime,
                 Quiz = new QuizDTO
@@ -137,6 +138,7 @@ public class LiveController(
 
             return new LiveGamePlayerStatusDTO
             {
+                UpdateNo = lastUpdateNo,
                 RelTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 CountdownToTime = state.NextEventTime,
                 CurrentState = state.CurrentState,

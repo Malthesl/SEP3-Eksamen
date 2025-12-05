@@ -12,6 +12,8 @@ public class LiveCreateQuizResponseDTO
 
 public class LiveGameHostStatusDTO
 {
+    public required int UpdateNo { get; init; }
+    
     public required long RelTime { get; init; }
     public required long CountdownToTime { get; init; }
     
@@ -34,6 +36,8 @@ public class LiveGameHostStatusDTO
 
 public class LiveGamePlayerStatusDTO
 {
+    public required int UpdateNo { get; init; }
+    
     public required long RelTime { get; init; }
     public required long CountdownToTime { get; init; }
     

@@ -90,13 +90,14 @@ public class LiveGame
             .ToList();
     }
 
+    private int _currentUpdateNo = 1;
+
     /// <summary>
     /// Henter den nuværende game, efter en ændring er sket.
     /// </summary>
-    /// <param name="force">Skal hente med det samme?</param>
-    public async Task<LiveGame> GetGameState(bool force = false)
+    public async Task<LiveGame> GetGameState(int lastUpdateNo)
     {
-        if (force) return this;
+        if (_currentUpdateNo > lastUpdateNo) return this;
         var t = new TaskCompletionSource();
         _tasks.Add(t);
         await Task.WhenAny(t.Task, Task.Delay(1000 * 30));
@@ -108,6 +109,8 @@ public class LiveGame
     /// </summary>
     public void StateUpdated()
     {
+        _currentUpdateNo++;
+        
         foreach (var task in _tasks)
         {
             task.SetResult();
