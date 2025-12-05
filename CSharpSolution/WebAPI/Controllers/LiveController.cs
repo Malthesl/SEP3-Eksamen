@@ -90,7 +90,7 @@ public class LiveController(
 
             return new LiveGameHostStatusDTO
             {
-                UpdateNo = lastUpdateNo,
+                UpdateNo = state.UpdateNo,
                 RelTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 CountdownToTime = state.NextEventTime,
                 Quiz = new QuizDTO
@@ -138,7 +138,7 @@ public class LiveController(
 
             return new LiveGamePlayerStatusDTO
             {
-                UpdateNo = lastUpdateNo,
+                UpdateNo = state.UpdateNo,
                 RelTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 CountdownToTime = state.NextEventTime,
                 CurrentState = state.CurrentState,
