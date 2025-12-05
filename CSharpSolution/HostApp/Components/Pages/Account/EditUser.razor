@@ -1,4 +1,5 @@
-﻿@using ApiContracts
+﻿@page "/Account"
+@using ApiContracts
 @using BlazorClient.Services
 @using HostApp.Services
 @using Microsoft.AspNetCore.Components.Authorization
@@ -6,30 +7,32 @@
 @inject IUserService UserService;
 @inject AuthenticationStateProvider AuthStateProvider;
 @inject NavigationManager Nav;
+<AuthorizeView>
+    <Authorized>
 
-<div class="fullscreen-center">
-    <div class="centered-box">
-        <h3>Redigere profil</h3>
+        <div class="fullscreen-center">
+            <div class="centered-box">
+                <h3>Redigere profil</h3>
 
-        <label for="newUsername">Ny Brugernavn:</label>
-        <input type="text" id="newUsername" @bind="Username">
-        <div>
-            <button class="button" @onclick="NewUsername">opdatere brugernavn</button> 
+                <label for="newUsername">Ny Brugernavn:</label>
+                <input type="text" id="newUsername" @bind="Username">
+                <div>
+                    <button class="button" @onclick="NewUsername">opdatere brugernavn</button> 
+                </div>
+                <label for="newPassword"> Ny Adgangskode:</label>
+                <input type="password" id="newPassword" @bind="Password">
+                <div>
+                    <button class="button" @onclick="NewPassword">opdatere adgangskoden</button> 
+                </div>
+                <div>
+                    <button class="button" @onclick="DeleteUser">Slet bruger</button> 
+                </div>
+                <span id="error" class="error-label">@Error</span>
+            </div>
         </div>
-        <label for="newPassword"> Ny Adgangskode:</label>
-        <input type="password" id="newPassword" @bind="Password">
-        <div>
-            <button class="button" @onclick="NewPassword">opdatere adgangskoden</button> 
-        </div>
-        <div>
-            <button class="button" @onclick="DeleteUser">Slet bruger</button> 
-        </div>
-        <span id="error" class="error-label">@Error</span>
-    </div>
-    
-    
-    
-</div>
+        
+    </Authorized>
+</AuthorizeView>
 
 @code {
 
