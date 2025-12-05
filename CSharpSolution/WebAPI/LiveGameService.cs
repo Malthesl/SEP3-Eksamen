@@ -30,6 +30,8 @@ public class LiveGame
     public int QuizId { get; init; }
     public string JoinCode { get; init; }
 
+    public const int QuestionTime = 10 * 1000;
+    
     public int CurrentQuestionId { get; private set; }
 
     public LiveGameQuestion? CurrentQuestion => Questions.Find(q => q.QuestionId == CurrentQuestionId);
@@ -217,7 +219,9 @@ public class LiveGame
 
         CurrentState = "question-answering";
 
-        UpdateStateAndCountdown(10 * 1000, () => SetStateAnswer(questionId));
+        _questionStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        UpdateStateAndCountdown(QuestionTime, () => SetStateAnswer(questionId));
     }
 
     public void SetStateAnswer(int questionId)
@@ -263,6 +267,8 @@ public class LiveGame
         callback();
     }
 
+    private long _questionStartTime = 0;
+
     public void Answer(int questionId, int answerId, string playerId)
     {
         LiveGameQuestion? question = CurrentQuestion;
@@ -277,7 +283,11 @@ public class LiveGame
 
         player.Answers.Add(new LiveGamePlayerAnswer { QuestionId = questionId, AnswerId = answer.AnswerId });
 
-        int score = answer.IsCorrect ? 1000 : 0;
+        long timeElapsed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _questionStartTime;
+        long timeLeft = QuestionTime - timeElapsed;
+        double timePct = (double)timeLeft / QuestionTime;
+        
+        int score = answer.IsCorrect ? (int)(250 + 750 * timePct) : 0;
 
         player.Score += score;
         player.LatestAnswerId = answer.AnswerId;

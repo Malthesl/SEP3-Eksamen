@@ -119,7 +119,7 @@ public class LiveController(
                         Index = answer.Index
                     }).ToList()
                 }).ToList(),
-                Players = state.Players.Select(player => new LiveGamePlayerDTO
+                Players = state.Players.OrderByDescending(p => p.Score).Select(player => new LiveGamePlayerDTO
                 {
                     PlayerId = player.PlayerId,
                     Name = player.Name,
@@ -160,7 +160,7 @@ public class LiveController(
                 HostUserId = state.HostUserId,
                 Name = player.Name,
                 QuizId = state.QuizId,
-                Ranking = state.Players.OrderBy(p => p.Score).ToList().FindIndex(p => p.PlayerId == player.PlayerId),
+                Ranking = state.Players.OrderByDescending(p => p.Score).ToList().FindIndex(p => p.PlayerId == player.PlayerId),
                 LatestAnswerId = player.LatestAnswerId,
                 LatestScoreChange = player.LatestScoreChange,
                 LatestAnswerCorrect = state.CurrentQuestion?.Answers.Find(a => a.AnswerId == player.LatestAnswerId)
