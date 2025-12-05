@@ -269,6 +269,7 @@ public class LiveGame
         player.LatestScoreChange = score;
         
         if (Players.All(p => p.LatestAnswerId is not null)) SetStateAnswer(questionId);
+        else StateUpdated();
     }
 }
 

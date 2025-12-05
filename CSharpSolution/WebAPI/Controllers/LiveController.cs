@@ -192,7 +192,7 @@ public class LiveController(
     {
         LiveGame? game = gameService.GetGame(request.GameId);
 
-        if (game is null) return NotFound($"Spillet findes ikke.");
+        if (game is null) return NotFound("Spillet findes ikke.");
 
         game.Answer(request.QuestionId, request.AnswerId, request.PlayerId);
 
