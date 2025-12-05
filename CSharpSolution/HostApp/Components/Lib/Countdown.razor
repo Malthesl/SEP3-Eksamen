@@ -1,0 +1,40 @@
+@inject IJSRuntime JS;
+
+@_timeLeft
+
+@code {
+    [Parameter] public long Start { get; set; }
+    [Parameter] public long End { get; set; }
+
+    private int _timeLeft = 0;
+    
+    private System.Timers.Timer? _timer;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _timeLeft = (int)((End - Start) / 1000);
+        _timer = new System.Timers.Timer(1000);
+        _timer.Elapsed += OnTimerElapsed;
+        _timer.AutoReset = true;
+        _timer.Start();
+    }
+
+    private void OnTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
+    {
+        if (_timeLeft > 0)
+        {
+            _timeLeft--;
+            InvokeAsync(StateHasChanged); // opdater UI
+        }
+        else
+        {
+            _timer?.Stop();
+            Dispose();
+        }
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}

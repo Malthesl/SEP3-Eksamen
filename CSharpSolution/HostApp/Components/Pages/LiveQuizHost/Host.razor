@@ -1,23 +1,97 @@
 @page "/host"
 @using ApiContracts
+@using HostApp.Components.Lib
 @using HostApp.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IQuizHostService QuizHostService;
 
 <AuthorizeView>
     <Authorized>
-        @if (GameStatus is not null)
+        @switch (GameStatus?.CurrentState)
         {
-            <span>@GameStatus.Quiz.Title</span>
-            <h1>Join med denne kode: @GameStatus.JoinCode</h1>
+            case "lobby":
+                <span>@GameStatus.Quiz.Title</span>
+                <h1>Join med denne kode: @GameStatus.JoinCode</h1>
 
-            <ul>
+                <ul>
+                    @foreach (var player in GameStatus.Players)
+                    {
+                        <li>@player.Name</li>
+                    }
+                </ul>
 
-                @foreach (var player in GameStatus.Players)
+                <button @onclick="StartQuiz">Start</button>
+                <button @onclick="ContinueQuiz">Continue</button>
+                break;
+            case "question-countdown":
+                @if (CurrentQuestion is not null)
                 {
-                    <li>@player.Name</li>
+                    <h1>@CurrentQuestion.Title</h1>
+                    <span>Du kan svare om <Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" /> sekunder</span>
                 }
-            </ul>
+
+                break;
+            case "question-answering":
+                @if (CurrentQuestion is not null)
+                {
+                    <h1>@CurrentQuestion.Title</h1>
+                    <span>Du har <Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" /> sekunder til at svare</span>
+                    <fieldset>
+                        <legend>Svarmuligheder</legend>
+                        <ul>
+                            @foreach (var answer in CurrentQuestion.Answers)
+                            {
+                                <li>@answer.Title</li>
+                            }
+                        </ul>
+                    </fieldset>
+                }
+
+                <button @onclick="ContinueQuiz">Continue</button>
+
+                break;
+            case "question-answer":
+                @if (CurrentQuestion is not null)
+                {
+                    <h1>@CurrentQuestion.Title</h1>
+                    <p>og det korrekt svar var...</p>
+                    <fieldset>
+                        <legend>Svarmuligheder</legend>
+                        <ul>
+                            @foreach (var answer in CurrentQuestion.Answers)
+                            {
+                                <li>
+                                    @if (answer.IsCorrect)
+                                    {
+                                        <strong>@answer.Title</strong>
+                                    }
+                                    else
+                                    {
+                                        @answer.Title
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </fieldset>
+                }
+
+                <button @onclick="ContinueQuiz">Continue</button>
+
+                break;
+            case "leaderboard":
+                @if (CurrentQuestion is not null)
+                {
+                    <p>Her er hvem der fører...</p>
+                    <span>Fortsætter om <Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" /> sekunder</span>
+                }
+
+                <button @onclick="ContinueQuiz">Continue</button>
+
+                break;
+            default:
+                <p>Hmmm</p>
+                <button @onclick="ContinueQuiz">Continue</button>
+                break;
         }
     </Authorized>
     <NotAuthorized>
@@ -27,7 +101,9 @@
 
 @code {
     [Parameter] [SupplyParameterFromQuery] public string GameId { get; set; }
-    public LiveGameStatusDTO? GameStatus { get; set; }
+    private LiveGameStatusDTO? GameStatus { get; set; }
+
+    private LiveGameQuestionDTO? CurrentQuestion => GameStatus.Questions.Find(q => q.QuestionId == GameStatus.CurrentQuestionId);
 
     protected override async Task OnParametersSetAsync()
     {
@@ -35,11 +111,21 @@
         GetNextStatus();
     }
 
-    public async Task GetNextStatus()
+    private async Task GetNextStatus()
     {
         GameStatus = await QuizHostService.GetGameInfo(GameId);
         StateHasChanged();
         GetNextStatus();
+    }
+
+    private async Task StartQuiz()
+    {
+        await QuizHostService.StartQuiz(GameId);
+    }
+
+    private async Task ContinueQuiz()
+    {
+        await QuizHostService.ContinueQuiz(GameId);
     }
 
 }

@@ -19,7 +19,7 @@ public class LiveGameService(
 
         return game;
     }
-    
+
     public LiveGame? GetGameFromJoinCode(string joinCode) => Games.Values.FirstOrDefault(g => g.JoinCode == joinCode);
 }
 
@@ -49,6 +49,8 @@ public class LiveGame
     public List<LiveGameQuestion> Questions { get; init; }
 
     public List<LiveGamePlayer> Players { get; init; } = [];
+
+    public long NextEventTime { get; set; }
 
     private readonly List<TaskCompletionSource> _tasks = [];
 
@@ -119,7 +121,7 @@ public class LiveGame
         LiveGamePlayer player = new LiveGamePlayer { PlayerId = Guid.NewGuid().ToString(), Name = name };
 
         Players.Add(player);
-        
+
         StateUpdated();
 
         return player;
@@ -149,6 +151,93 @@ public class LiveGame
         JoinCodesInUse.Add(joinCode);
 
         return joinCode;
+    }
+
+    public async Task Start()
+    {
+        if (CurrentState != "lobby") return;
+
+        SetQuestion(0);
+    }
+
+    public async Task Continue()
+    {
+        switch (CurrentState)
+        {
+            case "question-answering":
+                SetStateAnswer(CurrentQuestionId);
+                break;
+            case "question-answer":
+                SetStateLeaderboard(CurrentQuestionId);
+                break;
+            case "leaderboard":
+                NextQuestion(CurrentQuestionId);
+                break;
+            default:
+                // staten kan ikke skippes
+                break;
+        }
+    }
+
+    public void SetQuestion(int index)
+    {
+        CurrentState = "question-countdown";
+        int questionId = Questions[index].QuestionId;
+        CurrentQuestionId = questionId;
+
+        UpdateStateAndCountdown(3 * 1000, () => SetStateAnswering(questionId));
+    }
+
+    public void SetStateAnswering(int questionId)
+    {
+        if (CurrentState != "question-countdown" || CurrentQuestionId != questionId) return;
+        
+        CurrentState = "question-answering";
+
+        UpdateStateAndCountdown(10 * 1000, () => SetStateAnswer(questionId));
+    }
+
+    public void SetStateAnswer(int questionId)
+    {
+        if (CurrentState != "question-answering" || CurrentQuestionId != questionId) return;
+        
+        CurrentState = "question-answer";
+        
+        StateUpdated();
+    }
+
+    public void SetStateLeaderboard(int questionId)
+    {
+        if (CurrentState != "question-answer" || CurrentQuestionId != questionId) return;
+        
+        CurrentState = "leaderboard";
+
+        UpdateStateAndCountdown(5 * 1000, () => NextQuestion(questionId));
+    }
+
+    public void NextQuestion(int questionId)
+    {
+        if (CurrentState != "leaderboard" || CurrentQuestionId != questionId) return;
+        
+        int index = Questions.FindIndex(q => q.QuestionId == questionId);
+        
+        if (index + 1 < Questions.Count) SetQuestion(index + 1);
+        else
+        {
+            CurrentState = "game-over";
+            StateUpdated();
+        }
+    }
+    
+    private async Task UpdateStateAndCountdown(int msDelay, Action callback)
+    {
+        NextEventTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + msDelay;
+
+        StateUpdated();
+
+        await Task.Delay(msDelay);
+        
+        callback();
     }
 }
 

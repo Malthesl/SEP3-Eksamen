@@ -31,16 +31,34 @@ public class LiveController(
 
     [Authorize]
     [HttpPost("start")]
-    public ActionResult Start()
+    public ActionResult Start([FromBody] LiveBasicHostRequestDTO request)
     {
-        throw new NotImplementedException();
+        int userId = int.Parse(User.FindFirst("Id")!.Value);
+
+        LiveGame game = gameService.GetGame(request.GameId);
+
+        if (game is null) return NotFound("Game not found");
+        if (game.HostUserId != userId) return Unauthorized("Kun host kan starte quizzen");
+
+        game.Start();
+
+        return Ok();
     }
 
     [Authorize]
     [HttpPost("continue")]
-    public ActionResult Continue()
+    public ActionResult Continue([FromBody] LiveBasicHostRequestDTO request)
     {
-        throw new NotImplementedException();
+        int userId = int.Parse(User.FindFirst("Id")!.Value);
+
+        LiveGame game = gameService.GetGame(request.GameId);
+
+        if (game is null) return NotFound("Game not found");
+        if (game.HostUserId != userId) return Unauthorized("Kun host kan starte quizzen");
+
+        game.Continue();
+
+        return Ok();
     }
 
     [Authorize]
@@ -62,6 +80,8 @@ public class LiveController(
 
         return new LiveGameStatusDTO
         {
+            RelTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+            CountdownToTime = state.NextEventTime,
             Quiz = new QuizDTO
             {
                 Title = state.Quiz.Title,
@@ -74,6 +94,7 @@ public class LiveController(
             CurrentQuestionId = state.CurrentQuestionId,
             QuizId = state.QuizId,
             GameId = state.GameId,
+            HostUserId = state.HostUserId,
             Questions = state.Questions.Select(question => new LiveGameQuestionDTO
             {
                 Title = question.Title,

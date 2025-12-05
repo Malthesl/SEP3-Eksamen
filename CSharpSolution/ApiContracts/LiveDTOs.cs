@@ -12,20 +12,23 @@ public class LiveCreateQuizResponseDTO
 
 public class LiveGameStatusDTO
 {
-    public string GameId { get; init; } = Guid.NewGuid().ToString();
-    public int HostUserId { get; init; }
-    public int QuizId { get; init; }
-    public string JoinCode { get; init; }
+    public required long RelTime { get; init; }
+    public required long CountdownToTime { get; init; }
     
-    public int CurrentQuestionId { get; set; }
-
-    public string CurrentState { get; set; }
-
-    public QuizDTO Quiz { get; init; }
-
-    public List<LiveGameQuestionDTO> Questions { get; init; }
+    public required string GameId { get; init; } = Guid.NewGuid().ToString();
+    public required int HostUserId { get; init; }
+    public required int QuizId { get; init; }
+    public required string JoinCode { get; init; }
     
-    public List<LiveGamePlayerDTO> Players { get; init; }
+    public required int CurrentQuestionId { get; set; }
+
+    public required string CurrentState { get; set; }
+
+    public required QuizDTO Quiz { get; init; }
+
+    public required List<LiveGameQuestionDTO> Questions { get; init; }
+    
+    public required List<LiveGamePlayerDTO> Players { get; init; }
 }
 
 public class LiveGamePlayerDTO
@@ -58,4 +61,9 @@ public class LiveGameJoinResponseDTO
 {
     public string GameId { get; set; }
     public string PlayerId { get; set; }
+}
+
+public class LiveBasicHostRequestDTO
+{
+    public string GameId { get; set; }
 }
