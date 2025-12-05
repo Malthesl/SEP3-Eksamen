@@ -82,7 +82,7 @@
                         <ol>
                             @foreach (var player in GameStatus.Players)
                             {
-                                <li>@player.Name - @player.Score point</li>
+                                <li>@player.Name - @player.Score point (+@player.LatestScoreChange)</li>
                             }
                         </ol>
 
