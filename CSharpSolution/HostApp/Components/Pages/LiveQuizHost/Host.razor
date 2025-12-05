@@ -78,6 +78,13 @@
                             <p>Her er hvem der fører...</p>
                             <span>Fortsætter om <Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" /> sekunder</span>
                         }
+                        
+                        <ol>
+                            @foreach (var player in GameStatus.Players)
+                            {
+                                <li>@player.Name - @player.Score point</li>
+                            }
+                        </ol>
 
                         <button class="fixed-continue-button" @onclick="ContinueQuiz">Continue</button>
 
