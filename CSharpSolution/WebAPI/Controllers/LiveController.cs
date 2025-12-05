@@ -70,7 +70,10 @@ public class LiveController(
 
     // Delt
     [HttpGet("status")]
-    public async Task<ActionResult<LiveGameStatusDTO>> Status([FromQuery] string gameId, [FromQuery] bool force = false)
+    public async Task<ActionResult<dynamic>> Status(
+        [FromQuery] string gameId,
+        [FromQuery] string? playerId,
+        [FromQuery] bool force = false)
     {
         LiveGame? game = gameService.GetGame(gameId);
 
@@ -78,41 +81,91 @@ public class LiveController(
 
         LiveGame state = await game.GetGameState(force);
 
-        return new LiveGameStatusDTO
+        string? userIdString = User.FindFirst("Id")?.Value;
+
+        // HOST STATUS
+        if (userIdString is not null)
         {
-            RelTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-            CountdownToTime = state.NextEventTime,
-            Quiz = new QuizDTO
+            if (int.Parse(userIdString) != game.HostUserId) return Unauthorized();
+
+            return new LiveGameHostStatusDTO
             {
-                Title = state.Quiz.Title,
-                Visibility = state.Quiz.Visibility,
-                CreatorId = state.Quiz.CreatorId,
-                Id = state.Quiz.Id
-            },
-            JoinCode = state.JoinCode,
-            CurrentState = state.CurrentState,
-            CurrentQuestionId = state.CurrentQuestionId,
-            QuizId = state.QuizId,
-            GameId = state.GameId,
-            HostUserId = state.HostUserId,
-            Questions = state.Questions.Select(question => new LiveGameQuestionDTO
-            {
-                Title = question.Title,
-                QuestionId = question.QuestionId,
-                Answers = question.Answers.Select(answer => new LiveGameAnswerDTO
+                RelTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                CountdownToTime = state.NextEventTime,
+                Quiz = new QuizDTO
                 {
-                    Title = answer.Title,
-                    AnswerId = answer.AnswerId,
-                    IsCorrect = answer.IsCorrect,
-                    Index = answer.Index
+                    Title = state.Quiz.Title,
+                    Visibility = state.Quiz.Visibility,
+                    CreatorId = state.Quiz.CreatorId,
+                    Id = state.Quiz.Id
+                },
+                JoinCode = state.JoinCode,
+                CurrentState = state.CurrentState,
+                CurrentQuestionId = state.CurrentQuestionId,
+                QuizId = state.QuizId,
+                GameId = state.GameId,
+                HostUserId = state.HostUserId,
+                PlayersAnswered = state.Players.Count(player => player.LatestAnswerId != null),
+                Questions = state.Questions.Select(question => new LiveGameQuestionDTO
+                {
+                    Title = question.Title,
+                    QuestionId = question.QuestionId,
+                    Answers = question.Answers.Select(answer => new LiveGameAnswerDTO
+                    {
+                        Title = answer.Title,
+                        AnswerId = answer.AnswerId,
+                        IsCorrect = answer.IsCorrect,
+                        Index = answer.Index
+                    }).ToList()
+                }).ToList(),
+                Players = state.Players.Select(player => new LiveGamePlayerDTO
+                {
+                    PlayerId = player.PlayerId,
+                    Name = player.Name,
+                    Score = player.Score,
+                    LatestAnswerId = player.LatestAnswerId,
+                    LatestScoreChange = player.LatestScoreChange,
+                    LatestAnswerCorrect = state.CurrentQuestion?.Answers.Find(a => a.AnswerId == player.LatestAnswerId)
+                        ?.IsCorrect
                 }).ToList()
-            }).ToList(),
-            Players = state.Players.Select(player => new LiveGamePlayerDTO
+            };
+        }
+        // PLAYER STATUS
+        if (playerId is not null && game.Players.Any(player => player.PlayerId == playerId))
+        {
+            LiveGamePlayer player = game.Players.Find(player => player.PlayerId == playerId)!;
+
+            return new LiveGamePlayerStatusDTO
             {
+                RelTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                CountdownToTime = state.NextEventTime,
+                CurrentState = state.CurrentState,
+                CurrentQuestionId = state.CurrentQuestionId,
+                Questions = state.Questions.Select(q => new LiveGameQuestionCensoredDTO
+                {
+                    QuestionId = q.QuestionId,
+                    Title = q.Title,
+                    Answers = q.Answers.Select(a => new LiveGameAnswerCensoredDTO
+                    {
+                        AnswerId = a.AnswerId,
+                        Title = a.Title,
+                        Index = a.Index
+                    }).ToList()
+                }).ToList(),
+                Score = player.Score,
+                GameId = state.GameId,
                 PlayerId = player.PlayerId,
-                Name = player.Name
-            }).ToList()
-        };
+                HostUserId = state.HostUserId,
+                Name = player.Name,
+                QuizId = state.QuizId,
+                LatestAnswerId = player.LatestAnswerId,
+                LatestScoreChange = player.LatestScoreChange,
+                LatestAnswerCorrect = state.CurrentQuestion?.Answers.Find(a => a.AnswerId == player.LatestAnswerId)
+                    ?.IsCorrect
+            };
+        }
+
+        return BadRequest("Mangler host login eller et player id");
     }
 
     // Deltagere
@@ -120,11 +173,11 @@ public class LiveController(
     public ActionResult<LiveGameJoinResponseDTO> Join([FromBody] LiveGameJoinRequestDTO request)
     {
         LiveGame? game = gameService.GetGameFromJoinCode(request.JoinCode);
-        
+
         if (game is null) return NotFound($"Spillet med join koden {request.JoinCode} var ikke fundet.");
 
         LiveGamePlayer player = game.JoinGame(request.Name);
-        
+
         return Ok(new LiveGameJoinResponseDTO
         {
             PlayerId = player.PlayerId,
@@ -134,12 +187,15 @@ public class LiveController(
 
     [HttpPost("answer")]
     public ActionResult Answer(
-        // [FromQuery] string gameId,
-        // [FromQuery] string playerId,
-        // [FromQuery] int questionId,
-        // [FromQuery] int answerId    ... Skal være en DTO fra FromBody, føler det er mere rest
+        [FromBody] LiveGameAnswerRequestDTO request
     )
     {
-        throw new NotImplementedException();
+        LiveGame? game = gameService.GetGame(request.GameId);
+
+        if (game is null) return NotFound($"Spillet findes ikke.");
+
+        game.Answer(request.QuestionId, request.AnswerId, request.PlayerId);
+
+        return Ok();
     }
 }

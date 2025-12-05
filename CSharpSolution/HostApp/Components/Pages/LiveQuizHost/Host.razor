@@ -41,6 +41,7 @@
                         {
                             <div class="question-title-sm">@CurrentQuestion.Title</div>
                             <div class="question-answering-time"><Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" /> sekunder!</div>
+                            <div class="question-answered-count">@GameStatus.PlayersAnswered/@GameStatus.Players.Count har svaret!</div>
                             <div class="answers">
                                 @foreach (var answer in CurrentQuestion.Answers)
                                 {
@@ -96,7 +97,7 @@
 
 @code {
     [Parameter] [SupplyParameterFromQuery] public string GameId { get; set; }
-    private LiveGameStatusDTO? GameStatus { get; set; }
+    private LiveGameHostStatusDTO? GameStatus { get; set; }
 
     private LiveGameQuestionDTO? CurrentQuestion => GameStatus.Questions.Find(q => q.QuestionId == GameStatus.CurrentQuestionId);
 

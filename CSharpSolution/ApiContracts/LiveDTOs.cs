@@ -10,31 +10,72 @@ public class LiveCreateQuizResponseDTO
     public string GameId { get; set; }
 }
 
-public class LiveGameStatusDTO
+public class LiveGameHostStatusDTO
 {
     public required long RelTime { get; init; }
     public required long CountdownToTime { get; init; }
     
-    public required string GameId { get; init; } = Guid.NewGuid().ToString();
+    public required string GameId { get; init; }
     public required int HostUserId { get; init; }
     public required int QuizId { get; init; }
     public required string JoinCode { get; init; }
     
-    public required int CurrentQuestionId { get; set; }
-
     public required string CurrentState { get; set; }
+    public required int CurrentQuestionId { get; set; }
 
     public required QuizDTO Quiz { get; init; }
 
     public required List<LiveGameQuestionDTO> Questions { get; init; }
     
     public required List<LiveGamePlayerDTO> Players { get; init; }
+    
+    public required int PlayersAnswered { get; init; } 
+}
+
+public class LiveGamePlayerStatusDTO
+{
+    public required long RelTime { get; init; }
+    public required long CountdownToTime { get; init; }
+    
+    public required string GameId { get; init; }
+    public required int HostUserId { get; init; }
+    public required int QuizId { get; init; }
+
+    public required int CurrentQuestionId { get; set; }
+    public required string CurrentState { get; set; }
+
+    public required List<LiveGameQuestionCensoredDTO> Questions { get; init; }
+    
+    public required string PlayerId { get; set; }
+    public required string Name { get; set; }
+    public required int Score { get; set; }
+    public int? LatestScoreChange { get; set; }
+    public int? LatestAnswerId { get; set; }
+    public bool? LatestAnswerCorrect { get; set; }
 }
 
 public class LiveGamePlayerDTO
 {
-    public string PlayerId { get; set; }
-    public string Name { get; set; }
+    public required string PlayerId { get; set; }
+    public required string Name { get; set; }
+    public required int Score { get; set; }
+    public int? LatestScoreChange { get; set; }
+    public int? LatestAnswerId { get; set; }
+    public bool? LatestAnswerCorrect { get; set; }
+}
+
+public class LiveGameQuestionCensoredDTO
+{
+    public required int QuestionId { get; set; }
+    public required String Title { get; set; }
+    public required List<LiveGameAnswerCensoredDTO> Answers { get; set; }
+}
+
+public class LiveGameAnswerCensoredDTO
+{
+    public required int AnswerId { get; set; }
+    public required String Title { get; set; }
+    public required int Index { get; set; }
 }
 
 public class LiveGameQuestionDTO
@@ -54,17 +95,25 @@ public class LiveGameAnswerDTO
 
 public class LiveGameJoinRequestDTO
 {
-    public string JoinCode { get; set; }
-    public string Name { get; set; }
+    public required string JoinCode { get; set; }
+    public required string Name { get; set; }
 }
 
 public class LiveGameJoinResponseDTO
 {
-    public string GameId { get; set; }
-    public string PlayerId { get; set; }
+    public required string GameId { get; set; }
+    public required string PlayerId { get; set; }
 }
 
 public class LiveBasicHostRequestDTO
 {
-    public string GameId { get; set; }
+    public required string GameId { get; set; }
 }
+
+public class LiveGameAnswerRequestDTO
+{
+    public required string GameId { get; set; }
+    public required string PlayerId { get; set; }
+    public required int QuestionId { get; set; }
+    public required int AnswerId { get; set; }
+} 
