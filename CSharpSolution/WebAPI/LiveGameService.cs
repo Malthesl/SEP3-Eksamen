@@ -31,7 +31,7 @@ public class LiveGame
     public string JoinCode { get; init; }
 
     public int CurrentQuestionId { get; private set; }
-    
+
     public LiveGameQuestion? CurrentQuestion => Questions.Find(q => q.QuestionId == CurrentQuestionId);
 
     /// <summary>
@@ -97,10 +97,18 @@ public class LiveGame
     /// </summary>
     public async Task<LiveGame> GetGameState(int lastUpdateNo)
     {
-        if (UpdateNo > lastUpdateNo) return this;
-        var t = new TaskCompletionSource();
-        _tasks.Add(t);
+        if (UpdateNo != lastUpdateNo) return this;
+        
+        TaskCompletionSource t;
+        
+        lock (_tasks)
+        {
+            t = new TaskCompletionSource();
+            _tasks.Add(t);
+        }
+
         await Task.WhenAny(t.Task, Task.Delay(1000 * 30));
+
         return this;
     }
 
@@ -109,14 +117,17 @@ public class LiveGame
     /// </summary>
     public void StateUpdated()
     {
-        UpdateNo++;
-        
-        foreach (var task in _tasks)
+        lock (_tasks)
         {
-            task.SetResult();
-        }
+            UpdateNo++;
 
-        _tasks.Clear();
+            foreach (var task in _tasks)
+            {
+                task.SetResult();
+            }
+
+            _tasks.Clear();
+        }
     }
 
     /// <summary>
@@ -203,7 +214,7 @@ public class LiveGame
     public void SetStateAnswering(int questionId)
     {
         if (CurrentState != "question-countdown" || CurrentQuestionId != questionId) return;
-        
+
         CurrentState = "question-answering";
 
         UpdateStateAndCountdown(10 * 1000, () => SetStateAnswer(questionId));
@@ -212,16 +223,16 @@ public class LiveGame
     public void SetStateAnswer(int questionId)
     {
         if (CurrentState != "question-answering" || CurrentQuestionId != questionId) return;
-        
+
         CurrentState = "question-answer";
-        
+
         StateUpdated();
     }
 
     public void SetStateLeaderboard(int questionId)
     {
         if (CurrentState != "question-answer" || CurrentQuestionId != questionId) return;
-        
+
         CurrentState = "leaderboard";
 
         UpdateStateAndCountdown(5 * 1000, () => NextQuestion(questionId));
@@ -230,9 +241,9 @@ public class LiveGame
     public void NextQuestion(int questionId)
     {
         if (CurrentState != "leaderboard" || CurrentQuestionId != questionId) return;
-        
+
         int index = Questions.FindIndex(q => q.QuestionId == questionId);
-        
+
         if (index + 1 < Questions.Count) SetQuestion(index + 1);
         else
         {
@@ -240,7 +251,7 @@ public class LiveGame
             StateUpdated();
         }
     }
-    
+
     private async Task UpdateStateAndCountdown(int msDelay, Action callback)
     {
         NextEventTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + msDelay;
@@ -248,7 +259,7 @@ public class LiveGame
         StateUpdated();
 
         await Task.Delay(msDelay);
-        
+
         callback();
     }
 
@@ -260,9 +271,10 @@ public class LiveGame
         if (answer is null) throw new Exception("Answer not found");
         LiveGamePlayer? player = Players.Find(p => p.PlayerId == playerId);
         if (player is null) throw new Exception("Player not found");
-        
-        if (player.Answers.Any(a => a.QuestionId == questionId)) throw new Exception("Player already answered question");
-        
+
+        if (player.Answers.Any(a => a.QuestionId == questionId))
+            throw new Exception("Player already answered question");
+
         player.Answers.Add(new LiveGamePlayerAnswer { QuestionId = questionId, AnswerId = answer.AnswerId });
 
         int score = answer.IsCorrect ? 1000 : 0;
@@ -270,7 +282,7 @@ public class LiveGame
         player.Score += score;
         player.LatestAnswerId = answer.AnswerId;
         player.LatestScoreChange = score;
-        
+
         if (Players.All(p => p.LatestAnswerId is not null)) SetStateAnswer(questionId);
         else StateUpdated();
     }
@@ -280,9 +292,9 @@ public class LiveGamePlayer
 {
     public required string PlayerId { get; init; } = Guid.NewGuid().ToString();
     public required string Name { get; set; }
-    
+
     public int Score { get; set; }
-    
+
     public List<LiveGamePlayerAnswer> Answers { get; set; } = [];
 
     public int? LatestAnswerId { get; set; }
