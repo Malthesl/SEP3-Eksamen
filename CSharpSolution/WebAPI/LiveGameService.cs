@@ -186,6 +186,12 @@ public class LiveGame
         int questionId = Questions[index].QuestionId;
         CurrentQuestionId = questionId;
 
+        foreach (var player in Players)
+        {
+            player.LatestAnswerId = null;
+            player.LatestScoreChange = null;
+        }
+
         UpdateStateAndCountdown(3 * 1000, () => SetStateAnswering(questionId));
     }
 
@@ -240,12 +246,47 @@ public class LiveGame
         
         callback();
     }
+
+    public void Answer(int questionId, int answerId, string playerId)
+    {
+        LiveGameQuestion? question = Questions.Find(q => q.QuestionId == questionId);
+        if (question is null) throw new Exception("Question not found");
+        LiveGameAnswer? answer = question.Answers.Find(a => a.AnswerId == answerId);
+        if (answer is null) throw new Exception("Answer not found");
+        LiveGamePlayer? player = Players.Find(p => p.PlayerId == playerId);
+        if (player is null) throw new Exception("Player not found");
+        
+        if (player.Answers.Any(a => a.QuestionId == questionId)) throw new Exception("Player already answered question");
+        
+        player.Answers.Add(new LiveGamePlayerAnswer { QuestionId = questionId, AnswerId = answerId });
+
+        int score = answer.IsCorrect ? 1000 : 0;
+
+        player.Score += score;
+        player.LatestAnswerId = answerId;
+        player.LatestScoreChange = score;
+        
+        if (Players.All(p => p.LatestAnswerId is not null)) SetStateAnswer(questionId);
+    }
 }
 
 public class LiveGamePlayer
 {
     public required string PlayerId { get; init; } = Guid.NewGuid().ToString();
-    public string Name { get; set; }
+    public required string Name { get; set; }
+    
+    public int Score { get; set; }
+    
+    public List<LiveGamePlayerAnswer> Answers { get; set; } = [];
+
+    public int? LatestAnswerId { get; set; }
+    public int? LatestScoreChange { get; set; }
+}
+
+public class LiveGamePlayerAnswer
+{
+    public required int QuestionId { get; set; }
+    public required int AnswerId { get; set; }
 }
 
 public class LiveGameQuestion

@@ -29,12 +29,17 @@ public class LiveGameStatusDTO
     public required List<LiveGameQuestionDTO> Questions { get; init; }
     
     public required List<LiveGamePlayerDTO> Players { get; init; }
+    
+    public required int PlayersAnswered { get; init; } 
 }
 
 public class LiveGamePlayerDTO
 {
-    public string PlayerId { get; set; }
-    public string Name { get; set; }
+    public required string PlayerId { get; set; }
+    public required string Name { get; set; }
+    public required int Score { get; set; }
+    public int? LatestScoreChange { get; set; }
+    public int? LatestAnswerId { get; set; }
 }
 
 public class LiveGameQuestionDTO
@@ -54,17 +59,25 @@ public class LiveGameAnswerDTO
 
 public class LiveGameJoinRequestDTO
 {
-    public string JoinCode { get; set; }
-    public string Name { get; set; }
+    public required string JoinCode { get; set; }
+    public required string Name { get; set; }
 }
 
 public class LiveGameJoinResponseDTO
 {
-    public string GameId { get; set; }
-    public string PlayerId { get; set; }
+    public required string GameId { get; set; }
+    public required string PlayerId { get; set; }
 }
 
 public class LiveBasicHostRequestDTO
 {
-    public string GameId { get; set; }
+    public required string GameId { get; set; }
 }
+
+public class LiveGameAnswerRequestDTO
+{
+    public required string GameId { get; set; }
+    public required string PlayerId { get; set; }
+    public required int QuestionId { get; set; }
+    public required int AnswerId { get; set; }
+} 

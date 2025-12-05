@@ -95,6 +95,7 @@ public class LiveController(
             QuizId = state.QuizId,
             GameId = state.GameId,
             HostUserId = state.HostUserId,
+            PlayersAnswered = state.Players.Count(player => player.LatestAnswerId != null),
             Questions = state.Questions.Select(question => new LiveGameQuestionDTO
             {
                 Title = question.Title,
@@ -110,7 +111,10 @@ public class LiveController(
             Players = state.Players.Select(player => new LiveGamePlayerDTO
             {
                 PlayerId = player.PlayerId,
-                Name = player.Name
+                Name = player.Name,
+                Score = player.Score,
+                LatestAnswerId = player.LatestAnswerId,
+                LatestScoreChange = player.LatestScoreChange
             }).ToList()
         };
     }
@@ -134,12 +138,15 @@ public class LiveController(
 
     [HttpPost("answer")]
     public ActionResult Answer(
-        // [FromQuery] string gameId,
-        // [FromQuery] string playerId,
-        // [FromQuery] int questionId,
-        // [FromQuery] int answerId    ... Skal være en DTO fra FromBody, føler det er mere rest
+        [FromBody] LiveGameAnswerRequestDTO request
     )
     {
-        throw new NotImplementedException();
+        LiveGame? game = gameService.GetGame(request.GameId);
+        
+        if (game is null) return NotFound($"Spillet findes ikke.");
+
+        game.Answer(request.QuestionId, request.AnswerId, request.PlayerId);
+
+        return Ok();
     }
 }
