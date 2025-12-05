@@ -249,11 +249,11 @@ public class LiveGame
         callback();
     }
 
-    public void Answer(int questionId, int answerIndex, string playerId)
+    public void Answer(int questionId, int answerId, string playerId)
     {
         LiveGameQuestion? question = CurrentQuestion;
         if (question is null) throw new Exception("Question not found");
-        LiveGameAnswer? answer = question.Answers[answerIndex];
+        LiveGameAnswer? answer = question.Answers.Find(a => a.AnswerId == answerId);
         if (answer is null) throw new Exception("Answer not found");
         LiveGamePlayer? player = Players.Find(p => p.PlayerId == playerId);
         if (player is null) throw new Exception("Player not found");

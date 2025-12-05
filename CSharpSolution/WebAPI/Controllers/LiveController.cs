@@ -145,7 +145,12 @@ public class LiveController(
                 {
                     QuestionId = q.QuestionId,
                     Title = q.Title,
-                    NoOfAnswers = q.Answers.Count
+                    Answers = q.Answers.Select(a => new LiveGameAnswerCensoredDTO
+                    {
+                        AnswerId = a.AnswerId,
+                        Title = a.Title,
+                        Index = a.Index
+                    }).ToList()
                 }).ToList(),
                 Score = player.Score,
                 GameId = state.GameId,
@@ -189,7 +194,7 @@ public class LiveController(
 
         if (game is null) return NotFound($"Spillet findes ikke.");
 
-        game.Answer(request.QuestionId, request.AnswerIndex, request.PlayerId);
+        game.Answer(request.QuestionId, request.AnswerId, request.PlayerId);
 
         return Ok();
     }

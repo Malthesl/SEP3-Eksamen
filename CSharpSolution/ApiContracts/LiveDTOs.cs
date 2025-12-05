@@ -68,7 +68,14 @@ public class LiveGameQuestionCensoredDTO
 {
     public required int QuestionId { get; set; }
     public required String Title { get; set; }
-    public required int NoOfAnswers { get; set; }
+    public required List<LiveGameAnswerCensoredDTO> Answers { get; set; }
+}
+
+public class LiveGameAnswerCensoredDTO
+{
+    public required int AnswerId { get; set; }
+    public required String Title { get; set; }
+    public required int Index { get; set; }
 }
 
 public class LiveGameQuestionDTO
@@ -108,5 +115,5 @@ public class LiveGameAnswerRequestDTO
     public required string GameId { get; set; }
     public required string PlayerId { get; set; }
     public required int QuestionId { get; set; }
-    public required int AnswerIndex { get; set; }
+    public required int AnswerId { get; set; }
 } 
