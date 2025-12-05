@@ -7,9 +7,14 @@
 
 <p style="position: fixed">@GameStatus?.UpdateNo</p>
 <div class="body @GetBackgroundColor()">
-    @if (GameId is null)
+    @if (GameId is null || GameStatus is null)
     {
-        <p>Brormand du er ikke joinet et game! >:((((</p>
+        <div class="centered-box content-inline">
+            <h1>Loading...</h1>
+            <div class="loader-container">
+                <div class="loader"></div>
+            </div>
+        </div>
     }
     else
     {
@@ -32,7 +37,7 @@
                     <h1 class="title-title">Svar!</h1>
                 </div>
                 <div class="answers">
-                    @foreach (var answer in GameStatus?.Questions.Find(q => q.QuestionId == GameStatus.CurrentQuestionId)?.Answers ?? [])
+                    @foreach (var answer in GameStatus.Questions.Find(q => q.QuestionId == GameStatus.CurrentQuestionId)?.Answers ?? [])
                     {
                         <button class="answer-button @GetButtonColor(answer.Index)" @onclick="() => Answer(answer.AnswerId)">@GetButtonColor(answer.Index)</button>
                     }
@@ -51,9 +56,13 @@
                 </div>
                 break;
             case "answered":
-                bool latestAnswer = GameStatus?.LatestAnswerCorrect ?? false;
+                bool latestAnswer = GameStatus.LatestAnswerCorrect ?? false;
                 <div class="title">
-                    <h1 class="title-title">@(latestAnswer? "Du har svaret rigtigt✅" : "Du har svaret forkert❌")</h1>
+                    <h1 class="title-title">@(GameStatus.LatestAnswerCorrect is null ? "Tiden løb ud⌛" : latestAnswer ? "Du har svaret rigtigt✅" : "Du har svaret forkert❌")</h1>
+                </div>
+                <div class="mid-body">
+                    <h1>@(GameStatus.LatestAnswerCorrect is null ? "Du var lidt for langsom😞" : latestAnswer ? "🔥🔥🔥" : "Du har den næste gang")</h1>
+                    <h2 class="mid-body-subtitle">Du lægger på @(GameStatus.Ranking + 1). plads</h2>
                 </div>
                 break;
             case "question":
@@ -95,6 +104,12 @@
         GameId = await PlayerService.GetGameIdAsync();
         UserId = await PlayerService.GetPlayerIdAsync();
 
+        if (GameId is null || UserId is null)
+        {
+            await PlayerService.Clear();
+            Nav.NavigateTo("play");
+        }
+
         GameStatus = await ParticipateService.GetGameStatusAsync();
         UpdateLocalGameState();
         GetNextStatus();
@@ -132,13 +147,14 @@
                 ErrorText = "State findes ikke";
                 break;
         }
+
         StateHasChanged();
     }
 
     private async Task GetNextStatus()
     {
         GameStatus = await ParticipateService.GetGameStatusAsync(GameStatus?.UpdateNo ?? 0);
-        
+
         UpdateLocalGameState();
 
         StateHasChanged();
@@ -189,8 +205,8 @@
 
             await ParticipateService.AnswerAsync(questionId, answerId);
 
-            if (GameState == "answers") GameState = "waiting-for-answers";
-            
+            if (GameState == "answer") GameState = "waiting-for-answers";
+
             StateHasChanged();
         }
         catch (Exception e)

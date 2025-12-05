@@ -180,7 +180,6 @@
     
     .answer-button {
         color: rgba(255,255,255,0.7);
-        padding: 100px 30px;
         border: none;
         outline: none;
         font-size: 50px;
@@ -188,6 +187,8 @@
         border-radius: 15px;
         cursor: pointer;
         box-shadow: -5px -5px rgba(255,255,255,0.2) inset;
+        width: 100%;
+        height: 100%;
         
         &:hover {
             opacity: 0.9;
