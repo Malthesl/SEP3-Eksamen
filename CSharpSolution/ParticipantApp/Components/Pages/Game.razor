@@ -5,6 +5,8 @@
 @inject IParticipateService ParticipateService
 @inject NavigationManager Nav
 
+<PageTitle>Kahoot++ | Game</PageTitle>
+
 <p style="position: fixed">@GameStatus?.UpdateNo</p>
 <div class="body @GetBackgroundColor()">
     @if (GameId is null || GameStatus is null)
@@ -62,7 +64,7 @@
                 </div>
                 <div class="mid-body">
                     <h1>@(GameStatus.LatestAnswerCorrect is null ? "Du var lidt for langsom😞" : latestAnswer ? "🔥🔥🔥" : "Du har den næste gang")</h1>
-                    <h2 class="mid-body-subtitle">Du lægger på @(GameStatus.Ranking + 1). plads</h2>
+                    <h2 class="mid-body-subtitle">Du ligger på @(GameStatus.Ranking + 1). plads</h2>
                 </div>
                 break;
             case "question":
