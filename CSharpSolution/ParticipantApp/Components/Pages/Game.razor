@@ -7,10 +7,10 @@
 
 <PageTitle>Kahoot++ | Game</PageTitle>
 
-<p style="position: fixed">@GameStatus?.UpdateNo</p>
 <div class="body @GetBackgroundColor()">
     @if (GameId is null || GameStatus is null)
     {
+        <button class="leave-button" @onclick="Leave">Forlad</button>
         <div class="centered-box content-inline">
             <h1>Loading...</h1>
             <div class="loader-container">
@@ -24,7 +24,7 @@
         {
             case "waiting":
                 <div class="centered-box center-content-veritcally">
-                    <h1>Velkommen til @UserId!</h1>
+                    <h1>Velkommen!</h1>
                     <div class="content-inline">
                         <h2>Venter på vært starter</h2>
                         <div class="loader-container">
@@ -73,7 +73,15 @@
                     <h2 class="mid-body-subtitle">Ellers misser du spørgsmålet</h2>
                 </div>
                 break;
-            default:
+            case "gameover":
+                <button class="leave-button" @onclick="Leave">Forlad</button>
+                <div class="mid-body">
+                    <h1 class="mid-body-title">Spillet er slut</h1>
+                    <h2 class="mid-body-subtitle">Se op på tavlen for at få din rankering</h2>
+                </div>
+                break;
+            default:                    
+                <button class="leave-button" @onclick="Leave">Forlad</button>
                 <div class="centered-box content-inline">
                     <h1>Loading...</h1>
                     <div class="loader-container">
@@ -185,9 +193,11 @@
             case "waiting-for-answers":
                 return "purple";
             case "question":
+            case "gameover":
                 return "yellow";
             case "answered":
                 return GameStatus?.LatestAnswerCorrect is null or false ? "red" : "green";
+            
             default:
                 return "blue";
         }
