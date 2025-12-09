@@ -46,6 +46,8 @@ public class AuthorizationService(
     /// <returns>Returner en task, som giver en bool om brugeren har adgang.</returns>
     public async Task<bool> IsAuthorizedToModifyQuiz(int quizId, ClaimsPrincipal user)
     {
+        if (user.Identity?.IsAuthenticated is false or null) return false;
+        
         int userId = int.Parse(user.FindFirst("Id")!.Value);
         
         int quizCreatorId = (await quizService.GetQuizAsync(new GetQuizRequest
@@ -68,7 +70,7 @@ public class AuthorizationService(
             (await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest { QuestionId = questionId }))
             .Question.QuizId;
 
-        return await IsAuthorizedToModifyQuiz(quizId, user);
+        return await IsAuthorizedToAccessQuiz(quizId, user);
     }
 
     /// <summary>
@@ -82,6 +84,8 @@ public class AuthorizationService(
         var quiz = (await quizService.GetQuizAsync(new GetQuizRequest { QuizId = quizId })).Quiz;
         
         if (quiz.Visibility == "public") return true;
+        
+        if (user.Identity?.IsAuthenticated is false or null) return false;
         
         int userId = int.Parse(user.FindFirst("Id")!.Value);
 
