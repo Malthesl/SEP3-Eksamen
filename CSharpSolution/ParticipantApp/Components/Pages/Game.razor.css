@@ -1,10 +1,29 @@
 ﻿.body {
-    background: #5b9fff;
     color: white;
     width: 100vw;
     height: 100vh;
     margin: 0;
     padding: 0;
+}
+
+.blue {
+    background: #5b9fff;
+}
+
+.yellow {
+    background: #E3C128;
+}
+
+.green {
+    background: #0BB702;
+}
+
+.purple {
+    background: #943AE2;
+}
+
+.red {
+    background: #B71102;
 }
 
 .centered-box {
@@ -77,4 +96,102 @@
     0%,20%  {transform:rotate(0deg)                    translate(0,0)     rotate(0deg)}
     50%     {transform:rotate(calc(var(--s,1)*-90deg)) translate(0,0)     rotate(0deg)}
     100%    {transform:rotate(calc(var(--s,1)*-90deg)) translate(0,-20px) rotate(calc(var(--s,1)*-90deg))}
+}
+
+.title {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 40px;
+    box-sizing: border-box;
+    .title-title {
+        margin: 0;
+        width: 40%;
+        text-align: center;
+    }
+    
+    .title-subtitle {
+        font-weight: lighter;
+        font-style: italic;
+    }
+}
+
+.mid-body {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 40px;
+    box-sizing: border-box;
+    
+    .mid-body-subtitle {
+        font-weight: lighter;
+        font-style: italic;
+        margin: 0;
+    }
+}
+
+.error-text-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 30px;
+    background: white;
+    border-radius: 5px 5px 0 0;
+    padding: 15px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hide {
+    display: none;
+}
+
+.close-button {
+    color: white;
+    background: #cb4444;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    width: 25px;
+    height: 25px;
+    text-align: center;
+}
+
+.answers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 40px;
+    padding: 50px;
+    box-sizing: border-box;
+    
+    .answer-button {
+        color: rgba(255,255,255,0.7);
+        border: none;
+        outline: none;
+        font-size: 50px;
+        text-transform: capitalize;
+        border-radius: 15px;
+        cursor: pointer;
+        box-shadow: -5px -5px rgba(255,255,255,0.2) inset;
+        width: 100%;
+        height: 100%;
+        
+        &:hover {
+            opacity: 0.9;
+        }
+    }
 }

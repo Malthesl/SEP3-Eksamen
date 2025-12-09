@@ -3,6 +3,8 @@
 @inject IParticipateService ParticipateService;
 @inject NavigationManager Nav;
 
+<PageTitle>Kahoot++ | Play</PageTitle>
+
 <div class="body">
     <div class="centered-content">
         @if (State == "join")
@@ -10,7 +12,7 @@
             <h1>Kahoot++</h1>
 
             <div class="content-container">
-                <input @bind="GameCode" oninput="this.value=this.value.toUpperCase()" class="code-input text-input" placeholder="ABC123" maxlength="6"/>
+                <input @bind="Code" @oninput="e => AutoCheckCode(e)" class="code-input text-input" placeholder="ABC123" maxlength="6"/>
                 <button class="start-button" @onclick="GoToNameState">Start</button>
             </div>
         } else if (State == "name")
@@ -31,17 +33,27 @@
 
 @code {
 
-    private string GameCode { get; set; } = "";
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? Code { get; set; } = "";
     private string NameString { get; set; } = "";
     private string ErrorText { get; set; } = "";
 
     private string State { get; set; } = "join";
-    
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Code != null)
+        {
+            GoToNameState();
+        }
+    }
+
     private void GoToNameState()
     {
         try
         {
-            if (GameCode.Length != 6) throw new Exception("Koden skal være 6 tegn");
+            if (Code?.Length != 6) throw new Exception("Koden skal være 6 tegn");
             
             State = "name";
 
@@ -58,7 +70,7 @@
         {
             if (String.IsNullOrWhiteSpace(NameString)) throw new ArgumentException("Ugyldigt navn");
 
-            await ParticipateService.JoinAsync(GameCode, NameString);
+            await ParticipateService.JoinAsync(Code!.ToUpper(), NameString);
             
             Nav.NavigateTo("game");
         }
@@ -76,5 +88,14 @@
     private void CloseErrorMessage()
     {
         ErrorText = "";
+    }
+
+    private void AutoCheckCode(ChangeEventArgs e)
+    {
+        if (e.Value?.ToString()?.Length == 6)
+        {
+            Code = e.Value.ToString();
+            GoToNameState();
+        }
     }
 }

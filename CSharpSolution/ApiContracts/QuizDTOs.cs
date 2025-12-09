@@ -2,12 +2,12 @@
 
 public class QuizDTO
 {
-    public required int Id { get; init; }
-    public required string Title { get; init; }
-    public required string Visibility { get; init; }
-    public required int CreatorId { get; init; }
-    public UserDTO? Creator { get; init; }
-    public int? QuestionCount { get; init; }
+    public required int Id { get; set; }
+    public required string Title { get; set; }
+    public required string Visibility { get; set; }
+    public required int CreatorId { get; set; }
+    public UserDTO? Creator { get; set; }
+    public int? QuestionCount { get; set; }
 }
 
 public class CreateQuizDTO
@@ -23,8 +23,8 @@ public class UpdateQuizDTO
 
 public class QuizQueryDTO
 {
-    public required IEnumerable<QuizDTO> Quizzes { get; init; }
-    public required int Start { get; init; }
-    public required int End { get; init; }
-    public required int Count { get; init; }
+    public required IEnumerable<QuizDTO> Quizzes { get; set; }
+    public required int Start { get; set; }
+    public required int End { get; set; }
+    public required int Count { get; set; }
 }

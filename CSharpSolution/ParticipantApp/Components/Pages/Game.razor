@@ -1,12 +1,22 @@
 ﻿@page "/game"
+@using ApiContracts
 @using ParticipantApp.Services
 @inject IPlayerService PlayerService
+@inject IParticipateService ParticipateService
 @inject NavigationManager Nav
 
-<div class="body">
-    @if (GameId is null)
+<PageTitle>Kahoot++ | Game</PageTitle>
+
+<div class="body @GetBackgroundColor()">
+    @if (GameId is null || GameStatus is null)
     {
-        <p>Brormand du er ikke joinet et game! >:((((</p>
+        <button class="leave-button" @onclick="Leave">Forlad</button>
+        <div class="centered-box content-inline">
+            <h1>Loading...</h1>
+            <div class="loader-container">
+                <div class="loader"></div>
+            </div>
+        </div>
     }
     else
     {
@@ -14,7 +24,7 @@
         {
             case "waiting":
                 <div class="centered-box center-content-veritcally">
-                    <h1>Velkommen til @UserId!</h1>
+                    <h1>Velkommen!</h1>
                     <div class="content-inline">
                         <h2>Venter på vært starter</h2>
                         <div class="loader-container">
@@ -24,7 +34,54 @@
                     <button class="leave-button" @onclick="Leave">Forlad</button>
                 </div>
                 break;
-            default:
+            case "answer":
+                <div class="title">
+                    <h1 class="title-title">Svar!</h1>
+                </div>
+                <div class="answers">
+                    @foreach (var answer in GameStatus.Questions.Find(q => q.QuestionId == GameStatus.CurrentQuestionId)?.Answers ?? [])
+                    {
+                        <button class="answer-button @GetButtonColor(answer.Index)" @onclick="() => Answer(answer.AnswerId)">@GetButtonColor(answer.Index)</button>
+                    }
+                </div>
+                break;
+            case "waiting-for-answers":
+                <div class="title">
+                    <h1 class="title-title">Du har svaret</h1>
+                    <h1 class="title-subtitle">Du er hurtigere end lynet🔥</h1>
+                </div>
+                <div class="mid-body">
+                    <h1 class="mid-body-title">Venter på dine langsomme medspillere</h1>
+                    <div class="loader-container">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+                break;
+            case "answered":
+                bool latestAnswer = GameStatus.LatestAnswerCorrect ?? false;
+                <div class="title">
+                    <h1 class="title-title">@(GameStatus.LatestAnswerCorrect is null ? "Tiden løb ud⌛" : latestAnswer ? "Du har svaret rigtigt✅" : "Du har svaret forkert❌")</h1>
+                </div>
+                <div class="mid-body">
+                    <h1>@(GameStatus.LatestAnswerCorrect is null ? "Du var lidt for langsom😞" : latestAnswer ? "🔥🔥🔥" : "Du har den næste gang")</h1>
+                    <h2 class="mid-body-subtitle">Du ligger på @(GameStatus.Ranking + 1). plads</h2>
+                </div>
+                break;
+            case "question":
+                <div class="mid-body">
+                    <h1 class="mid-body-title">Kig op på tavlen</h1>
+                    <h2 class="mid-body-subtitle">Ellers misser du spørgsmålet</h2>
+                </div>
+                break;
+            case "gameover":
+                <button class="leave-button" @onclick="Leave">Forlad</button>
+                <div class="mid-body">
+                    <h1 class="mid-body-title">Spillet er slut</h1>
+                    <h2 class="mid-body-subtitle">Se op på tavlen for at få din rankering</h2>
+                </div>
+                break;
+            default:                    
+                <button class="leave-button" @onclick="Leave">Forlad</button>
                 <div class="centered-box content-inline">
                     <h1>Loading...</h1>
                     <div class="loader-container">
@@ -32,9 +89,13 @@
                     </div>
                 </div>
                 break;
-                
         }
     }
+</div>
+
+<div class="error-text-container @(String.IsNullOrEmpty(ErrorText) ? "hide" : "")">
+    <p class="error-text">@ErrorText</p>
+    <button class="close-button" @onclick="CloseErrorMessage">x</button>
 </div>
 
 @code {
@@ -42,18 +103,128 @@
     private string? GameId { get; set; }
     private string? UserId { get; set; }
 
-    private string GameState { get; set; } = "waiting";
+    private string ErrorText { get; set; } = "";
+
+    private LiveGamePlayerStatusDTO? GameStatus { get; set; }
+
+    private string GameState { get; set; } = "loading";
 
     protected async override Task OnInitializedAsync()
     {
         GameId = await PlayerService.GetGameIdAsync();
         UserId = await PlayerService.GetPlayerIdAsync();
+
+        if (GameId is null || UserId is null)
+        {
+            await PlayerService.Clear();
+            Nav.NavigateTo("play");
+        }
+
+        GameStatus = await ParticipateService.GetGameStatusAsync();
+        UpdateLocalGameState();
+        GetNextStatus();
+    }
+
+    private void UpdateLocalGameState()
+    {
+        switch (GameStatus?.CurrentState)
+        {
+            case "lobby":
+                GameState = "waiting";
+                break;
+            case "question-countdown":
+                GameState = "question";
+                break;
+            case "question-answering":
+                if (GameState == "waiting-for-answers")
+                {
+                    GameState = "waiting-for-answers";
+                }
+                else
+                {
+                    GameState = "answer";
+                }
+
+                break;
+            case "question-answer":
+            case "leaderboard":
+                GameState = "answered";
+                break;
+            case "game-over":
+                GameState = "gameover";
+                break;
+            default:
+                ErrorText = "State findes ikke";
+                break;
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task GetNextStatus()
+    {
+        GameStatus = await ParticipateService.GetGameStatusAsync(GameStatus?.UpdateNo ?? 0);
+
+        UpdateLocalGameState();
+
+        StateHasChanged();
+
+        GetNextStatus();
     }
 
     private async void Leave()
     {
         await PlayerService.Clear();
         Nav.NavigateTo("play");
+    }
+
+    private void CloseErrorMessage()
+    {
+        ErrorText = "";
+    }
+
+    private string GetBackgroundColor()
+    {
+        switch (GameState)
+        {
+            case "waiting":
+                return "blue";
+            case "answer":
+            case "waiting-for-answers":
+                return "purple";
+            case "question":
+            case "gameover":
+                return "yellow";
+            case "answered":
+                return GameStatus?.LatestAnswerCorrect is null or false ? "red" : "green";
+            
+            default:
+                return "blue";
+        }
+    }
+
+    private string GetButtonColor(int index)
+    {
+        string[] colors = { "green", "yellow", "blue", "red" };
+        return colors[index - 1];
+    }
+
+    private async void Answer(int answerId)
+    {
+        try
+        {
+            var questionId = GameStatus!.CurrentQuestionId;
+
+            await ParticipateService.AnswerAsync(questionId, answerId);
+
+            if (GameState == "answer") GameState = "waiting-for-answers";
+
+            StateHasChanged();
+        }
+        catch (Exception e)
+        {
+            ErrorText = e.Message;
+        }
     }
 
 }

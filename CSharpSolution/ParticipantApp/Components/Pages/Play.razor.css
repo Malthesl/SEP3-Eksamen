@@ -34,7 +34,8 @@
 }
 
 .code-input {
-    letter-spacing: .5rem;    
+    letter-spacing: .5rem;
+    text-transform: uppercase;
 }
 
 .text-input {

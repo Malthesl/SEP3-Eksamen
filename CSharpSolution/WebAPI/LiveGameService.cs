@@ -11,9 +11,9 @@ public class LiveGameService(
 
     public LiveGame? GetGame(string gameId) => Games.GetValueOrDefault(gameId);
 
-    public LiveGame CreateGame(int quizId, int userId)
+    public LiveGame CreateGame(int quizId, int hostId)
     {
-        LiveGame game = new LiveGame(quizId, userId, quizService, questionService, answerService);
+        LiveGame game = new LiveGame(quizId, hostId, quizService, questionService, answerService);
 
         Games.Add(game.GameId, game);
 
@@ -25,13 +25,15 @@ public class LiveGameService(
 
 public class LiveGame
 {
-    public string GameId { get; init; } = Guid.NewGuid().ToString();
-    public int HostUserId { get; init; }
-    public int QuizId { get; init; }
-    public string JoinCode { get; init; }
+    public string GameId { get; } = Guid.NewGuid().ToString();
+    public int HostUserId { get; }
+    public int QuizId { get; }
+    public string JoinCode { get; }
+
+    private const int QuestionTime = 10 * 1000;
 
     public int CurrentQuestionId { get; private set; }
-    
+
     public LiveGameQuestion? CurrentQuestion => Questions.Find(q => q.QuestionId == CurrentQuestionId);
 
     /// <summary>
@@ -46,13 +48,15 @@ public class LiveGame
     /// </summary>
     public string CurrentState { get; private set; } = "lobby";
 
-    public QuizDTO Quiz { get; init; }
+    public QuizDTO Quiz { get; }
 
-    public List<LiveGameQuestion> Questions { get; init; }
+    public List<LiveGameQuestion> Questions { get; }
 
-    public List<LiveGamePlayer> Players { get; init; } = [];
+    public List<LiveGamePlayer> Players { get; } = [];
 
-    public long NextEventTime { get; set; }
+    public long NextEventTime { get; private set; }
+
+    public int UpdateNo { get; private set; } = 1;
 
     private readonly List<TaskCompletionSource> _tasks = [];
 
@@ -93,27 +97,39 @@ public class LiveGame
     /// <summary>
     /// Henter den nuværende game, efter en ændring er sket.
     /// </summary>
-    /// <param name="force">Skal hente med det samme?</param>
-    public async Task<LiveGame> GetGameState(bool force = false)
+    public async Task<LiveGame> GetGameState(int lastUpdateNo)
     {
-        if (force) return this;
-        var t = new TaskCompletionSource();
-        _tasks.Add(t);
+        if (UpdateNo != lastUpdateNo) return this;
+
+        TaskCompletionSource t;
+
+        lock (_tasks)
+        {
+            t = new TaskCompletionSource();
+            _tasks.Add(t);
+        }
+
         await Task.WhenAny(t.Task, Task.Delay(1000 * 30));
+
         return this;
     }
 
     /// <summary>
     /// Kald denne metode, når en ændring er sket. Så bliver klienterne opdateret!
     /// </summary>
-    public void StateUpdated()
+    private void StateUpdated()
     {
-        foreach (var task in _tasks)
+        lock (_tasks)
         {
-            task.SetResult();
-        }
+            UpdateNo++;
 
-        _tasks.Clear();
+            foreach (var task in _tasks)
+            {
+                task.SetResult();
+            }
+
+            _tasks.Clear();
+        }
     }
 
     /// <summary>
@@ -156,14 +172,14 @@ public class LiveGame
         return joinCode;
     }
 
-    public async Task Start()
+    public void Start()
     {
         if (CurrentState != "lobby") return;
 
         SetQuestion(0);
     }
 
-    public async Task Continue()
+    public void Continue()
     {
         switch (CurrentState)
         {
@@ -182,7 +198,7 @@ public class LiveGame
         }
     }
 
-    public void SetQuestion(int index)
+    private void SetQuestion(int index)
     {
         CurrentState = "question-countdown";
         int questionId = Questions[index].QuestionId;
@@ -197,47 +213,53 @@ public class LiveGame
         UpdateStateAndCountdown(3 * 1000, () => SetStateAnswering(questionId));
     }
 
-    public void SetStateAnswering(int questionId)
+    private void SetStateAnswering(int questionId)
     {
         if (CurrentState != "question-countdown" || CurrentQuestionId != questionId) return;
-        
+
         CurrentState = "question-answering";
 
-        UpdateStateAndCountdown(10 * 1000, () => SetStateAnswer(questionId));
+        _questionStartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        UpdateStateAndCountdown(QuestionTime, () => SetStateAnswer(questionId));
     }
 
-    public void SetStateAnswer(int questionId)
+    private void SetStateAnswer(int questionId)
     {
         if (CurrentState != "question-answering" || CurrentQuestionId != questionId) return;
-        
+
         CurrentState = "question-answer";
-        
+
         StateUpdated();
     }
 
-    public void SetStateLeaderboard(int questionId)
+    private void SetStateLeaderboard(int questionId)
     {
         if (CurrentState != "question-answer" || CurrentQuestionId != questionId) return;
-        
-        CurrentState = "leaderboard";
 
-        UpdateStateAndCountdown(5 * 1000, () => NextQuestion(questionId));
-    }
-
-    public void NextQuestion(int questionId)
-    {
-        if (CurrentState != "leaderboard" || CurrentQuestionId != questionId) return;
-        
         int index = Questions.FindIndex(q => q.QuestionId == questionId);
-        
-        if (index + 1 < Questions.Count) SetQuestion(index + 1);
-        else
+
+        if (index + 1 >= Questions.Count)
         {
             CurrentState = "game-over";
             StateUpdated();
         }
+        else
+        {
+            CurrentState = "leaderboard";
+            UpdateStateAndCountdown(5 * 1000, () => NextQuestion(questionId));
+        }
     }
-    
+
+    private void NextQuestion(int questionId)
+    {
+        if (CurrentState != "leaderboard" || CurrentQuestionId != questionId) return;
+
+        int index = Questions.FindIndex(q => q.QuestionId == questionId);
+
+        SetQuestion(index + 1);
+    }
+
     private async Task UpdateStateAndCountdown(int msDelay, Action callback)
     {
         NextEventTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + msDelay;
@@ -245,9 +267,11 @@ public class LiveGame
         StateUpdated();
 
         await Task.Delay(msDelay);
-        
+
         callback();
     }
+
+    private long _questionStartTime = 0;
 
     public void Answer(int questionId, int answerId, string playerId)
     {
@@ -257,29 +281,35 @@ public class LiveGame
         if (answer is null) throw new Exception("Answer not found");
         LiveGamePlayer? player = Players.Find(p => p.PlayerId == playerId);
         if (player is null) throw new Exception("Player not found");
-        
-        if (player.Answers.Any(a => a.QuestionId == questionId)) throw new Exception("Player already answered question");
-        
-        player.Answers.Add(new LiveGamePlayerAnswer { QuestionId = questionId, AnswerId = answerId });
 
-        int score = answer.IsCorrect ? 1000 : 0;
+        if (player.Answers.Any(a => a.QuestionId == questionId))
+            throw new Exception("Player already answered question");
+
+        player.Answers.Add(new LiveGamePlayerAnswer { QuestionId = questionId, AnswerId = answer.AnswerId });
+
+        long timeElapsed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _questionStartTime;
+        long timeLeft = QuestionTime - timeElapsed;
+        double timePct = (double)timeLeft / QuestionTime;
+
+        int score = answer.IsCorrect ? (int)(250 + 750 * timePct) : 0;
 
         player.Score += score;
-        player.LatestAnswerId = answerId;
+        player.LatestAnswerId = answer.AnswerId;
         player.LatestScoreChange = score;
-        
+
         if (Players.All(p => p.LatestAnswerId is not null)) SetStateAnswer(questionId);
+        else StateUpdated();
     }
 }
 
 public class LiveGamePlayer
 {
     public required string PlayerId { get; init; } = Guid.NewGuid().ToString();
-    public required string Name { get; set; }
-    
+    public required string Name { get; init; }
+
     public int Score { get; set; }
-    
-    public List<LiveGamePlayerAnswer> Answers { get; set; } = [];
+
+    public List<LiveGamePlayerAnswer> Answers { get; init; } = [];
 
     public int? LatestAnswerId { get; set; }
     public int? LatestScoreChange { get; set; }
@@ -287,21 +317,21 @@ public class LiveGamePlayer
 
 public class LiveGamePlayerAnswer
 {
-    public required int QuestionId { get; set; }
-    public required int AnswerId { get; set; }
+    public required int QuestionId { get; init; }
+    public required int AnswerId { get; init; }
 }
 
 public class LiveGameQuestion
 {
-    public required int QuestionId { get; set; }
-    public required String Title { get; set; }
-    public required List<LiveGameAnswer> Answers { get; set; }
+    public required int QuestionId { get; init; }
+    public required String Title { get; init; }
+    public required List<LiveGameAnswer> Answers { get; init; }
 }
 
 public class LiveGameAnswer
 {
-    public required int AnswerId { get; set; }
-    public required String Title { get; set; }
-    public required bool IsCorrect { get; set; }
-    public required int Index { get; set; }
+    public required int AnswerId { get; init; }
+    public required String Title { get; init; }
+    public required bool IsCorrect { get; init; }
+    public required int Index { get; init; }
 }

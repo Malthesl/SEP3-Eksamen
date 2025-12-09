@@ -1,7 +1,10 @@
-﻿namespace ParticipantApp.Services;
+﻿using ApiContracts;
+
+namespace ParticipantApp.Services;
 
 public interface IParticipateService
 {
     Task<string> JoinAsync(string code, string name);
-    Task<string> AnswerAsync(string gameId, string playerId, int questionId, int answerId);
+    Task AnswerAsync(int questionId, int answerId);
+    Task<LiveGamePlayerStatusDTO> GetGameStatusAsync(int updateNo = 0);
 }

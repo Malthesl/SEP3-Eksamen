@@ -8,25 +8,18 @@ namespace WebAPI.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class LiveController(
-    QuizService.QuizServiceClient quizService,
-    QuestionService.QuestionServiceClient questionService,
-    AnswerService.AnswerServiceClient answerService,
-    LiveGameService gameService) : ControllerBase
+public class LiveController(LiveGameService gameService) : ControllerBase
 {
     // Host
     [Authorize]
     [HttpPost("new")]
-    public ActionResult<string> New([FromBody] LiveCreateQuizRequestDTO quiz)
+    public ActionResult<LiveCreateGameResponseDTO> New([FromBody] LiveCreateGameRequestDTO quiz)
     {
         int userId = int.Parse(User.FindFirst("Id")!.Value);
 
         LiveGame game = gameService.CreateGame(quiz.QuizId, userId);
 
-        return Ok(new LiveCreateQuizResponseDTO
-        {
-            GameId = game.GameId
-        });
+        return Ok(new LiveCreateGameResponseDTO { GameId = game.GameId });
     }
 
     [Authorize]
@@ -73,13 +66,13 @@ public class LiveController(
     public async Task<ActionResult<dynamic>> Status(
         [FromQuery] string gameId,
         [FromQuery] string? playerId,
-        [FromQuery] bool force = false)
+        [FromQuery] int lastUpdateNo = 0)
     {
         LiveGame? game = gameService.GetGame(gameId);
 
         if (game is null) return BadRequest("Game not found");
 
-        LiveGame state = await game.GetGameState(force);
+        LiveGame state = await game.GetGameState(lastUpdateNo);
 
         string? userIdString = User.FindFirst("Id")?.Value;
 
@@ -90,6 +83,7 @@ public class LiveController(
 
             return new LiveGameHostStatusDTO
             {
+                UpdateNo = state.UpdateNo,
                 RelTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 CountdownToTime = state.NextEventTime,
                 Quiz = new QuizDTO
@@ -118,7 +112,7 @@ public class LiveController(
                         Index = answer.Index
                     }).ToList()
                 }).ToList(),
-                Players = state.Players.Select(player => new LiveGamePlayerDTO
+                Players = state.Players.OrderByDescending(p => p.Score).Select(player => new LiveGamePlayerDTO
                 {
                     PlayerId = player.PlayerId,
                     Name = player.Name,
@@ -137,6 +131,7 @@ public class LiveController(
 
             return new LiveGamePlayerStatusDTO
             {
+                UpdateNo = state.UpdateNo,
                 RelTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 CountdownToTime = state.NextEventTime,
                 CurrentState = state.CurrentState,
@@ -145,7 +140,12 @@ public class LiveController(
                 {
                     QuestionId = q.QuestionId,
                     Title = q.Title,
-                    NoOfAnswers = q.Answers.Count
+                    Answers = q.Answers.Select(a => new LiveGameAnswerCensoredDTO
+                    {
+                        AnswerId = a.AnswerId,
+                        Title = a.Title,
+                        Index = a.Index
+                    }).ToList()
                 }).ToList(),
                 Score = player.Score,
                 GameId = state.GameId,
@@ -153,6 +153,7 @@ public class LiveController(
                 HostUserId = state.HostUserId,
                 Name = player.Name,
                 QuizId = state.QuizId,
+                Ranking = state.Players.OrderByDescending(p => p.Score).ToList().FindIndex(p => p.PlayerId == player.PlayerId),
                 LatestAnswerId = player.LatestAnswerId,
                 LatestScoreChange = player.LatestScoreChange,
                 LatestAnswerCorrect = state.CurrentQuestion?.Answers.Find(a => a.AnswerId == player.LatestAnswerId)
@@ -187,7 +188,7 @@ public class LiveController(
     {
         LiveGame? game = gameService.GetGame(request.GameId);
 
-        if (game is null) return NotFound($"Spillet findes ikke.");
+        if (game is null) return NotFound("Spillet findes ikke.");
 
         game.Answer(request.QuestionId, request.AnswerId, request.PlayerId);
 
