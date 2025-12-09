@@ -1,9 +1,8 @@
 ﻿@page "/Account"
-@using ApiContracts
 @using BlazorClient.Services
+@using HostApp.Components.Modals
 @using HostApp.Services
 @using Microsoft.AspNetCore.Components.Authorization
-@inject AuthService AuthService;
 @inject IUserService UserService;
 @inject AuthenticationStateProvider AuthStateProvider;
 @inject NavigationManager Nav;
@@ -17,16 +16,17 @@
                 <label for="newUsername">Ny Brugernavn:</label>
                 <input type="text" id="newUsername" @bind="Username">
                 <div>
-                    <button class="button" @onclick="NewUsername">opdatere brugernavn</button> 
+                    <button class="button" @onclick="()=> _usernameModal!.Show()">opdatere brugernavn</button> 
                 </div>
                 <label for="newPassword"> Ny Adgangskode:</label>
                 <input type="password" id="newPassword" @bind="Password">
                 <div>
-                    <button class="button" @onclick="NewPassword">opdatere adgangskoden</button> 
+                    <button class="button" @onclick="()=> _passwordModal!.Show()">opdatere adgangskoden</button> 
                 </div>
                 <div>
-                    <button class="button" @onclick="DeleteUser">Slet bruger</button> 
+                    <button class="button" @onclick="()=> _confirmModal!.Show()">Slet bruger</button> 
                 </div>
+                <p>@Status</p>
                 <span id="error" class="error-label">@Error</span>
             </div>
         </div>
@@ -34,28 +34,55 @@
     </Authorized>
 </AuthorizeView>
 
+<ConfirmModal @ref="_confirmModal"
+              Title="Delete User"
+              Message="Er du sikker på, at du vil slette din bruger?"
+              OnClose="HandleDeleteConfirmation" />
+
+<ConfirmModal @ref="_passwordModal"
+              Title="Edit Password"
+              Message="Er du sikker på at du vil ændre din adgangskode?"
+              OnClose="HandleEditPasswordConfirmation" />">
+
+<ConfirmModal @ref="_usernameModal"
+              Title="Edit Username"
+              Message="Er du sikker på at du vil ændre dit brugernavn?"
+              OnClose="HandleEditUsernameConfirmation" />">
+
 @code {
 
     private string Username { get; set; } = "";
     private string Password { get; set; } = "";
     private string Error { get; set; } = "";
+    private string Status { get; set; } = "";
+    private ConfirmModal? _confirmModal;
+    private ConfirmModal? _passwordModal;
+    private ConfirmModal? _usernameModal;
+    
+    private async Task HandleDeleteConfirmation(bool confirmed)
+    {
+        if (confirmed)
+        {
+            int userId = int.Parse((await AuthStateProvider.GetAuthenticationStateAsync()).User.FindFirst("Id")!.Value); 
+            await UserService.DeleteUser(userId);
+            if (AuthStateProvider is TokenAuthenticationStateProvider auth) await auth.SignOut();
+            Nav.NavigateTo("/login");
+        }
+    }
 
-    private async Task NewUsername()
+    private async Task HandleEditPasswordConfirmation(bool confirmed)
     {
         int userId = int.Parse((await AuthStateProvider.GetAuthenticationStateAsync()).User.FindFirst("Id")!.Value);
-        UserDTO username = await UserService.UpdateUsername(userId, Username);
+        await UserService.UpdatePassword(userId, Password);
+        Status = "Din adgangskode er blevet ændret!";
+        StateHasChanged();
     }
 
-    private async Task NewPassword()
+    private async Task HandleEditUsernameConfirmation(bool confirmed)
     {
         int userId = int.Parse((await AuthStateProvider.GetAuthenticationStateAsync()).User.FindFirst("Id")!.Value);
-        UserDTO password = await UserService.UpdatePassword(userId, Password);
+        await UserService.UpdateUsername(userId, Username);
+        Status = "Dit brugernavn er blevet ændret!";
+        StateHasChanged();
     }
-
-    private async Task DeleteUser()
-    {
-        int userId = int.Parse((await AuthStateProvider.GetAuthenticationStateAsync()).User.FindFirst("Id")!.Value); 
-        await UserService.DeleteUser(userId);
-    }
-
 }
