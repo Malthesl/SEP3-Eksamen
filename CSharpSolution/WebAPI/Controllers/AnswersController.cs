@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using AnswerDTO = ApiContracts.AnswerDTO;
+﻿using AnswerDTO = ApiContracts.AnswerDTO;
 using ApiContracts;
 using GrpcClient;
 using Microsoft.AspNetCore.Authorization;
@@ -7,54 +6,65 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
 
+/// <summary>
+/// WebAPI til at håndtere svarmulighederne til et spørgsmål.
+/// </summary>
 [Authorize]
 [ApiController]
 [Route("[controller]")]
-public class AnswersController(
-    AnswerService.AnswerServiceClient answersService,
-    QuestionService.QuestionServiceClient questionService,
-    QuizService.QuizServiceClient quizService) : ControllerBase
+public class AnswersController(AnswerService.AnswerServiceClient answersService, AuthorizationService authService)
+    : ControllerBase
 {
+    /// <summary>
+    /// Henter alle svarmuligheder der hører til et spørgsmål.
+    /// Sikkerhed: Hvis quizzen spørgsmålet hører til er privat, kræver dette endpoint at man er logget ind som quiz-ejeren.
+    /// </summary>
+    /// <param name="questionId">ID'et på spørgsmålet</param>
+    /// <returns>En liste af svarmuligheder som AnswerDTO'er</returns>
     [HttpGet]
     public async Task<ActionResult<List<AnswerDTO>>> GetAnswers([FromQuery] int questionId)
     {
-        if (!await IsAuthorizedToAccess(questionId, User)) return Unauthorized();
+        if (!await authService.IsAuthorizedToAccessQuestion(questionId, User)) return Unauthorized();
 
-        var answers = await answersService.GetAllAnswersInQuestionAsync(new GetAllAnswersInQuestionRequest()
+        var answers = await answersService.GetAllAnswersInQuestionAsync(new GetAllAnswersInQuestionRequest
         {
             QuestionId = questionId
         });
 
-        List<AnswerDTO> returnList = new List<AnswerDTO>();
-        foreach (var answer in answers.Answers)
-        {
-            returnList.Add(new AnswerDTO()
+        List<AnswerDTO> dtos = answers.Answers.Select(answer => new AnswerDTO
             {
                 Index = answer.Index,
                 Title = answer.Title,
                 AnswerId = answer.Id,
                 IsCorrect = answer.IsCorrect,
                 QuestionId = answer.QuestionId,
-            });
-        }
+            })
+            .ToList();
 
-        return Ok(returnList);
+        return Ok(dtos);
     }
 
+    /// <summary>
+    /// Tilføjer en ny svarmulighed til en quiz.
+    /// Sikkerhed: Kræver at man er logget ind som quiz-ejeren.
+    /// </summary>
+    /// <param name="createDto">DTO med informationer om titlen, rækkefølge indeks, id på spørgsmålet og om svaret er korrekt</param>
+    /// <returns>Den nye svarmulighed</returns>
+    [Authorize]
     [HttpPost]
-    public async Task<ActionResult<AnswerDTO>> AddAnswer([FromBody] CreateAnswerDTO createAnswerDto)
+    public async Task<ActionResult<AnswerDTO>> AddAnswer([FromBody] CreateAnswerDTO createDto)
     {
-        if (!await IsAuthorizedToAdd(createAnswerDto.QuestionId, User)) return Unauthorized();
+        if (!await authService.IsAuthorizedToModifyQuestion(createDto.QuestionId, User)) return Unauthorized();
 
-        var res = await answersService.AddAnswerAsync(new AddAnswerRequest()
+        var res = await answersService.AddAnswerAsync(new AddAnswerRequest
         {
-            Index = createAnswerDto.Index,
-            Title = createAnswerDto.Title,
-            IsCorrect = createAnswerDto.IsCorrect,
-            QuestionId = createAnswerDto.QuestionId,
+            Index = createDto.Index,
+            Title = createDto.Title,
+            IsCorrect = createDto.IsCorrect,
+            QuestionId = createDto.QuestionId,
         });
 
-        return Ok(new AnswerDTO()
+        return Created("/answers/" + res.Answer.Id, new AnswerDTO
         {
             Index = res.Answer.Index,
             Title = res.Answer.Title,
@@ -64,14 +74,22 @@ public class AnswersController(
         });
     }
 
+    /// <summary>
+    /// Opdaterer en eksisterende svarmulighed.
+    /// Sikkerhed: Kræver at man er logget ind som quiz-ejeren.
+    /// </summary>
+    /// <param name="answerId">ID'et på svarmuligheden der skal opdateres</param>
+    /// <param name="answerDto">DTO med ændringerne til indeks, titel og korrekthed</param>
+    /// <returns>AnswerDTO med resultatet af de nye ændringer</returns>
+    [Authorize]
     [HttpPost("{answerId:int}")]
-    public async Task<ActionResult> UpdateAnswer([FromRoute] int answerId, [FromBody] AnswerDTO answerDto)
+    public async Task<ActionResult<AnswerDTO>> UpdateAnswer([FromRoute] int answerId, [FromBody] AnswerDTO answerDto)
     {
-        if (!await IsAuthorizedToChange(answerId, User)) return Unauthorized();
+        if (!await authService.IsAuthorizedToModifyAnswer(answerId, User)) return Unauthorized();
 
-        answersService.UpdateAnswer(new UpdateAnswerRequest()
+        await answersService.UpdateAnswerAsync(new UpdateAnswerRequest
         {
-            NewAnswer = new GrpcClient.AnswerDTO()
+            NewAnswer = new GrpcClient.AnswerDTO
             {
                 Index = answerDto.Index,
                 Title = answerDto.Title,
@@ -81,59 +99,23 @@ public class AnswersController(
             }
         });
 
-        return Ok(answerDto);
+        return Ok((await answersService.GetAnswerAsync(new GetAnswerRequest { Id = answerId })).Answer);
     }
 
+    /// <summary>
+    /// Sletter en svarmulighed.
+    /// Sikkerhed: Kræver at man er logget ind som quiz-ejeren.
+    /// </summary>
+    /// <param name="answerId">ID'et på spørgsmålet der skal opdateres</param>
+    /// <returns>Ok hvis svaret er blevet slettet korrekt</returns>
+    [Authorize]
     [HttpDelete("{answerId:int}")]
     public async Task<ActionResult> DeleteAnswer([FromRoute] int answerId)
     {
-        if (!await IsAuthorizedToChange(answerId, User)) return Unauthorized();
+        if (!await authService.IsAuthorizedToModifyAnswer(answerId, User)) return Unauthorized();
 
-        answersService.DeleteAnswer(new DeleteAnswerRequest()
-        {
-            AnswerId = answerId
-        });
+        await answersService.DeleteAnswerAsync(new DeleteAnswerRequest { AnswerId = answerId });
 
         return Ok();
-    }
-
-    private async Task<bool> IsAuthorizedToChange(int answerId, ClaimsPrincipal user)
-    {
-        int questionId = (await answersService.GetAnswerAsync(new GetAnswerRequest { Id = answerId })).Answer
-            .QuestionId;
-        var question =
-            await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest { QuestionId = questionId });
-        int userId = int.Parse(user.FindFirst("Id")!.Value);
-        int quizCreatorId = (await quizService.GetQuizAsync(new GetQuizRequest()
-        {
-            QuizId = question.Question.QuizId
-        })).Quiz.CreatorId;
-
-        return quizCreatorId == userId;
-    }
-
-    private async Task<bool> IsAuthorizedToAdd(int questionId, ClaimsPrincipal user)
-    {
-        int userId = int.Parse(user.FindFirst("Id")!.Value);
-        int quizId =
-            (await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest { QuestionId = questionId }))
-            .Question.QuizId;
-        int quizCreatorId = (await quizService.GetQuizAsync(new GetQuizRequest()
-        {
-            QuizId = quizId
-        })).Quiz.CreatorId;
-
-        return quizCreatorId == userId;
-    }
-
-    private async Task<bool> IsAuthorizedToAccess(int questionId, ClaimsPrincipal user)
-    {
-        int quizId =
-            (await questionService.GetQuestionByIdAsync(new GetQuestionByIdRequest { QuestionId = questionId }))
-            .Question.QuizId;
-        var quiz = (await quizService.GetQuizAsync(new GetQuizRequest { QuizId = quizId })).Quiz;
-        int userId = int.Parse(user.FindFirst("Id")!.Value);
-
-        return quiz.CreatorId == userId || quiz.Visibility == "public";
     }
 }

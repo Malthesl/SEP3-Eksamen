@@ -8,11 +8,7 @@ namespace WebAPI.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class LiveController(
-    QuizService.QuizServiceClient quizService,
-    QuestionService.QuestionServiceClient questionService,
-    AnswerService.AnswerServiceClient answerService,
-    LiveGameService gameService) : ControllerBase
+public class LiveController(LiveGameService gameService) : ControllerBase
 {
     // Host
     [Authorize]

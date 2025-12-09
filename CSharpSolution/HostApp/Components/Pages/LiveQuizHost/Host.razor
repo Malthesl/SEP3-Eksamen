@@ -87,13 +87,13 @@
 
                         <div class="leaderboard">
                             <div class="player-rankings">
-                                @for (int i = 3; i < GameStatus.Players.Count; i++)
+                                @for (int i = 0; i < GameStatus.Players.Count; i++)
                                 {
                                     var player = GameStatus.Players[i];
                                     <div class="player-ranking-slot">
                                         <div class="player-ranking-rank">@(i + 1).</div>
                                         <div class="player-ranking-name">@player.Name</div>
-                                        <div class="player-ranking-score">@player.Score point</div>
+                                        <div class="player-ranking-score">@player.Score point (+@player.LatestScoreChange)</div>
                                     </div>
                                 }
                             </div>
