@@ -1,4 +1,4 @@
-﻿package mnm.sep3.server;
+package mnm.sep3.server;
 
 import io.grpc.stub.StreamObserver;
 import mnm.sep3.*;

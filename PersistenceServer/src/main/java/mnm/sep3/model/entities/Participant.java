@@ -1,4 +1,4 @@
-﻿package mnm.sep3.model.entities;
+package mnm.sep3.model.entities;
 
 public class Participant {
     private final int id;
