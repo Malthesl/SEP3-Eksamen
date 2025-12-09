@@ -11,9 +11,9 @@ public class LiveGameService(
 
     public LiveGame? GetGame(string gameId) => Games.GetValueOrDefault(gameId);
 
-    public LiveGame CreateGame(int quizId, int userId)
+    public LiveGame CreateGame(int quizId, int hostId)
     {
-        LiveGame game = new LiveGame(quizId, userId, quizService, questionService, answerService);
+        LiveGame game = new LiveGame(quizId, hostId, quizService, questionService, answerService);
 
         Games.Add(game.GameId, game);
 
@@ -25,12 +25,12 @@ public class LiveGameService(
 
 public class LiveGame
 {
-    public string GameId { get; init; } = Guid.NewGuid().ToString();
-    public int HostUserId { get; init; }
-    public int QuizId { get; init; }
-    public string JoinCode { get; init; }
+    public string GameId { get; } = Guid.NewGuid().ToString();
+    public int HostUserId { get; }
+    public int QuizId { get; }
+    public string JoinCode { get; }
 
-    public const int QuestionTime = 10 * 1000;
+    private const int QuestionTime = 10 * 1000;
 
     public int CurrentQuestionId { get; private set; }
 
@@ -48,13 +48,15 @@ public class LiveGame
     /// </summary>
     public string CurrentState { get; private set; } = "lobby";
 
-    public QuizDTO Quiz { get; init; }
+    public QuizDTO Quiz { get; }
 
-    public List<LiveGameQuestion> Questions { get; init; }
+    public List<LiveGameQuestion> Questions { get; }
 
-    public List<LiveGamePlayer> Players { get; init; } = [];
+    public List<LiveGamePlayer> Players { get; } = [];
 
-    public long NextEventTime { get; set; }
+    public long NextEventTime { get; private set; }
+
+    public int UpdateNo { get; private set; } = 1;
 
     private readonly List<TaskCompletionSource> _tasks = [];
 
@@ -92,8 +94,6 @@ public class LiveGame
             .ToList();
     }
 
-    public int UpdateNo { get; set; } = 1;
-
     /// <summary>
     /// Henter den nuværende game, efter en ændring er sket.
     /// </summary>
@@ -117,7 +117,7 @@ public class LiveGame
     /// <summary>
     /// Kald denne metode, når en ændring er sket. Så bliver klienterne opdateret!
     /// </summary>
-    public void StateUpdated()
+    private void StateUpdated()
     {
         lock (_tasks)
         {
@@ -172,14 +172,14 @@ public class LiveGame
         return joinCode;
     }
 
-    public async Task Start()
+    public void Start()
     {
         if (CurrentState != "lobby") return;
 
         SetQuestion(0);
     }
 
-    public async Task Continue()
+    public void Continue()
     {
         switch (CurrentState)
         {
@@ -198,7 +198,7 @@ public class LiveGame
         }
     }
 
-    public void SetQuestion(int index)
+    private void SetQuestion(int index)
     {
         CurrentState = "question-countdown";
         int questionId = Questions[index].QuestionId;
@@ -213,7 +213,7 @@ public class LiveGame
         UpdateStateAndCountdown(3 * 1000, () => SetStateAnswering(questionId));
     }
 
-    public void SetStateAnswering(int questionId)
+    private void SetStateAnswering(int questionId)
     {
         if (CurrentState != "question-countdown" || CurrentQuestionId != questionId) return;
 
@@ -224,7 +224,7 @@ public class LiveGame
         UpdateStateAndCountdown(QuestionTime, () => SetStateAnswer(questionId));
     }
 
-    public void SetStateAnswer(int questionId)
+    private void SetStateAnswer(int questionId)
     {
         if (CurrentState != "question-answering" || CurrentQuestionId != questionId) return;
 
@@ -233,7 +233,7 @@ public class LiveGame
         StateUpdated();
     }
 
-    public void SetStateLeaderboard(int questionId)
+    private void SetStateLeaderboard(int questionId)
     {
         if (CurrentState != "question-answer" || CurrentQuestionId != questionId) return;
 
@@ -251,7 +251,7 @@ public class LiveGame
         }
     }
 
-    public void NextQuestion(int questionId)
+    private void NextQuestion(int questionId)
     {
         if (CurrentState != "leaderboard" || CurrentQuestionId != questionId) return;
 
@@ -305,11 +305,11 @@ public class LiveGame
 public class LiveGamePlayer
 {
     public required string PlayerId { get; init; } = Guid.NewGuid().ToString();
-    public required string Name { get; set; }
+    public required string Name { get; init; }
 
     public int Score { get; set; }
 
-    public List<LiveGamePlayerAnswer> Answers { get; set; } = [];
+    public List<LiveGamePlayerAnswer> Answers { get; init; } = [];
 
     public int? LatestAnswerId { get; set; }
     public int? LatestScoreChange { get; set; }
@@ -317,21 +317,21 @@ public class LiveGamePlayer
 
 public class LiveGamePlayerAnswer
 {
-    public required int QuestionId { get; set; }
-    public required int AnswerId { get; set; }
+    public required int QuestionId { get; init; }
+    public required int AnswerId { get; init; }
 }
 
 public class LiveGameQuestion
 {
-    public required int QuestionId { get; set; }
-    public required String Title { get; set; }
-    public required List<LiveGameAnswer> Answers { get; set; }
+    public required int QuestionId { get; init; }
+    public required String Title { get; init; }
+    public required List<LiveGameAnswer> Answers { get; init; }
 }
 
 public class LiveGameAnswer
 {
-    public required int AnswerId { get; set; }
-    public required String Title { get; set; }
-    public required bool IsCorrect { get; set; }
-    public required int Index { get; set; }
+    public required int AnswerId { get; init; }
+    public required String Title { get; init; }
+    public required bool IsCorrect { get; init; }
+    public required int Index { get; init; }
 }

@@ -13,16 +13,13 @@ public class LiveController(LiveGameService gameService) : ControllerBase
     // Host
     [Authorize]
     [HttpPost("new")]
-    public ActionResult<string> New([FromBody] LiveCreateQuizRequestDTO quiz)
+    public ActionResult<LiveCreateGameResponseDTO> New([FromBody] LiveCreateGameRequestDTO quiz)
     {
         int userId = int.Parse(User.FindFirst("Id")!.Value);
 
         LiveGame game = gameService.CreateGame(quiz.QuizId, userId);
 
-        return Ok(new LiveCreateQuizResponseDTO
-        {
-            GameId = game.GameId
-        });
+        return Ok(new LiveCreateGameResponseDTO { GameId = game.GameId });
     }
 
     [Authorize]
