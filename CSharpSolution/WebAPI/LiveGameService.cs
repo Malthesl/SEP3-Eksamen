@@ -31,7 +31,7 @@ public class LiveGame
     public string JoinCode { get; init; }
 
     public const int QuestionTime = 10 * 1000;
-    
+
     public int CurrentQuestionId { get; private set; }
 
     public LiveGameQuestion? CurrentQuestion => Questions.Find(q => q.QuestionId == CurrentQuestionId);
@@ -100,9 +100,9 @@ public class LiveGame
     public async Task<LiveGame> GetGameState(int lastUpdateNo)
     {
         if (UpdateNo != lastUpdateNo) return this;
-        
+
         TaskCompletionSource t;
-        
+
         lock (_tasks)
         {
             t = new TaskCompletionSource();
@@ -237,9 +237,18 @@ public class LiveGame
     {
         if (CurrentState != "question-answer" || CurrentQuestionId != questionId) return;
 
-        CurrentState = "leaderboard";
+        int index = Questions.FindIndex(q => q.QuestionId == questionId);
 
-        UpdateStateAndCountdown(5 * 1000, () => NextQuestion(questionId));
+        if (index + 1 >= Questions.Count)
+        {
+            CurrentState = "game-over";
+            StateUpdated();
+        }
+        else
+        {
+            CurrentState = "leaderboard";
+            UpdateStateAndCountdown(5 * 1000, () => NextQuestion(questionId));
+        }
     }
 
     public void NextQuestion(int questionId)
@@ -248,12 +257,7 @@ public class LiveGame
 
         int index = Questions.FindIndex(q => q.QuestionId == questionId);
 
-        if (index + 1 < Questions.Count) SetQuestion(index + 1);
-        else
-        {
-            CurrentState = "game-over";
-            StateUpdated();
-        }
+        SetQuestion(index + 1);
     }
 
     private async Task UpdateStateAndCountdown(int msDelay, Action callback)
@@ -286,7 +290,7 @@ public class LiveGame
         long timeElapsed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _questionStartTime;
         long timeLeft = QuestionTime - timeElapsed;
         double timePct = (double)timeLeft / QuestionTime;
-        
+
         int score = answer.IsCorrect ? (int)(250 + 750 * timePct) : 0;
 
         player.Score += score;

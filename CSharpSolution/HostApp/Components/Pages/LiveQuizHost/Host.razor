@@ -6,6 +6,7 @@
 @using HostApp.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IQuizHostService QuizHostService;
+@inject NavigationManager Nav;
 
 <AuthorizeView>
     <Authorized>
@@ -40,8 +41,13 @@
                         @if (CurrentQuestion is not null)
                         {
                             <div class="question-title-sm">@CurrentQuestion.Title</div>
-                            <div class="question-answering-time"><Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" /> sekunder!</div>
-                            <div class="question-answered-count">@GameStatus.PlayersAnswered/@GameStatus.Players.Count har svaret!</div>
+                            <div class="question-answering-time">
+                                <Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" />
+                                sekunder!
+                            </div>
+                            <div class="question-answered-count">@GameStatus.PlayersAnswered/@GameStatus.Players.Count har
+                                                                                            svaret!
+                            </div>
                             <div class="answers">
                                 @foreach (var answer in CurrentQuestion.Answers)
                                 {
@@ -78,16 +84,78 @@
                             <p>Her er hvem der fører...</p>
                             <span>Fortsætter om <Countdown Start="GameStatus.RelTime" End="GameStatus.CountdownToTime" /> sekunder</span>
                         }
-                        
-                        <ol>
-                            @foreach (var player in GameStatus.Players)
-                            {
-                                <li>@player.Name - @player.Score point (+@player.LatestScoreChange)</li>
-                            }
-                        </ol>
+
+                        <div class="leaderboard">
+                            <div class="player-rankings">
+                                @for (int i = 3; i < GameStatus.Players.Count; i++)
+                                {
+                                    var player = GameStatus.Players[i];
+                                    <div class="player-ranking-slot">
+                                        <div class="player-ranking-rank">@(i + 1).</div>
+                                        <div class="player-ranking-name">@player.Name</div>
+                                        <div class="player-ranking-score">@player.Score point</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
 
                         <button class="fixed-continue-button" @onclick="ContinueQuiz">Continue</button>
-
+                        break;
+                    case "game-over":
+                        <h1>Det endelige resultat</h1>
+                        <div class="podium">
+                            @if (GameStatus.Players.Count >= 2)
+                            {
+                                <div class="podium-stand podium-stand-2">
+                                    <div class="podium-title">2.</div>
+                                    <div class="podium-player-name">
+                                        @GameStatus.Players[1].Name
+                                    </div>
+                                    <div class="podium-player-score">
+                                        @GameStatus.Players[1].Score point
+                                    </div>
+                                </div>
+                            }
+                            @if (GameStatus.Players.Count >= 1)
+                            {
+                                <div class="podium-stand podium-stand-1">
+                                    <div class="podium-title">1.</div>
+                                    <div class="podium-player-name">
+                                        @GameStatus.Players[0].Name
+                                    </div>
+                                    <div class="podium-player-score">
+                                        @GameStatus.Players[0].Score point
+                                    </div>
+                                </div>
+                            }
+                            @if (GameStatus.Players.Count >= 3)
+                            {
+                                <div class="podium-stand podium-stand-3">
+                                    <div class="podium-title">3.</div>
+                                    <div class="podium-player-name">
+                                        @GameStatus.Players[2].Name
+                                    </div>
+                                    <div class="podium-player-score">
+                                        @GameStatus.Players[2].Score point
+                                    </div>
+                                </div>
+                            }
+                            
+                            <button class="fixed-continue-button" @onclick='() => Nav.NavigateTo("/results/" + GameId)'>Færdig</button>
+                        </div>
+                        <div class="the-rest">
+                            <div class="player-rankings">
+                                @for (int i = 3; i < GameStatus.Players.Count; i++)
+                                {
+                                    var player = GameStatus.Players[i];
+                                    <div class="player-ranking-slot">
+                                        <div class="player-ranking-rank">@(i + 1).</div>
+                                        <div class="player-ranking-name">@player.Name</div>
+                                        <div class="player-ranking-score">@player.Score point</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
                         break;
                     default:
                         <p>Hmmm</p>

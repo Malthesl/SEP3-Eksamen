@@ -96,10 +96,84 @@
   &.answers-highlight-correct {
     .answer {
       opacity: 0.4;
-      
+
       &.answer-correct {
         opacity: 1;
       }
+    }
+  }
+}
+
+.podium {
+  display: flex;
+  margin-top: 100px;
+  
+  .podium-stand-1 {
+    font-size: 1.2em;
+  }
+
+  .podium-stand-2 {
+    font-size: 1em;
+  }
+
+  .podium-stand-3 {
+    font-size: 0.8em;
+  }
+
+  .podium-stand {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+
+    .podium-title {
+      font-size: 2em;
+    }
+
+    .podium-player-name {
+      font-size: 2em;
+      font-weight: 500;
+    }
+
+    .podium-player-score {
+      font-size: 1.75em;
+    }
+  }
+}
+
+.leaderboard, .the-rest {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 100px;
+}
+
+.player-rankings {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 600px;
+
+  .player-ranking-slot {
+    width: 100%;
+    display: flex;
+    background: #0002;
+
+    .player-ranking-rank {
+      padding: 10px;
+    }
+
+    .player-ranking-name {
+      flex-grow: 1;
+      padding: 10px;
+    }
+
+    .player-ranking-score {
+      margin-left: auto;
+      padding: 10px;
     }
   }
 }
