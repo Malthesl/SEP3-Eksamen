@@ -1,0 +1,78 @@
+﻿syntax = "proto3";
+
+option java_multiple_files = true;
+
+package mnm.sep3;
+
+option csharp_namespace = "GrpcClient";
+
+import "dtos.proto";
+
+message GetGameRequest {
+  string gameId = 1;
+}
+
+message GetGameResponse {
+  GameDTO game = 1;
+}
+
+message GetParticipantsInGameRequest {
+  string gameId = 1;
+}
+
+message GetParticipantsInGameResponse {
+  repeated ParticipantDTO participants = 1;
+}
+
+message GetGameResultsRequest {
+  string gameId = 1;
+}
+
+message GetGameResultsResponse {
+  repeated ParticipantAnswerDTO answers = 1;
+}
+
+message GetResultOnQuestionRequest {
+  string gameId = 1;
+  int32 questionId = 2;
+}
+
+message GetResultOnQuestionResponse {
+  repeated ParticipantAnswerDTO answers = 1;
+}
+
+message GetGamesHostedByUserRequest {
+  int32 userId = 1;
+}
+
+message GetGamesHostedByUserResponse {
+  repeated GameDTO games = 1;
+}
+
+message SubmitGameResultsRequest {
+  GameDTO game = 1;
+  repeated SubmitResultsByParticipant results = 2;
+}
+
+message SubmitResultsByParticipant {
+  string name = 1;
+  repeated ParticipantResult answers = 2;
+}
+
+message ParticipantResult {
+  int32 answerId = 1;
+}
+
+service ResultService {
+  // Games
+  rpc GetGame (GetGameRequest) returns (GetGameResponse);
+  rpc GetGamesHostedByUser (GetGamesHostedByUserRequest) returns (GetGamesHostedByUserResponse);
+
+  // Participants
+  rpc GetParticipantsInGame (GetParticipantsInGameRequest) returns (GetParticipantsInGameResponse);
+  
+  // Results
+  rpc GetGameResults (GetGameResultsRequest) returns (GetGameResultsResponse);
+  rpc GetResultOnQuestion (GetResultOnQuestionRequest) returns (GetResultOnQuestionResponse);
+  rpc SubmitGameResults (SubmitGameResultsRequest) returns (Empty);
+}

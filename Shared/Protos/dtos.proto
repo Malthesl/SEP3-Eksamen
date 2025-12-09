@@ -44,3 +44,22 @@ message AnswerDTO {
   int32 questionId = 4; // Evt lav en repeated AnswerDTO variable på question i stedet for
   bool isCorrect = 5;
 }
+
+message GameDTO {
+  string id = 1;
+  int32 hostId = 2;
+  int64 playedTime = 3;
+  int32 quizId = 4;
+}
+
+message ParticipantDTO {
+  string gameId = 1;
+  int32 id = 2;
+  string name = 3;
+}
+
+message ParticipantAnswerDTO {
+  int32 id = 1;
+  int32 answer = 2;
+  int32 participantId = 3;
+}
