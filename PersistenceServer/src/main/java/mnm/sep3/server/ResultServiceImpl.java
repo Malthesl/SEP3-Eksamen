@@ -5,6 +5,7 @@ import mnm.sep3.*;
 import mnm.sep3.model.GamesManager;
 import mnm.sep3.model.ParticipantsAnswerManager;
 import mnm.sep3.model.ParticipantsManager;
+import mnm.sep3.model.entities.Game;
 
 public class ResultServiceImpl extends ResultServiceGrpc.ResultServiceImplBase {
     private final GamesManager gamesManager;
@@ -40,5 +41,43 @@ public class ResultServiceImpl extends ResultServiceGrpc.ResultServiceImplBase {
 
         emptyStreamObserver.onNext(Empty.newBuilder().build());
         emptyStreamObserver.onCompleted();
+    }
+
+    @Override
+    public void getGamesHostedByUser(GetGamesHostedByUserRequest request, StreamObserver<GetGamesHostedByUserResponse> responseStreamObserver) {
+        var res = GetGamesHostedByUserResponse.newBuilder();
+
+        int userId = request.getUserId();
+        for (var game : gamesManager.getGamesHostedByUser(userId)) {
+            res.addGames(GameDTO.newBuilder()
+                            .setHostId(game.getHostId())
+                            .setId(game.getGameId())
+                            .setPlayedTime(game.getPlayedTime())
+                            .setQuizId(game.getQuizId())
+                            .build()
+            );
+        }
+
+        responseStreamObserver.onNext(res.build());
+        responseStreamObserver.onCompleted();
+    }
+
+    @Override
+    public void getGame(GetGameRequest request, StreamObserver<GetGameResponse> responseStreamObserver) {
+        var res = GetGameResponse.newBuilder();
+
+        Game game = gamesManager.getGame(request.getGameId());
+
+        GameDTO gameDto = GameDTO.newBuilder()
+                .setQuizId(game.getQuizId())
+                .setPlayedTime(game.getPlayedTime())
+                .setId(game.getGameId())
+                .setHostId(game.getHostId())
+                .build();
+
+        res.setGame(gameDto);
+
+        responseStreamObserver.onNext(res.build());
+        responseStreamObserver.onCompleted();
     }
 }
