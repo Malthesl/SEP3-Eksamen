@@ -19,6 +19,7 @@ public class ParticipantsManagerDB implements ParticipantsManager {
             PreparedStatement statement = connection.prepareStatement("INSERT INTO participants (name, game_id, score) VALUES (?, ?, ?) returning id");
             statement.setString(1, name);
             statement.setString(2, gameId);
+            statement.setInt(3, score);
 
             ResultSet res = statement.executeQuery();
 
