@@ -1,0 +1,50 @@
+@page "/results/{gameId}/questions/{questionId:int}"
+@using ApiContracts
+@using HostApp.Services
+@inject IGameResultsService GameResultsService;
+@inject IQuestionService QuestionService;
+@inject IAnswerService AnswerService;
+
+@if (Game is not null && Question is not null)
+{
+    <h1>@Game.Quiz.Title</h1>
+
+    <h2>Spørgsmål: @Question.Title</h2>
+    <div>
+        Antal svar: @ParticipantAnswers.Count
+    </div>
+    <h3>Oversigt</h3>
+    @foreach (AnswerDTO answer in Answers)
+    {
+        <div class="answer answer-@(answer.IsCorrect ? "correct" : "wrong")">
+            @answer.Title:
+                         Svaret @(answer.IsCorrect ? "korrekt" : "forkert") af @ParticipantAnswers.Count(q => q.AnswerId == answer.AnswerId)
+        </div>
+    }
+
+    <h3>Hver deltager</h3>
+    @foreach (GameParticipantAnswerDTO participantAnswer in ParticipantAnswers)
+    {
+        AnswerDTO answer = Answers.First(a => a.AnswerId == participantAnswer.AnswerId);
+        <div>@participantAnswer.ParticipantName svarede @(answer.IsCorrect ? "korrekt" : "forkert"): @answer.Title</div>
+    }
+}
+
+@code {
+    [Parameter] public required string GameId { get; set; }
+    [Parameter] public required int QuestionId { get; set; }
+
+    public GameResultDTO? Game { get; set; }
+    public QuestionDTO? Question { get; set; }
+    public List<AnswerDTO>? Answers { get; set; }
+    public List<GameParticipantAnswerDTO> ParticipantAnswers { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Game = await GameResultsService.GetGame(GameId);
+        Question = await QuestionService.GetQuestion(QuestionId);
+        Answers = await AnswerService.GetAnswersFromQuestionAsync(QuestionId);
+        ParticipantAnswers = await GameResultsService.GetAnswers(GameId, QuestionId);
+    }
+
+}

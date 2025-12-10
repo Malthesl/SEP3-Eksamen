@@ -1,0 +1,25 @@
+@page "/results"
+@using ApiContracts
+@using HostApp.Services
+@inject IGameResultsService GameResultsService;
+<h3>Dine færdiggjorde quizzer</h3>
+
+@if (CompletedGames is not null)
+{
+    <ul>
+        @foreach (GameResultDTO game in CompletedGames)
+        {
+            <li><NavLink href=@($"/results/{game.GameId}")>@game.Quiz.Title</NavLink></li>
+        }
+    </ul>
+}
+
+@code {
+    public List<GameResultDTO>? CompletedGames { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        CompletedGames = await GameResultsService.GetGames();
+    }
+
+}

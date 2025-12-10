@@ -2,13 +2,21 @@ using ApiContracts;
 using GrpcClient;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AnswerDTO = ApiContracts.AnswerDTO;
+using QuestionDTO = ApiContracts.QuestionDTO;
+using QuizDTO = ApiContracts.QuizDTO;
 
 namespace WebAPI.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("[controller]")]
-public class ResultsController(ResultService.ResultServiceClient resultService, AuthorizationService authService)
+public class ResultsController(
+    QuizService.QuizServiceClient quizService,
+    QuestionService.QuestionServiceClient questionService,
+    AnswerService.AnswerServiceClient answerService,
+    ResultService.ResultServiceClient resultService,
+    AuthorizationService authService)
     : ControllerBase
 {
     [HttpGet("{gameId}")]
@@ -18,12 +26,21 @@ public class ResultsController(ResultService.ResultServiceClient resultService, 
 
         if (!await authService.IsAuthorizedToAccessGame(gameId, User)) return Unauthorized();
 
+        var quiz = await quizService.GetQuizAsync(new GetQuizRequest { QuizId = res.Game.QuizId });
+
         return Ok(new GameResultDTO
         {
             GameId = res.Game.Id,
             HostUserId = res.Game.HostId,
             PlayedTime = res.Game.PlayedTime,
-            QuizId = res.Game.QuizId
+            QuizId = res.Game.QuizId,
+            Quiz = new QuizDTO
+            {
+                Id = quiz.Quiz.Id,
+                Title = quiz.Quiz.Title,
+                Visibility = quiz.Quiz.Visibility,
+                CreatorId = quiz.Quiz.CreatorId
+            }
         });
     }
 
@@ -34,12 +51,24 @@ public class ResultsController(ResultService.ResultServiceClient resultService, 
 
         var res = await resultService.GetGamesHostedByUserAsync(new GetGamesHostedByUserRequest { UserId = userId });
 
-        return Ok(res.Games.Select(g => new GameResultDTO
+        return Ok(res.Games.Select(g =>
         {
-            GameId = g.Id,
-            HostUserId = g.HostId,
-            PlayedTime = g.PlayedTime,
-            QuizId = g.QuizId
+            var quiz = quizService.GetQuiz(new GetQuizRequest { QuizId = g.QuizId });
+
+            return new GameResultDTO
+            {
+                GameId = g.Id,
+                HostUserId = g.HostId,
+                PlayedTime = g.PlayedTime,
+                QuizId = g.QuizId,
+                Quiz = new QuizDTO
+                {
+                    Id = quiz.Quiz.Id,
+                    Title = quiz.Quiz.Title,
+                    Visibility = quiz.Quiz.Visibility,
+                    CreatorId = quiz.Quiz.CreatorId
+                }
+            };
         }));
     }
 
@@ -53,20 +82,49 @@ public class ResultsController(ResultService.ResultServiceClient resultService, 
 
         var results = await resultService.GetGameResultsAsync(new GetGameResultsRequest { GameId = gameId });
 
-        return Ok(participants.Participants.Select(p => new GameParticipantDTO
+        var game = await resultService.GetGameAsync(new GetGameRequest { GameId = gameId });
+
+        return Ok(participants.Participants.Select(p =>
         {
-            GameId = p.GameId,
-            ParticipantId = p.Id,
-            ParticipantName = p.Name,
-            Answers = results.Answers
-                .Where(a => a.ParticipantId == p.Id)
-                .Select(a => new GameParticipantAnswerDTO
-                {
-                    GameId = p.GameId,
-                    AnswerId = a.Answer,
-                    ParticipantId = p.Id,
-                    ParticipantName = p.Name,
-                })
+            return new GameParticipantDTO
+            {
+                GameId = p.GameId,
+                ParticipantId = p.Id,
+                ParticipantName = p.Name,
+                Answers = results.Answers
+                    .Where(a => a.ParticipantId == p.Id)
+                    .Select(a =>
+                    {
+                        var answer = answerService.GetAnswer(new GetAnswerRequest { Id = a.Answer }).Answer;
+                        var question = questionService.GetQuestionById(new GetQuestionByIdRequest
+                            { QuestionId = answer.QuestionId }).Question;
+                        var answers = answerService.GetAllAnswersInQuestion(new GetAllAnswersInQuestionRequest
+                            { QuestionId = answer.QuestionId }).Answers;
+
+                        return new GameParticipantAnswerDTO
+                        {
+                            GameId = p.GameId,
+                            AnswerId = a.Answer,
+                            ParticipantId = p.Id,
+                            ParticipantName = p.Name,
+                            Question = new QuestionDTO
+                            {
+                                QuizId = question.QuizId,
+                                QuestionId = question.Id,
+                                Title = question.Title,
+                                Index = question.Index
+                            },
+                            Answers = answers.Select(qa => new AnswerDTO
+                            {
+                                AnswerId = qa.Id,
+                                QuestionId = qa.QuestionId,
+                                Index = qa.Index,
+                                IsCorrect = qa.IsCorrect,
+                                Title = qa.Title
+                            })
+                        };
+                    })
+            };
         }));
     }
 
@@ -86,12 +144,33 @@ public class ResultsController(ResultService.ResultServiceClient resultService, 
         {
             var p = participants.Participants.Single(p => p.Id == a.ParticipantId);
 
+            var answer = answerService.GetAnswer(new GetAnswerRequest { Id = a.Answer }).Answer;
+            var question = questionService.GetQuestionById(new GetQuestionByIdRequest
+                { QuestionId = answer.QuestionId }).Question;
+            var answers = answerService.GetAllAnswersInQuestion(new GetAllAnswersInQuestionRequest
+                { QuestionId = answer.QuestionId }).Answers;
+
             return new GameParticipantAnswerDTO
             {
                 GameId = p.GameId,
                 AnswerId = a.Answer,
                 ParticipantId = p.Id,
                 ParticipantName = p.Name,
+                Question = new QuestionDTO
+                {
+                    QuizId = question.QuizId,
+                    QuestionId = question.Id,
+                    Title = question.Title,
+                    Index = question.Index
+                },
+                Answers = answers.Select(qa => new AnswerDTO
+                {
+                    AnswerId = qa.Id,
+                    QuestionId = qa.QuestionId,
+                    Index = qa.Index,
+                    IsCorrect = qa.IsCorrect,
+                    Title = qa.Title
+                })
             };
         }));
     }
