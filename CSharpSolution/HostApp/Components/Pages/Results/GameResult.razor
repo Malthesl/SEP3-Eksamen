@@ -1,0 +1,46 @@
+@page "/results/{gameId}"
+@using ApiContracts
+@using HostApp.Services
+@inject IGameResultsService GameResultsService;
+@inject IQuestionService QuestionService;
+@inject IAnswerService AnswerService;
+@if (Game is not null && Questions is not null)
+{
+    <h1>@Game.Quiz.Title</h1>
+
+    @foreach (QuestionDTO question in Questions)
+    {
+        <fieldset>
+            <legend><NavLink href=@($"/results/{GameId}/questions/{question.QuestionId}")>@question.Title</NavLink></legend>
+            <div>
+                Antal svar: @ParticipantAnswers[question.QuestionId].Count
+            </div>
+            @foreach (AnswerDTO answer in Answers[question.QuestionId])
+            {
+                <div class="answer answer-@(answer.IsCorrect ? "correct" : "wrong")">@answer.Title: Svaret @(answer.IsCorrect ? "korrekt" : "forkert") af @ParticipantAnswers[question.QuestionId].Count(q => q.AnswerId == answer.AnswerId)</div>
+            }
+        </fieldset>
+    }
+}
+
+@code {
+    [Parameter] public required string GameId { get; set; }
+
+    public GameResultDTO? Game { get; set; }
+    public List<QuestionDTO>? Questions { get; set; }
+    public Dictionary<int, List<AnswerDTO>> Answers { get; set; } = new();
+    public Dictionary<int, List<GameParticipantAnswerDTO>> ParticipantAnswers { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Game = await GameResultsService.GetGame(GameId);
+        Questions = await QuestionService.GetQuestionsFromQuiz(Game.QuizId);
+
+        foreach (var question in Questions)
+        {
+            Answers[question.QuestionId] = await AnswerService.GetAnswersFromQuestionAsync(question.QuestionId);
+            ParticipantAnswers[question.QuestionId] = await GameResultsService.GetAnswers(GameId, question.QuestionId);
+        }
+    }
+
+}
