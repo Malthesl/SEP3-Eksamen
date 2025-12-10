@@ -11,17 +11,17 @@ public interface ParticipantsAnswerManager {
      * @param participantId ID'et på deltageren i spillet
      * @return Det ny oprettede svar
      */
-    ParticipantAnswer AddParticipantAnswer(int answerId, int participantId);
+    ParticipantAnswer addParticipantAnswer(int answerId, int participantId);
 
     /**
      * Henter alle svar i et afholdt spil, ud fra spillets ID
      */
-    List<ParticipantAnswer> GetGameResults(String gameId);
+    List<ParticipantAnswer> getGameResults(String gameId);
 
     /**
      * Henter alle svar på et spørgsmål, i en afholdt quiz
      * @param gameId ID'et på spillet
      * @param questionId ID'et på spørgsmålet
      */
-    List<ParticipantAnswer> GetAnswersOnQuestion(String gameId, int questionId);
+    List<ParticipantAnswer> getAnswersOnQuestion(String gameId, int questionId);
 }

@@ -11,10 +11,10 @@ public interface ParticipantsManager {
      * @param name Navnet på spilleren
      * @return Den ny oprettede deltager
      */
-    Participant AddParticipant(String gameId, String name);
+    Participant addParticipant(String gameId, String name);
 
     /**
      * Henter alle deltagere i et spil ud fra ID'et på spillet
      */
-    List<Participant> GetAllParticipantsInGame(String gameId);
+    List<Participant> getAllParticipantsInGame(String gameId);
 }

@@ -29,10 +29,10 @@ public class ResultServiceImpl extends ResultServiceGrpc.ResultServiceImplBase {
         );
 
         for (var participant : request.getResultsList()) {
-            int participantId = participantsManager.AddParticipant(gameDTO.getId(), participant.getName()).getId();
+            int participantId = participantsManager.addParticipant(gameDTO.getId(), participant.getName()).getId();
 
             for (var answer : participant.getAnswersList()) {
-                participantsAnswerManager.AddParticipantAnswer(
+                participantsAnswerManager.addParticipantAnswer(
                         answer.getAnswerId(),
                         participantId
                 );
@@ -87,7 +87,7 @@ public class ResultServiceImpl extends ResultServiceGrpc.ResultServiceImplBase {
       var res = GetParticipantsInGameResponse.newBuilder();
 
       String gameId = request.getGameId();
-      for (var participant : participantsManager.GetAllParticipantsInGame(gameId)) {
+      for (var participant : participantsManager.getAllParticipantsInGame(gameId)) {
         res.addParticipants(ParticipantDTO.newBuilder()
                 .setGameId(gameId)
                 .setId(participant.getId())
@@ -104,7 +104,7 @@ public class ResultServiceImpl extends ResultServiceGrpc.ResultServiceImplBase {
       var res = GetGameResultsResponse.newBuilder();
 
       String gameId = request.getGameId();
-      for (var gameResult : participantsAnswerManager.GetGameResults(gameId)) {
+      for (var gameResult : participantsAnswerManager.getGameResults(gameId)) {
         res.addAnswers(ParticipantAnswerDTO.newBuilder()
                 .setId(gameResult.getId())
                 .setAnswer(gameResult.getAnswerId())
@@ -123,7 +123,7 @@ public class ResultServiceImpl extends ResultServiceGrpc.ResultServiceImplBase {
 
     String gameId = request.getGameId();
     int questionId = request.getQuestionId();
-    for (var resultOnQues : participantsAnswerManager.GetAnswersOnQuestion(gameId, questionId)) {
+    for (var resultOnQues : participantsAnswerManager.getAnswersOnQuestion(gameId, questionId)) {
         res.addAnswers(ParticipantAnswerDTO.newBuilder()
             .setId(resultOnQues.getId())
                 .setAnswer(resultOnQues.getAnswerId())

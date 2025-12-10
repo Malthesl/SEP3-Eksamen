@@ -14,7 +14,7 @@ public class ParticipantsManagerDB implements ParticipantsManager {
     private final Connection connection = Database.getConnection();
 
     @Override
-    public Participant AddParticipant(String gameId, String name) {
+    public Participant addParticipant(String gameId, String name) {
         try {
             PreparedStatement statement = connection.prepareStatement("INSERT INTO participants (name, game_id) VALUES (?, ?) returning id");
             statement.setString(1, name);
@@ -34,7 +34,7 @@ public class ParticipantsManagerDB implements ParticipantsManager {
     }
 
     @Override
-    public List<Participant> GetAllParticipantsInGame(String gameId) {
+    public List<Participant> getAllParticipantsInGame(String gameId) {
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM participants WHERE game_id = ?");
             statement.setString(1, gameId);

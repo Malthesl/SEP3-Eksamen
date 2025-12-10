@@ -14,7 +14,7 @@ public class ParticipantsAnswerManagerDB implements ParticipantsAnswerManager {
     private final Connection connection = Database.getConnection();
 
     @Override
-    public ParticipantAnswer AddParticipantAnswer(int answerId, int participantId) {
+    public ParticipantAnswer addParticipantAnswer(int answerId, int participantId) {
         try {
             PreparedStatement statement = connection.prepareStatement("INSERT INTO participant_answers (answer_id, participant) VALUES (?, ?) RETURNING id");
             statement.setInt(1, answerId);
@@ -36,7 +36,7 @@ public class ParticipantsAnswerManagerDB implements ParticipantsAnswerManager {
     }
 
     @Override
-    public List<ParticipantAnswer> GetGameResults(String gameId) {
+    public List<ParticipantAnswer> getGameResults(String gameId) {
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT pa.id as id, answer_id, participant FROM participant_answers pa INNER JOIN sep3_eksamen.participants p on p.id = pa.participant WHERE p.game_id = ?");
             statement.setString(1, gameId);
@@ -48,7 +48,7 @@ public class ParticipantsAnswerManagerDB implements ParticipantsAnswerManager {
     }
 
     @Override
-    public List<ParticipantAnswer> GetAnswersOnQuestion(String gameId, int questionId) {
+    public List<ParticipantAnswer> getAnswersOnQuestion(String gameId, int questionId) {
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT pa.id as id, answer_id, participant FROM participant_answers pa INNER JOIN sep3_eksamen.participants p on p.id = pa.participant INNER JOIN sep3_eksamen.answers a on pa.answer_id = a.id WHERE p.game_id = ? AND a.question_id = ?");
             statement.setString(1, gameId);
