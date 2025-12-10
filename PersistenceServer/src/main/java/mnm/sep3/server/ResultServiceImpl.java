@@ -80,4 +80,58 @@ public class ResultServiceImpl extends ResultServiceGrpc.ResultServiceImplBase {
         responseStreamObserver.onNext(res.build());
         responseStreamObserver.onCompleted();
     }
+
+  @Override public void getParticipantsInGame(GetParticipantsInGameRequest request,
+      StreamObserver<GetParticipantsInGameResponse> responseStreamObserver)
+  {
+      var res = GetParticipantsInGameResponse.newBuilder();
+
+      String gameId = request.getGameId();
+      for (var participant : participantsManager.GetAllParticipantsInGame(gameId)) {
+        res.addParticipants(ParticipantDTO.newBuilder()
+                .setGameId(gameId)
+                .setId(participant.getId())
+                .setName(participant.getName())
+                .build());
+      }
+
+      responseStreamObserver.onNext(res.build());
+      responseStreamObserver.onCompleted();
+  }
+
+  @Override
+  public void getGameResults (GetGameResultsRequest request, StreamObserver<GetGameResultsResponse> responseStreamObserver){
+      var res = GetGameResultsResponse.newBuilder();
+
+      String gameId = request.getGameId();
+      for (var gameResult : participantsAnswerManager.GetGameResults(gameId)) {
+        res.addAnswers(ParticipantAnswerDTO.newBuilder()
+                .setId(gameResult.getId())
+                .setAnswer(gameResult.getAnswerId())
+                .setParticipantId(gameResult.getParticipantId())
+                .build());
+      }
+
+      responseStreamObserver.onNext(res.build());
+      responseStreamObserver.onCompleted();
+  }
+
+  public void getResultOnQuestion(GetResultOnQuestionRequest request,
+      StreamObserver<GetResultOnQuestionResponse> responseStreamObserver)
+  {
+    var res = GetResultOnQuestionResponse.newBuilder();
+
+    String gameId = request.getGameId();
+    int questionId = request.getQuestionId();
+    for (var resultOnQues : participantsAnswerManager.GetAnswersOnQuestion(gameId, questionId)) {
+        res.addAnswers(ParticipantAnswerDTO.newBuilder()
+            .setId(resultOnQues.getId())
+                .setAnswer(resultOnQues.getAnswerId())
+                .setParticipantId(resultOnQues.getParticipantId())
+                .build());
+    }
+
+    responseStreamObserver.onNext(res.build());
+    responseStreamObserver.onCompleted();
+  }
 }
