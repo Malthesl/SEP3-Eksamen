@@ -300,7 +300,8 @@ public class LiveGame
         {
             var participant = new SubmitResultsByParticipant
             {
-                Name = p.Name
+                Name = p.Name,
+                Score = p.Score
             };
 
             participant.Answers.AddRange(p.Answers.Select(a => new ParticipantResult

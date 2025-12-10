@@ -1,7 +1,24 @@
+.main-grid {
+  display: grid;
+  grid-template-columns: 4fr 1fr;
+}
+
 .answer-correct {
   color: green;
 }
 
 .answer-wrong {
   color: red;
+}
+
+.ranking-0 {
+  background: gold;
+}
+
+.ranking-1 {
+  background: silver;
+}
+
+.ranking-2 {
+  background: brown;
 }

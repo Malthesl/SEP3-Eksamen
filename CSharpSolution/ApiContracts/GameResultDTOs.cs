@@ -14,6 +14,7 @@ public class GameParticipantDTO
     public required string GameId { get; set; }
     public required int ParticipantId { get; set; }
     public required string ParticipantName { get; set; }
+    public required int Score { get; set; }
     public required IEnumerable<GameParticipantAnswerDTO> Answers { get; set; }
 }
 
@@ -23,6 +24,5 @@ public class GameParticipantAnswerDTO
     public required int ParticipantId { get; set; }
     public required string ParticipantName { get; set; }
     public required int AnswerId { get; set; }
-    public required QuestionDTO Question { get; set; }
     public required IEnumerable<AnswerDTO> Answers { get; set; }
 }

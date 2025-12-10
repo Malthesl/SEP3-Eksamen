@@ -9,7 +9,7 @@
     <ul>
         @foreach (GameResultDTO game in CompletedGames)
         {
-            <li><NavLink href=@($"/results/{game.GameId}")>@game.Quiz.Title</NavLink></li>
+            <li><NavLink href=@($"/results/{game.GameId}")>@game.Quiz.Title</NavLink> spillet @DateTimeOffset.FromUnixTimeMilliseconds(game.PlayedTime).ToString()</li>
         }
     </ul>
 }

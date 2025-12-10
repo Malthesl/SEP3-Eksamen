@@ -81,9 +81,7 @@ public class ResultsController(
             await resultService.GetParticipantsInGameAsync(new GetParticipantsInGameRequest { GameId = gameId });
 
         var results = await resultService.GetGameResultsAsync(new GetGameResultsRequest { GameId = gameId });
-
-        var game = await resultService.GetGameAsync(new GetGameRequest { GameId = gameId });
-
+        
         return Ok(participants.Participants.Select(p =>
         {
             return new GameParticipantDTO
@@ -91,13 +89,12 @@ public class ResultsController(
                 GameId = p.GameId,
                 ParticipantId = p.Id,
                 ParticipantName = p.Name,
+                Score = p.Score,
                 Answers = results.Answers
                     .Where(a => a.ParticipantId == p.Id)
                     .Select(a =>
                     {
                         var answer = answerService.GetAnswer(new GetAnswerRequest { Id = a.Answer }).Answer;
-                        var question = questionService.GetQuestionById(new GetQuestionByIdRequest
-                            { QuestionId = answer.QuestionId }).Question;
                         var answers = answerService.GetAllAnswersInQuestion(new GetAllAnswersInQuestionRequest
                             { QuestionId = answer.QuestionId }).Answers;
 
@@ -107,13 +104,6 @@ public class ResultsController(
                             AnswerId = a.Answer,
                             ParticipantId = p.Id,
                             ParticipantName = p.Name,
-                            Question = new QuestionDTO
-                            {
-                                QuizId = question.QuizId,
-                                QuestionId = question.Id,
-                                Title = question.Title,
-                                Index = question.Index
-                            },
                             Answers = answers.Select(qa => new AnswerDTO
                             {
                                 AnswerId = qa.Id,
@@ -145,8 +135,6 @@ public class ResultsController(
             var p = participants.Participants.Single(p => p.Id == a.ParticipantId);
 
             var answer = answerService.GetAnswer(new GetAnswerRequest { Id = a.Answer }).Answer;
-            var question = questionService.GetQuestionById(new GetQuestionByIdRequest
-                { QuestionId = answer.QuestionId }).Question;
             var answers = answerService.GetAllAnswersInQuestion(new GetAllAnswersInQuestionRequest
                 { QuestionId = answer.QuestionId }).Answers;
 
@@ -156,13 +144,6 @@ public class ResultsController(
                 AnswerId = a.Answer,
                 ParticipantId = p.Id,
                 ParticipantName = p.Name,
-                Question = new QuestionDTO
-                {
-                    QuizId = question.QuizId,
-                    QuestionId = question.Id,
-                    Title = question.Title,
-                    Index = question.Index
-                },
                 Answers = answers.Select(qa => new AnswerDTO
                 {
                     AnswerId = qa.Id,
