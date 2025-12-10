@@ -1,3 +1,4 @@
+using Google.Protobuf.Collections;
 using GrpcClient;
 
 namespace WebAPI;
@@ -5,7 +6,8 @@ namespace WebAPI;
 public class LiveGameService(
     QuizService.QuizServiceClient quizService,
     QuestionService.QuestionServiceClient questionService,
-    AnswerService.AnswerServiceClient answerService)
+    AnswerService.AnswerServiceClient answerService,
+    ResultService.ResultServiceClient resultService)
 {
     private Dictionary<string, LiveGame> Games { get; } = new();
 
@@ -13,7 +15,7 @@ public class LiveGameService(
 
     public LiveGame CreateGame(int quizId, int hostId)
     {
-        LiveGame game = new LiveGame(quizId, hostId, quizService, questionService, answerService);
+        LiveGame game = new LiveGame(quizId, hostId, quizService, questionService, answerService, resultService);
 
         Games.Add(game.GameId, game);
 
@@ -60,11 +62,14 @@ public class LiveGame
 
     private readonly List<TaskCompletionSource> _tasks = [];
 
+    private ResultService.ResultServiceClient _resultService;
+
     public LiveGame(int quizId,
         int userId,
         QuizService.QuizServiceClient quizService,
         QuestionService.QuestionServiceClient questionService,
-        AnswerService.AnswerServiceClient answerService)
+        AnswerService.AnswerServiceClient answerService,
+        ResultService.ResultServiceClient resultService)
     {
         HostUserId = userId;
         QuizId = quizId;
@@ -92,6 +97,8 @@ public class LiveGame
                     .ToList()
             })
             .ToList();
+
+        _resultService = resultService;
     }
 
     /// <summary>
@@ -139,7 +146,10 @@ public class LiveGame
     {
         LiveGamePlayer player = new LiveGamePlayer { PlayerId = Guid.NewGuid().ToString(), Name = name };
 
-        Players.Add(player);
+        lock (Players)
+        {
+            Players.Add(player);
+        }
 
         StateUpdated();
 
@@ -241,8 +251,7 @@ public class LiveGame
 
         if (index + 1 >= Questions.Count)
         {
-            CurrentState = "game-over";
-            StateUpdated();
+            FinishQuiz();
         }
         else
         {
@@ -271,6 +280,41 @@ public class LiveGame
         callback();
     }
 
+    private async Task FinishQuiz()
+    {
+        CurrentState = "game-over";
+        StateUpdated();
+
+        var results = new SubmitGameResultsRequest
+        {
+            Game = new GameDTO
+            {
+                HostId = HostUserId,
+                Id = GameId,
+                PlayedTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                QuizId = QuizId
+            }
+        };
+
+        results.Results.AddRange(Players.Select(p =>
+        {
+            var participant = new SubmitResultsByParticipant
+            {
+                Name = p.Name
+            };
+
+            participant.Answers.AddRange(p.Answers.Select(a => new ParticipantResult
+            {
+                AnswerId = a.AnswerId
+            }));
+
+            return participant;
+        }));
+
+        // Submit resultater
+        await _resultService.SubmitGameResultsAsync(results);
+    }
+
     private long _questionStartTime = 0;
 
     public void Answer(int questionId, int answerId, string playerId)
@@ -285,20 +329,23 @@ public class LiveGame
         if (player.Answers.Any(a => a.QuestionId == questionId))
             throw new Exception("Player already answered question");
 
-        player.Answers.Add(new LiveGamePlayerAnswer { QuestionId = questionId, AnswerId = answer.AnswerId });
+        lock (player)
+        {
+            player.Answers.Add(new LiveGamePlayerAnswer { QuestionId = questionId, AnswerId = answer.AnswerId });
 
-        long timeElapsed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _questionStartTime;
-        long timeLeft = QuestionTime - timeElapsed;
-        double timePct = (double)timeLeft / QuestionTime;
+            long timeElapsed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _questionStartTime;
+            long timeLeft = QuestionTime - timeElapsed;
+            double timePct = (double)timeLeft / QuestionTime;
 
-        int score = answer.IsCorrect ? (int)(250 + 750 * timePct) : 0;
+            int score = answer.IsCorrect ? (int)(250 + 750 * timePct) : 0;
 
-        player.Score += score;
-        player.LatestAnswerId = answer.AnswerId;
-        player.LatestScoreChange = score;
+            player.Score += score;
+            player.LatestAnswerId = answer.AnswerId;
+            player.LatestScoreChange = score;
 
-        if (Players.All(p => p.LatestAnswerId is not null)) SetStateAnswer(questionId);
-        else StateUpdated();
+            if (Players.All(p => p.LatestAnswerId is not null)) SetStateAnswer(questionId);
+            else StateUpdated();
+        }
     }
 }
 

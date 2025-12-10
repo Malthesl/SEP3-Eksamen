@@ -36,6 +36,12 @@ builder.Services.AddSingleton<GrpcClient.AnswerService.AnswerServiceClient>(sp =
     return new GrpcClient.AnswerService.AnswerServiceClient(channel);
 });
 
+builder.Services.AddSingleton<GrpcClient.ResultService.ResultServiceClient>(sp =>
+{
+    var channel = GrpcChannel.ForAddress("http://localhost:7042");
+    return new GrpcClient.ResultService.ResultServiceClient(channel);
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

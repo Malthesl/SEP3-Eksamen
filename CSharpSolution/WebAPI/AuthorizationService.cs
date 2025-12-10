@@ -6,7 +6,8 @@ namespace WebAPI;
 public class AuthorizationService(
     AnswerService.AnswerServiceClient answersService,
     QuestionService.QuestionServiceClient questionService,
-    QuizService.QuizServiceClient quizService
+    QuizService.QuizServiceClient quizService,
+    ResultService.ResultServiceClient resultService
 )
 {
     /// <summary>
@@ -46,9 +47,9 @@ public class AuthorizationService(
     /// <returns>Returner en task, som giver en bool om brugeren har adgang.</returns>
     public async Task<bool> IsAuthorizedToModifyQuiz(int quizId, ClaimsPrincipal user)
     {
-        if (user.Identity?.IsAuthenticated is false or null) return false;
+        int? userId = GetUserId(user);
         
-        int userId = int.Parse(user.FindFirst("Id")!.Value);
+        if (userId is null) return false;
         
         int quizCreatorId = (await quizService.GetQuizAsync(new GetQuizRequest
         {
@@ -84,11 +85,29 @@ public class AuthorizationService(
         var quiz = (await quizService.GetQuizAsync(new GetQuizRequest { QuizId = quizId })).Quiz;
         
         if (quiz.Visibility == "public") return true;
-        
-        if (user.Identity?.IsAuthenticated is false or null) return false;
-        
-        int userId = int.Parse(user.FindFirst("Id")!.Value);
 
-        return quiz.CreatorId == userId;
+        int? userId = GetUserId(user);
+        
+        if (userId is null) return false;
+
+        return userId == quiz.CreatorId;
+    }
+
+    public async Task<bool> IsAuthorizedToAccessGame(string gameId, ClaimsPrincipal user)
+    {
+        int? userId = GetUserId(user);
+        
+        if (userId is null) return false;
+        
+        var res = await resultService.GetGameAsync(new GetGameRequest { GameId = gameId });
+
+        return res.Game.HostId == userId;
+    }
+
+    public int? GetUserId(ClaimsPrincipal user)
+    {
+        if (user.Identity?.IsAuthenticated is false or null) return null;
+        
+        return int.Parse(user.FindFirst("Id")!.Value);
     }
 }
