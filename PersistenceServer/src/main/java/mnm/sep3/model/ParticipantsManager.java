@@ -11,7 +11,7 @@ public interface ParticipantsManager {
      * @param name Navnet på spilleren
      * @return Den ny oprettede deltager
      */
-    Participant addParticipant(String gameId, String name);
+    Participant addParticipant(String gameId, String name, int score);
 
     /**
      * Henter alle deltagere i et spil ud fra ID'et på spillet

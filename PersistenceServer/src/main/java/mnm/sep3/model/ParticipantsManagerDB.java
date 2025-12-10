@@ -14,9 +14,9 @@ public class ParticipantsManagerDB implements ParticipantsManager {
     private final Connection connection = Database.getConnection();
 
     @Override
-    public Participant addParticipant(String gameId, String name) {
+    public Participant addParticipant(String gameId, String name, int score) {
         try {
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO participants (name, game_id) VALUES (?, ?) returning id");
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO participants (name, game_id, score) VALUES (?, ?, ?) returning id");
             statement.setString(1, name);
             statement.setString(2, gameId);
 
@@ -24,7 +24,7 @@ public class ParticipantsManagerDB implements ParticipantsManager {
 
             if (res.next()) {
                 int id = res.getInt("id");
-                return new Participant(id, gameId, name);
+                return new Participant(id, gameId, name, score);
             }
 
             throw new RuntimeException("Kunne ikke indsætte");
@@ -46,7 +46,8 @@ public class ParticipantsManagerDB implements ParticipantsManager {
                 returnList.add(new Participant(
                         res.getInt("id"),
                         gameId,
-                        res.getString("name")
+                        res.getString("name"),
+                        res.getInt("score")
                 ));
             }
 

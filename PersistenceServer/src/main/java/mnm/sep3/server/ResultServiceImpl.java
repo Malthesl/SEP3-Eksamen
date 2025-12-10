@@ -29,7 +29,7 @@ public class ResultServiceImpl extends ResultServiceGrpc.ResultServiceImplBase {
         );
 
         for (var participant : request.getResultsList()) {
-            int participantId = participantsManager.addParticipant(gameDTO.getId(), participant.getName()).getId();
+            int participantId = participantsManager.addParticipant(gameDTO.getId(), participant.getName(), participant.getScore()).getId();
 
             for (var answer : participant.getAnswersList()) {
                 participantsAnswerManager.addParticipantAnswer(
@@ -92,6 +92,7 @@ public class ResultServiceImpl extends ResultServiceGrpc.ResultServiceImplBase {
                 .setGameId(gameId)
                 .setId(participant.getId())
                 .setName(participant.getName())
+                .setScore(participant.getScore())
                 .build());
       }
 

@@ -56,7 +56,8 @@ message SubmitGameResultsRequest {
 
 message SubmitResultsByParticipant {
   string name = 1;
-  repeated ParticipantResult answers = 2;
+  int32 score = 2;
+  repeated ParticipantResult answers = 3;
 }
 
 message ParticipantResult {

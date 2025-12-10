@@ -58,7 +58,8 @@ CREATE TABLE participants
 (
     id          SERIAL PRIMARY KEY,
     name        VARCHAR NOT NULL,
-    game_id     GAMEID NOT NULL REFERENCES games (game_id) ON DELETE CASCADE
+    game_id     GAMEID NOT NULL REFERENCES games (game_id) ON DELETE CASCADE,
+    score       INT NOT NULL
 );
 
 CREATE TABLE participant_answers
