@@ -113,12 +113,16 @@ else
 
     private async Task Refresh()
     {
+        _questionTextError = "";
+        
         _questions = await QuestionService.GetQuestionsFromQuiz(QuizId);
-
+            
         if (_selectedQuestion != null)
         {
             _questionText = _selectedQuestion.Title;
             _selectedQuestionAnswers = await AnswerService.GetAnswersFromQuestionAsync(_selectedQuestion.QuestionId);
+            if (_selectedQuestionAnswers.Count < 2) _questionTextError = "Et spørgsmål kræver mindst 2 svarmuligheder, for at en quiz kan spilles";
+            
             for (int i = 0; i < MaxQuestions; i++)
             {
                 try
