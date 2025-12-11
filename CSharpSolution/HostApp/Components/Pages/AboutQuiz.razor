@@ -7,41 +7,56 @@
 @inject IQuestionService QuestionService;
 @inject NavigationManager Nav;
 
-@if (Quiz is not null)
-{
-    <h3>@Quiz.Title</h3>
-    <p>@Quiz.Visibility</p>
-    <h6>Lavet af @Quiz.Creator.Username</h6>
-
-    <p>Indeholder @Quiz.QuestionCount spørgsmål:</p>
-    <ul>
-        @foreach (var question in Questions)
+<div class="centered-page">
+    <div class="wide-content-page">
+        @if (Quiz is not null)
         {
-            <li>@question.Title</li>
-        }
-    </ul>
+            <h1>
+                <span class="quiz-title">@Quiz.Title</span>
+                @if (Quiz.Visibility == "public")
+                {
+                    <span class="visibility-tag visibility-public">Synlig</span>
+                }
+                else
+                {
+                    <span class="visibility-tag visibility-private">Privat</span>
+                }
+            </h1>
+            <h5>Lavet af @Quiz.Creator.Username</h5>
 
-    <AuthorizeView>
-        <Authorized>
-            <NavLink href=@("/quiz/" + Quiz.Id + "/play")>
-                <button>Spil nu</button>
-            </NavLink>
-            @if (context.User.FindFirst("Id")!.Value == Quiz.CreatorId.ToString())
-            {
-                <NavLink href=@("/quiz/" + Quiz.Id + "/edit")>
-                    <button>Rediger quiz</button>
-                </NavLink>
-                <button @onclick="() => _visibilityModal.Show()">Ændre synlighed quiz</button>
-                <button @onclick="() => _renameModal.Show()">Omdøb quiz</button>
-                <button style="color: red" @onclick="() => _deleteModal.Show()">Slet quiz</button>
-            }
-        </Authorized>
-    </AuthorizeView>
-}
-else
-{
-    <p><em>Quiz ikke fundet :(</em></p>
-}
+            <p>Indeholder @Quiz.QuestionCount spørgsmål:</p>
+            <ul>
+                @foreach (var question in Questions)
+                {
+                    <li>@question.Title</li>
+                }
+            </ul>
+
+            <AuthorizeView>
+                <Authorized>
+                    <div class="options">
+                        <NavLink href=@("/quiz/" + Quiz.Id + "/play")>
+                            <button>Spil nu</button>
+                        </NavLink>
+                        @if (context.User.FindFirst("Id")!.Value == Quiz.CreatorId.ToString())
+                        {
+                            <NavLink href=@("/quiz/" + Quiz.Id + "/edit")>
+                                <button>Rediger quiz</button>
+                            </NavLink>
+                            <button @onclick="() => _visibilityModal.Show()">Ændre synlighed quiz</button>
+                            <button @onclick="() => _renameModal.Show()">Omdøb quiz</button>
+                            <button style="color: red" @onclick="() => _deleteModal.Show()">Slet quiz</button>
+                        }
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+        }
+        else
+        {
+            <p><em>Quiz ikke fundet :(</em></p>
+        }
+    </div>
+</div>
 
 <ConfirmModal @ref="_deleteModal"
               Title="Bekræft sletning"

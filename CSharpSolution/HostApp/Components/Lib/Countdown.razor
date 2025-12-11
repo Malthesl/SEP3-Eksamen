@@ -12,6 +12,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        if (_timer is not null) Dispose();
         _timeLeft = (int)((End - Start + 100) / 1000);
         _timer = new System.Timers.Timer(1000);
         _timer.Elapsed += OnTimerElapsed;

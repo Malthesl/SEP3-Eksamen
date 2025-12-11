@@ -14,7 +14,9 @@
             <input type="text" placeholder="Søg efter titel" @bind="query">
             <button @onclick="UpdateResults">Søg</button>
             <div class="spacer"></div>
-            <NavLink href="/quiz/create"><button class="right">Opret Quiz</button></NavLink>
+            <NavLink href="/quiz/create">
+                <button class="right big-create-button">Opret Quiz</button>
+            </NavLink>
         </div>
 
         @if (quizzes is not null)
@@ -22,13 +24,23 @@
             <button @onclick="PreviousPage">Forrige side</button>
             <span>Side @(pageIndex + 1) ud af @pages</span>
             <button @onclick="NextPage">Næste side</button>
-            <div>Viser @quizzes.Quizzes.Count() ud af @quizzes.Count der matcher din søgning</div>
-            <div class="cards-list">
-                @foreach (var quiz in quizzes.Quizzes)
-                {
-                    <QuizCard Quiz="@quiz" />
-                }
-            </div>
+            <span>Viser @quizzes.Quizzes.Count() ud af @quizzes.Count der matcher din søgning</span>
+            @if (quizzes.Count > 0)
+            {
+                <div class="cards-list">
+                    @foreach (var quiz in quizzes.Quizzes)
+                    {
+                        <QuizCard Quiz="@quiz" />
+                    }
+                </div>
+                <button @onclick="PreviousPage">Forrige side</button>
+                <span>Side @(pageIndex + 1) ud af @pages</span>
+                <button @onclick="NextPage">Næste side</button>
+            }
+            else
+            {
+                <h1>Der er ingen quizzer her :(</h1>
+            }
         }
     </div>
 </div>

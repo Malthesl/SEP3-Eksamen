@@ -1,15 +1,32 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components.Authorization
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Kahoot++</PageTitle>
 
-<h1>Velkommen til kahoot ++</h1>
-
-<AuthorizeView>
-    <Authorized>
-        Du er logget ind som @context.User.Identity?.Name
-    </Authorized>
-    <NotAuthorized>
-        Du er ikke logget ind.
-    </NotAuthorized>
-</AuthorizeView>
+<div class="centered-page">
+    <div class="content-page">
+        <div class="centered-hero">
+            <h1>Velkommen til Kahoot++</h1>
+            <div class="hero-buttons">
+                <AuthorizeView>
+                    <Authorized>
+                        <NavLink href="/quizzes">
+                            <button>Find en quiz!</button>
+                        </NavLink>
+                        <NavLink href="/quiz/create">
+                            <button>Lav din egen quiz!</button>
+                        </NavLink>
+                    </Authorized>
+                    <NotAuthorized>
+                        <NavLink href="/signup">
+                            <button>Opret dig!</button>
+                        </NavLink>
+                        <NavLink href="/login">
+                            <button>Log ind!</button>
+                        </NavLink>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </div>
+</div>
