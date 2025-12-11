@@ -1,21 +1,53 @@
 @page "/results"
+@using System.Globalization
 @using ApiContracts
 @using HostApp.Services
 @inject IGameResultsService GameResultsService;
-<h3>Dine færdiggjorde quizzer</h3>
 
-@if (CompletedGames is not null)
-{
-    <ul>
-        @foreach (GameResultDTO game in CompletedGames)
+<div class="centered-page">
+    <div class="content-page">
+        @if (CompletedGames is not null)
         {
-            <li><NavLink href=@($"/results/{game.GameId}")>@game.Quiz.Title</NavLink> spillet @DateTimeOffset.FromUnixTimeMilliseconds(game.PlayedTime).ToString()</li>
+            <div class="query-header">
+                <h1>Dine færdiggjorde quizzer</h1>
+
+                <div class="query-options">
+                    <div class="query-option">
+                        <label for="sorting">Sortér efter</label>
+                        <select id="sorting" @bind="Sort">
+                            <option value="newest">Nyeste først</option>
+                            <option value="oldest">Ældste først</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="games">
+                @{
+                    CompletedGames = CompletedGames.OrderByDescending(o => o.PlayedTime).ToList();
+                    if (Sort == "oldest") CompletedGames.Reverse();
+
+                    foreach (GameResultDTO game in CompletedGames)
+                    {
+                        <div class="game">
+                            <NavLink href=@($"/results/{game.GameId}")>@game.Quiz.Title</NavLink>
+                            spillet @DateTimeOffset.FromUnixTimeMilliseconds(game.PlayedTime).LocalDateTime.ToString("f", CultureInfo.GetCultureInfo("da-DK"))
+                        </div>
+                    }
+                }
+            </div>
         }
-    </ul>
-}
+        else
+        {
+            <h1>Fejl under indlæsning af spil, prøv igen senere.</h1>
+        }
+    </div>
+</div>
 
 @code {
-    public List<GameResultDTO>? CompletedGames { get; set; }
+    private List<GameResultDTO>? CompletedGames { get; set; }
+
+    private string Sort { get; set; } = "newest";
 
     protected override async Task OnParametersSetAsync()
     {

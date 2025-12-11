@@ -4,46 +4,66 @@
 @inject IGameResultsService GameResultsService;
 @inject IQuestionService QuestionService;
 @inject IAnswerService AnswerService;
-@if (Game is not null && Questions is not null && Participants is not null)
-{
-    <h1>@Game.Quiz.Title</h1>
 
-    <div class="main-grid">
-        <fieldset>
-            <legend><h2>Questions</h2></legend>
-            @foreach (QuestionDTO question in Questions)
-            {
+<div class="centered-page">
+    <div class="wide-content-page">
+        @if (Game is not null && Questions is not null && Participants is not null)
+        {
+            <h1>Resultater af quiz: @Game.Quiz.Title</h1>
+
+            <div class="main-grid">
                 <fieldset>
-                    <legend>
-                        <NavLink href=@($"/results/{GameId}/questions/{question.QuestionId}")>@question.Title</NavLink>
-                    </legend>
-                    <div>
-                        Antal svar: @ParticipantAnswers[question.QuestionId].Count
+                    <legend><h2>Spørgsmål</h2></legend>
+                    <div class="questions-list">
+                        @foreach (QuestionDTO question in Questions)
+                        {
+                            // Tæller korrekte svar på spørgsmålet
+                            int correct = ParticipantAnswers[question.QuestionId]
+                                .Count(pa => Answers.Values.SelectMany(a => a)
+                                    .Any(a => pa.AnswerId == a.AnswerId && a.IsCorrect)
+                                );
+                            int totalAnswers = @ParticipantAnswers[question.QuestionId].Count;
+                            float pctCorrect = (float)correct / totalAnswers * 100;
+
+                            <details>
+                                <summary>
+                                    <NavLink href=@($"/results/{GameId}/questions/{question.QuestionId}")>@question.Index. @question.Title</NavLink>
+                                    <span class="summary-answers">@totalAnswers har svaret (@pctCorrect% korrekte svar)</span>
+                                </summary>
+                                <div class="question-details">
+                                    <div>
+                                        Antal svar: @totalAnswers
+                                    </div>
+                                    @foreach (AnswerDTO answer in Answers[question.QuestionId])
+                                    {
+                                        <div class="answer answer-@(answer.IsCorrect ? "correct" : "wrong")">
+                                            @answer.Title: Svaret @(answer.IsCorrect ? "korrekt" : "forkert")
+                                                         af @ParticipantAnswers[question.QuestionId].Count(q => q.AnswerId == answer.AnswerId)
+                                        </div>
+                                    }
+                                </div>
+                            </details>
+                        }
                     </div>
-                    @foreach (AnswerDTO answer in Answers[question.QuestionId])
-                    {
-                        <div class="answer answer-@(answer.IsCorrect ? "correct" : "wrong")">@answer.Title:
-                                                                                                          Svaret @(answer.IsCorrect ? "korrekt" : "forkert") af @ParticipantAnswers[question.QuestionId].Count(q => q.AnswerId == answer.AnswerId)</div>
+                </fieldset>
+                <fieldset>
+                    <legend><h2>Spillere</h2></legend>
+                    @{
+                        var participants = Participants.OrderByDescending(p => p.Score).ToList();
+                        @for (int i = 0; i < participants.Count; i++)
+                        {
+                            var participant = participants[i];
+                            <div class="ranking ranking-@i">@(i + 1) @participant.ParticipantName
+                                - @Answers.Values.SelectMany(x => x).Count(a => participant.Answers.Any(pa => pa.AnswerId == a.AnswerId) && a.IsCorrect) korrekte
+                                svar
+                                - @participant.Score</div>
+                        }
                     }
                 </fieldset>
-            }
-        </fieldset>
-        <fieldset>
-            <legend><h2>Spillere</h2></legend>
-            @{
-                var participants = Participants.OrderByDescending(p => p.Score).ToList();
-                @for (int i = 0; i < participants.Count; i++)
-                {
-                    var participant = participants[i];
-                    <div class="ranking ranking-@i">@participant.ParticipantName
-                        - @Answers.Values.SelectMany(x => x).Count(a => participant.Answers.Any(pa => pa.AnswerId == a.AnswerId) && a.IsCorrect) korrekte
-                        svar
-                        - @participant.Score</div>
-                }
-            }
-        </fieldset>
+            </div>
+        }
     </div>
-}
+</div>
 
 @code {
     [Parameter] public required string GameId { get; set; }

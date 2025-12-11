@@ -1,6 +1,6 @@
 .main-grid {
   display: grid;
-  grid-template-columns: 4fr 1fr;
+  grid-template-columns: 3fr 1fr;
 }
 
 .answer-correct {
@@ -11,14 +11,43 @@
   color: red;
 }
 
-.ranking-0 {
-  background: gold;
+.ranking {
+  &.ranking {
+    padding: 10px 12px;
+  }
+
+  &.ranking-0 {
+    background: gold;
+  }
+
+  &.ranking-1 {
+    background: silver;
+  }
+
+  &.ranking-2 {
+    background: sandybrown;
+  }
 }
 
-.ranking-1 {
-  background: silver;
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.ranking-2 {
-  background: brown;
+details {
+    background: #eee;
+    padding: 12px;
+}
+
+.question-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+}
+
+.summary-answers {
+  color: #555;
+  font-size: .8em;
 }

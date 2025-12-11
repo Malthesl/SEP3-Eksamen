@@ -23,6 +23,11 @@ body {
   max-width: 1000px;
 }
 
+.wide-content-page {
+  width: 100%;
+  max-width: 1200px;
+}
+
 /* Globale styles --- Knapper */
 button {
   background: #fff;

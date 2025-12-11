@@ -1,7 +1,52 @@
+.answer {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
 .answer-correct {
   color: green;
 }
 
 .answer-wrong {
   color: red;
+}
+
+.answer-circle {
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
+}
+
+.answer-1 .answer-circle {
+  background: var(--question-1-color);
+}
+
+.answer-2 .answer-circle {
+  background: var(--question-2-color);
+}
+
+.answer-3 .answer-circle {
+  background: var(--question-3-color);
+}
+
+.answer-4 .answer-circle {
+  background: var(--question-4-color);
+}
+
+.participant-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.participant-answer {
+  padding: 8px 12px;
+  background: #eee;
+}
+
+.overview {
+  display: flex;
+  justify-content: space-between;
 }

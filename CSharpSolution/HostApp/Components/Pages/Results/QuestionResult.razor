@@ -5,30 +5,76 @@
 @inject IQuestionService QuestionService;
 @inject IAnswerService AnswerService;
 
-@if (Game is not null && Question is not null)
-{
-    <h1>@Game.Quiz.Title</h1>
+<div class="centered-page">
+    <div class="wide-content-page">
+        @if (Game is not null && Question is not null)
+        {
+            <h1>Resultater af quiz: @Game.Quiz.Title</h1>
+            <h2>Spørgsmål: @Question.Title</h2>
+            <div>Antal svar: @ParticipantAnswers.Count</div>
+            <h3>Oversigt</h3>
+            <div class="overview">
+                <div>
+                    @foreach (AnswerDTO answer in Answers)
+                    {
+                        <div class="answer answer-@(answer.IsCorrect ? "correct" : "wrong") answer-@answer.Index">
+                            <div class="answer-circle"></div>
+                            <div class="answer-info">
+                                @answer.Title:
+                                             Svaret @(answer.IsCorrect ? "korrekt" : "forkert") af @ParticipantAnswers.Count(q => q.AnswerId == answer.AnswerId)
+                            </div>
+                        </div>
+                    }
+                </div>
+                <svg width="200" height="200" viewBox="0 0 32 32" class="pie-chart">
+                    @{
+                        double startAngle = 0;
 
-    <h2>Spørgsmål: @Question.Title</h2>
-    <div>
-        Antal svar: @ParticipantAnswers.Count
+                        string[] colors = { "#00B700", "#E6E63D", "#439BFF", "#FF4949" };
+
+                        @foreach (var answer in Answers)
+                        {
+                            double percentage = (double)ParticipantAnswers.Count(p => p.AnswerId == answer.AnswerId) / ParticipantAnswers.Count;
+                            double endAngle = startAngle + percentage * Math.PI * 2;
+
+                            if (percentage == 1)
+                            {
+                                <circle cx="16" cy="16" r="16" fill="@colors[answer.Index - 1]" />
+                                break;
+                            }
+
+                            var start = PolarToCartesian(16, 16, 16, startAngle);
+                            var end = PolarToCartesian(16, 16, 16, endAngle);
+                            var largeArc = percentage > 0.5 ? 1 : 0;
+
+                            <path d="
+                                M 16 16
+                                L @start.x.ToString(System.Globalization.CultureInfo.InvariantCulture) @start.y.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                                A 16 16 0 @largeArc 1 @end.x.ToString(System.Globalization.CultureInfo.InvariantCulture) @end.y.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                                Z"
+                                  fill="@colors[answer.Index - 1]" />
+
+                            startAngle = endAngle;
+                        }
+                    }
+                </svg>
+            </div>
+
+            <h3>Hver deltager</h3>
+            <div class="participant-answers">
+                @foreach (GameParticipantAnswerDTO participantAnswer in ParticipantAnswers)
+                {
+                    AnswerDTO answer = Answers.First(a => a.AnswerId == participantAnswer.AnswerId);
+                    <div class="participant-answer answer-@(answer.IsCorrect ? "correct" : "wrong")" style="order: @(answer.IsCorrect ? 0 : 1)">@participantAnswer.ParticipantName svarede @(answer.IsCorrect ? "korrekt" : "forkert"): @answer.Title</div>
+                }
+            </div>
+        }
+        else
+        {
+            <h1>Fejl under indlæsning, eller spørgsmålet findes ikke.</h1>
+        }
     </div>
-    <h3>Oversigt</h3>
-    @foreach (AnswerDTO answer in Answers)
-    {
-        <div class="answer answer-@(answer.IsCorrect ? "correct" : "wrong")">
-            @answer.Title:
-                         Svaret @(answer.IsCorrect ? "korrekt" : "forkert") af @ParticipantAnswers.Count(q => q.AnswerId == answer.AnswerId)
-        </div>
-    }
-
-    <h3>Hver deltager</h3>
-    @foreach (GameParticipantAnswerDTO participantAnswer in ParticipantAnswers)
-    {
-        AnswerDTO answer = Answers.First(a => a.AnswerId == participantAnswer.AnswerId);
-        <div>@participantAnswer.ParticipantName svarede @(answer.IsCorrect ? "korrekt" : "forkert"): @answer.Title</div>
-    }
-}
+</div>
 
 @code {
     [Parameter] public required string GameId { get; set; }
@@ -45,6 +91,12 @@
         Question = await QuestionService.GetQuestion(QuestionId);
         Answers = await AnswerService.GetAnswersFromQuestionAsync(QuestionId);
         ParticipantAnswers = await GameResultsService.GetAnswers(GameId, QuestionId);
+    }
+
+    private (double x, double y) PolarToCartesian(double cx, double cy, double r, double angleRad)
+    {
+        angleRad -= Math.PI / 2;
+        return (cx + r * Math.Cos(angleRad), cy + r * Math.Sin(angleRad));
     }
 
 }

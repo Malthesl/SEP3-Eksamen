@@ -1,0 +1,25 @@
+.games {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.game {
+  background: #eee;
+  padding: 16px 24px;
+}
+
+.query-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.query-option {
+  display: flex;
+  flex-direction: column;
+  
+  label {
+    font-size: .8em;
+  }
+}
