@@ -1,5 +1,3 @@
-.cards-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.query-options {
+  margin-bottom: 20px;
 }

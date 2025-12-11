@@ -1,9 +1,3 @@
-.cards-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
 .buttons {
   display: flex;
   gap: 10px;

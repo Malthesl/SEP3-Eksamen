@@ -1,0 +1,32 @@
+@using ApiContracts
+@if (QuizQueryResults is not null)
+{
+    <button @onclick="PreviousPage">Forrige side</button>
+    <span>Side @(CurrentPage + 1) ud af @TotalPages</span>
+    <button @onclick="NextPage">Næste side</button>
+    <span>Viser @QuizQueryResults.Quizzes.Count() ud af @QuizQueryResults.Count der matcher din søgning</span>
+    @if (QuizQueryResults.Count > 0)
+    {
+        <div class="cards-list">
+            @foreach (var quiz in QuizQueryResults.Quizzes)
+            {
+                <QuizCard Quiz="@quiz" />
+            }
+        </div>
+        <button @onclick="PreviousPage">Forrige side</button>
+        <span>Side @(CurrentPage + 1) ud af @TotalPages</span>
+        <button @onclick="NextPage">Næste side</button>
+    }
+    else
+    {
+        <h1>Der er ingen quizzer her :(</h1>
+    }
+}
+
+@code {
+    [Parameter] public QuizQueryDTO? QuizQueryResults { get; set; }
+    [Parameter] public int? CurrentPage { get; set; }
+    [Parameter] public int? TotalPages { get; set; }
+    [Parameter] public required Func<Task> PreviousPage { get; set; }
+    [Parameter] public required Func<Task> NextPage { get; set; }
+}

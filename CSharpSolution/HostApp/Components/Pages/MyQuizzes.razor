@@ -6,6 +6,8 @@
 @inject IQuizService QuizService
 @inject AuthenticationStateProvider AuthStateProvider;
 
+<PageTitle>Kahoot++ | Mine Quizzer</PageTitle>
+
 <div class="centered-page">
     <div class="content-page">
         <h3>Mine Quizzer</h3>
@@ -19,29 +21,7 @@
             </NavLink>
         </div>
 
-        @if (quizzes is not null)
-        {
-            <button @onclick="PreviousPage">Forrige side</button>
-            <span>Side @(pageIndex + 1) ud af @pages</span>
-            <button @onclick="NextPage">Næste side</button>
-            <span>Viser @quizzes.Quizzes.Count() ud af @quizzes.Count der matcher din søgning</span>
-            @if (quizzes.Count > 0)
-            {
-                <div class="cards-list">
-                    @foreach (var quiz in quizzes.Quizzes)
-                    {
-                        <QuizCard Quiz="@quiz" />
-                    }
-                </div>
-                <button @onclick="PreviousPage">Forrige side</button>
-                <span>Side @(pageIndex + 1) ud af @pages</span>
-                <button @onclick="NextPage">Næste side</button>
-            }
-            else
-            {
-                <h1>Der er ingen quizzer her :(</h1>
-            }
-        }
+        <QuizResultsList QuizQueryResults="@quizzes" NextPage="@NextPage" PreviousPage="@PreviousPage" CurrentPage="@pageIndex" TotalPages="@pages" />
     </div>
 </div>
 
@@ -54,7 +34,7 @@
     private int pageIndex = 0;
     private int pageSize = 20;
 
-    private int pages => (int)Math.Ceiling((double)quizzes.Count / pageSize);
+    private int pages => (int)Math.Ceiling((double)(quizzes?.Count ?? 0) / pageSize);
 
     protected override async Task OnParametersSetAsync()
     {

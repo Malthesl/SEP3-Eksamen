@@ -4,26 +4,18 @@
 @using HostApp.Services
 @inject IQuizService QuizService
 
+<PageTitle>Kahoot++ | Quizzer</PageTitle>
+
 <div class="centered-page">
     <div class="content-page">
         <h3>Find Quizzer</h3>
 
-        <input type="text" placeholder="Søg efter titel" @bind="query">
-        <button @onclick="UpdateResults">Søg</button>
+        <div class="query-options">
+            <input type="text" placeholder="Søg efter titel" @bind="query">
+            <button @onclick="UpdateResults">Søg</button>
+        </div>
 
-        @if (quizzes is not null)
-        {
-            <button @onclick="PreviousPage">Forrige side</button>
-            <span>Side @(pageIndex + 1) ud af @pages</span>
-            <button @onclick="NextPage">Næste side</button>
-            <div>Viser @quizzes.Quizzes.Count() ud af @quizzes.Count der matcher din søgning</div>
-            <div class="cards-list">
-                @foreach (var quiz in quizzes.Quizzes)
-                {
-                    <QuizCard Quiz="@quiz" />
-                }
-            </div>
-        }
+        <QuizResultsList QuizQueryResults="@quizzes" NextPage="@NextPage" PreviousPage="@PreviousPage" CurrentPage="@pageIndex" TotalPages="@pages" />
     </div>
 </div>
 
@@ -36,7 +28,7 @@
     private int pageIndex = 0;
     private int pageSize = 20;
 
-    private int pages => (int)Math.Ceiling((double)quizzes.Count / pageSize);
+    private int pages => (int)Math.Ceiling((double)(quizzes?.Count ?? 0) / pageSize);
 
     protected override async Task OnParametersSetAsync()
     {

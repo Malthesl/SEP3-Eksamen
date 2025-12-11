@@ -4,19 +4,19 @@
 @inject NavigationManager Nav
 @using HostApp.Services
 
-<PageTitle>Kahoot++ | Create Quiz</PageTitle>
+<PageTitle>Kahoot++ | Opret Quiz</PageTitle>
 
 <div class="centered-page">
     <div class="content-page">
         <div>
-            <h1>Create Quiz</h1>
+            <h1>Opret Quiz</h1>
         </div>
         <div>
-            <label for="quiz-name">Name your Quiz</label>
-            <input id="quiz-name" placeholder="Enter quiz name here" @bind="Title">
+            <label for="quiz-name">Giv din quiz et navn</label>
+            <input id="quiz-name" placeholder="Min quiz" @bind="Title">
         </div>
         <div>
-            <button class="button" @onclick="Create">Create</button>
+            <button class="button" @onclick="Create">Opret</button>
         </div>
     </div>
 </div>

@@ -7,10 +7,14 @@
 @inject IQuestionService QuestionService;
 @inject NavigationManager Nav;
 
+<PageTitle>Kahoot++ | Quiz ikke fundet</PageTitle>
+
 <div class="centered-page">
     <div class="wide-content-page">
         @if (Quiz is not null)
         {
+            <PageTitle>Kahoot++ | Om @Quiz.Title</PageTitle>
+            
             <h1>
                 <span class="quiz-title">@Quiz.Title</span>
                 @if (Quiz.Visibility == "public")
