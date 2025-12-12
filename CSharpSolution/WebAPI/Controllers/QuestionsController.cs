@@ -51,6 +51,8 @@ public class QuestionsController(
     public async Task<ActionResult<QuestionDTO>> AddQuestion([FromBody] CreateQuestionDTO createDto)
     {
         if (!await authService.IsAuthorizedToModifyQuiz(createDto.QuizId, User)) return Unauthorized();
+        
+        if (String.IsNullOrWhiteSpace(createDto.Title)) return BadRequest("Title må ikke være tom");
 
         var res = await questionService.AddQuestionAsync(new AddQuestionRequest
         {
@@ -79,6 +81,8 @@ public class QuestionsController(
         [FromBody] QuestionDTO questionDto)
     {
         if (!await authService.IsAuthorizedToModifyQuestion(questionDto.QuestionId, User)) return Unauthorized();
+        
+        if (String.IsNullOrWhiteSpace(questionDto.Title)) return BadRequest("Titlen må ikke være tom");
 
         await questionService.UpdateQuestionAsync(new UpdateQuestionRequest
         {

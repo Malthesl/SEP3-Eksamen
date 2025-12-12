@@ -12,7 +12,7 @@ public class HttpParticipateService(HttpClient httpClient, IPlayerService player
             JoinCode = code
         });
         
-        if (!res.IsSuccessStatusCode) throw new HttpRequestException(res.ReasonPhrase);
+        if (!res.IsSuccessStatusCode) throw new Exception($"Http Error: {res.StatusCode} {res.ReasonPhrase} : {await res.Content.ReadAsStringAsync()}");
         
         var content = (await res.Content.ReadFromJsonAsync<LiveGameJoinResponseDTO>())!;
         
@@ -35,7 +35,7 @@ public class HttpParticipateService(HttpClient httpClient, IPlayerService player
         };
         
         var res = await httpClient.PostAsJsonAsync("/live/answer", req);
-        if (!res.IsSuccessStatusCode) throw new HttpRequestException(res.ReasonPhrase);
+        if (!res.IsSuccessStatusCode) throw new Exception($"Http Error: {res.StatusCode} {res.ReasonPhrase} : {await res.Content.ReadAsStringAsync()}");
     }
 
     public async Task<LiveGamePlayerStatusDTO> GetGameStatusAsync(int updateNo = 0)
@@ -44,7 +44,7 @@ public class HttpParticipateService(HttpClient httpClient, IPlayerService player
         string playerId = (await playerService.GetPlayerIdAsync())!;
         
         var res = await httpClient.GetAsync($"/live/status?gameId={gameId}&playerId={playerId}&lastUpdateNo={updateNo}");
-        if (!res.IsSuccessStatusCode) throw new HttpRequestException(res.ReasonPhrase);
+        if (!res.IsSuccessStatusCode) throw new Exception($"Http Error: {res.StatusCode} {res.ReasonPhrase} : {await res.Content.ReadAsStringAsync()}");
         
         var content = (await res.Content.ReadFromJsonAsync<LiveGamePlayerStatusDTO>())!;
         return content;

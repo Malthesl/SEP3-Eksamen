@@ -1,5 +1,6 @@
 using ApiContracts;
 using Microsoft.AspNetCore.WebUtilities;
+using static HostApp.Utils.Utils;
 
 namespace HostApp.Services;
 
@@ -21,37 +22,37 @@ public class HttpQuizService(HttpClient httpClient) : IQuizService
         var url = QueryHelpers.AddQueryString("quizzes", queryParams);
 
         var response = await httpClient.GetAsync(url);
-        if (!response.IsSuccessStatusCode) throw new Exception("Fejl i søgning af quizzer. " + response.StatusCode);
-
+        await CheckResponse(response);
+        
         return (await response.Content.ReadFromJsonAsync<QuizQueryDTO>())!;
     }
 
     public async Task<QuizDTO> CreateQuiz(string title)
     {
         var response = await httpClient.PostAsJsonAsync("quizzes", new { Title = title });
-        if (!response.IsSuccessStatusCode) throw new Exception("Kunne ikke oprette quiz. " + response.StatusCode);
-
+        await CheckResponse(response);
+        
         return (await response.Content.ReadFromJsonAsync<QuizDTO>())!;
     }
 
     public async Task<QuizDTO> UpdateQuiz(int id, string newTitle, string newVisibility)
     {
         var response = await httpClient.PostAsJsonAsync($"quizzes/{id}", new UpdateQuizDTO { Title = newTitle, Visibility = newVisibility });
-        if (!response.IsSuccessStatusCode) throw new Exception("Kunne ikke opdatere quiz. " + response.StatusCode);
-
+        await CheckResponse(response);
+        
         return (await response.Content.ReadFromJsonAsync<QuizDTO>())!;
     }
 
     public async Task DeleteQuiz(int id)
     {
-        var respone = await httpClient.DeleteAsync($"quizzes/{id}");
-        if (!respone.IsSuccessStatusCode) throw new Exception("Kunne ikke slette quiz. " + respone.StatusCode);
+        var response = await httpClient.DeleteAsync($"quizzes/{id}");
+        await CheckResponse(response);
     }
 
     public async Task<QuizDTO> GetQuiz(int id)
     {
         var response = await httpClient.GetAsync($"quizzes/{id}");
-        if (!response.IsSuccessStatusCode) throw new Exception("Kunne ikke hente quiz. " + response.StatusCode);
+        await CheckResponse(response);
         
         return (await response.Content.ReadFromJsonAsync<QuizDTO>())!;
     }

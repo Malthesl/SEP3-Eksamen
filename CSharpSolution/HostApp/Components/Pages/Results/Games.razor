@@ -29,6 +29,11 @@
                     CompletedGames = CompletedGames.OrderByDescending(o => o.PlayedTime).ToList();
                     if (Sort == "oldest") CompletedGames.Reverse();
 
+                    if (CompletedGames.Count < 1)
+                    {
+                        <h3>Du har ingen afholdte spil</h3>
+                    }
+
                     foreach (GameResultDTO game in CompletedGames)
                     {
                         <div class="game">

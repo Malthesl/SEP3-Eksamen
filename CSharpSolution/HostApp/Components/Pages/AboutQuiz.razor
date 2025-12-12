@@ -51,6 +51,7 @@
                             <button @onclick="() => _renameModal.Show()">Omdøb quiz</button>
                             <button style="color: red" @onclick="() => _deleteModal.Show()">Slet quiz</button>
                         }
+                        <p class="error-text">@ErrorText</p>
                     </div>
                 </Authorized>
             </AuthorizeView>
@@ -86,6 +87,8 @@
     private RenameModal? _renameModal;
     private OptionsModal? _visibilityModal;
 
+    private string? ErrorText { get; set; }
+
     [Parameter] public int Id { get; set; }
 
     private QuizDTO Quiz { get; set; }
@@ -108,7 +111,13 @@
 
     private async Task HandleRename(string? newName)
     {
-        if (newName != null && Quiz.Title != newName)
+        if (String.IsNullOrWhiteSpace(newName))
+        {
+            ErrorText = "Titlen kan ikke være tom";
+            return;
+        }
+        
+        if (Quiz.Title != newName)
         {
             Quiz = await QuizService.UpdateQuiz(Id, newName, Quiz.Visibility);
         }
