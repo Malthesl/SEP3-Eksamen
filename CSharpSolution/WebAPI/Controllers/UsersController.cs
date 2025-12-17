@@ -45,11 +45,13 @@ public class UsersController(UserService.UserServiceClient userService) : Contro
         string userIdClaim = User.FindFirst("Id")!.Value;
         int currentUserId = int.Parse(userIdClaim);
         
-        if (currentUserId != userId) return Unauthorized();
+        if (currentUserId != userId) return Unauthorized("Du har ikke adgang til at ændre denne bruger.");
         
         // Brugeren vil ændre brugernavn
         if (userChanges.Username is not null)
         {
+            if (String.IsNullOrWhiteSpace(userChanges.Username)) return BadRequest("Ugyldigt brugernavn.");
+            
             await userService.UpdateUsernameAsync(new UpdateUsernameRequest
                 { Id = userId, NewUsername = userChanges.Username });
             return await GetUser(userId);
@@ -58,12 +60,14 @@ public class UsersController(UserService.UserServiceClient userService) : Contro
         // Brugeren vil ændre password
         if (userChanges.Password is not null)
         {
+            if (String.IsNullOrWhiteSpace(userChanges.Password)) return BadRequest("Ugyldigt adgangskode.");
+            
             await userService.UpdatePasswordAsync(new UpdatePasswordRequest
                 { Id = userId, NewPassword = userChanges.Password });
             return await GetUser(userId);
         }
 
-        return BadRequest("Ingen username eller password");
+        return BadRequest("Ingen username eller password.");
     }
 
     [Authorize]

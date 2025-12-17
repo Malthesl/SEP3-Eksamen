@@ -1,6 +1,6 @@
 ﻿using HostApp.Components;
 using HostApp.Services;
-using BlazorClient.Services;
+using HostApp.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.DataProtection;
@@ -19,7 +19,7 @@ builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, TokenAuthenticationStateProvider>();
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<HttpAuthService>();
 builder.Services.AddScoped<AuthTokenHandler>();
 
 builder.Services.AddScoped(sp =>

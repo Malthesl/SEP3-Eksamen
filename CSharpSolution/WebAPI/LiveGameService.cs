@@ -1,4 +1,3 @@
-using Google.Protobuf.Collections;
 using GrpcClient;
 
 namespace WebAPI;
@@ -15,7 +14,29 @@ public class LiveGameService(
 
     public LiveGame CreateGame(int quizId, int hostId)
     {
-        LiveGame game = new LiveGame(quizId, hostId, quizService, questionService, answerService, resultService);
+        var quiz = quizService.GetQuiz(new GetQuizRequest { QuizId = quizId }).Quiz;
+        var questions = questionService
+            .GetAllQuestionsInQuiz(new GetAllQuestionsInQuizRequest { QuizId = quizId })
+            .Questions
+            .Select(q => new LiveGameQuestion
+            {
+                QuestionId = q.Id,
+                Title = q.Title,
+                Answers = answerService
+                    .GetAllAnswersInQuestion(new GetAllAnswersInQuestionRequest { QuestionId = q.Id })
+                    .Answers
+                    .Select(a => new LiveGameAnswer
+                    {
+                        AnswerId = a.Id,
+                        Title = a.Title,
+                        IsCorrect = a.IsCorrect,
+                        Index = a.Index
+                    })
+                    .ToList()
+            })
+            .ToList();
+
+        LiveGame game = new LiveGame(hostId, quiz, questions, resultService);
 
         Games.Add(game.GameId, game);
 
@@ -64,39 +85,19 @@ public class LiveGame
 
     private ResultService.ResultServiceClient _resultService;
 
-    public LiveGame(int quizId,
+    public LiveGame(
         int userId,
-        QuizService.QuizServiceClient quizService,
-        QuestionService.QuestionServiceClient questionService,
-        AnswerService.AnswerServiceClient answerService,
+        QuizDTO quiz,
+        List<LiveGameQuestion> questions,
         ResultService.ResultServiceClient resultService)
     {
         HostUserId = userId;
-        QuizId = quizId;
+        QuizId = quiz.Id;
 
         JoinCode = GenerateJoinCode();
 
-        Quiz = quizService.GetQuiz(new GetQuizRequest { QuizId = quizId }).Quiz;
-        Questions = questionService
-            .GetAllQuestionsInQuiz(new GetAllQuestionsInQuizRequest { QuizId = quizId })
-            .Questions
-            .Select(q => new LiveGameQuestion
-            {
-                QuestionId = q.Id,
-                Title = q.Title,
-                Answers = answerService
-                    .GetAllAnswersInQuestion(new GetAllAnswersInQuestionRequest { QuestionId = q.Id })
-                    .Answers
-                    .Select(a => new LiveGameAnswer
-                    {
-                        AnswerId = a.Id,
-                        Title = a.Title,
-                        IsCorrect = a.IsCorrect,
-                        Index = a.Index
-                    })
-                    .ToList()
-            })
-            .ToList();
+        Quiz = quiz;
+        Questions = questions;
 
         _resultService = resultService;
     }

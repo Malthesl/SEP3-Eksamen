@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Components.Authorization;
 
-namespace BlazorClient.Services;
+namespace HostApp.Services;
 
 /**
  * Den her DelegatingHandler tilføjer Authorization header til alle HTTP-requests hvis brugeren er logget ind.

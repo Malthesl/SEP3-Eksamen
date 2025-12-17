@@ -1,7 +1,7 @@
 @page "/login"
-@using BlazorClient.Services
+@using HostApp.Services
 @using Microsoft.AspNetCore.Components.Authorization
-@inject AuthService AuthService;
+@inject HttpAuthService HttpAuthService;
 @inject AuthenticationStateProvider AuthStateProvider;
 @inject NavigationManager Nav;
 
@@ -31,7 +31,7 @@
         {
             if (AuthStateProvider is TokenAuthenticationStateProvider provider)
             {
-                await provider.SignIn(await AuthService.LoginAndReturnToken(Username, Password));
+                await provider.SignIn(await HttpAuthService.LoginAndReturnToken(Username, Password));
 
                 Nav.NavigateTo("/");
             }

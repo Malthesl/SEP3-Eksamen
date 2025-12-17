@@ -1,9 +1,8 @@
 using System.Security.Authentication;
-using ApiContracts;
 
-namespace BlazorClient.Services;
+namespace HostApp.Services;
 
-public class AuthService(HttpClient httpClient)
+public class HttpAuthService(HttpClient httpClient) : IAuthService
 {
     public async Task<string> LoginAndReturnToken(string username, string password)
     {

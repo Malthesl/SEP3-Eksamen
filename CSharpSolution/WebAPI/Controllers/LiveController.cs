@@ -10,7 +10,10 @@ namespace WebAPI.Controllers;
 [Route("[controller]")]
 public class LiveController(LiveGameService gameService) : ControllerBase
 {
-    // Host
+    /// <summary>
+    /// Opretter en ny live quiz
+    /// </summary>
+    /// <param name="quiz">Informationer om hvilken quiz skal oprettes</param>
     [Authorize]
     [HttpPost("new")]
     public ActionResult<LiveCreateGameResponseDTO> New([FromBody] LiveCreateGameRequestDTO quiz)
@@ -22,6 +25,10 @@ public class LiveController(LiveGameService gameService) : ControllerBase
         return Ok(new LiveCreateGameResponseDTO { GameId = game.GameId });
     }
 
+    /// <summary>
+    /// Starter en live quiz
+    /// </summary>
+    /// <param name="request">Informationer om hvilken live quiz der skal startes</param>
     [Authorize]
     [HttpPost("start")]
     public ActionResult Start([FromBody] LiveBasicHostRequestDTO request)
@@ -38,6 +45,10 @@ public class LiveController(LiveGameService gameService) : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Fortsætter en live quiz (hopper til næste stadie i quiz-afspilningen)
+    /// </summary>
+    /// <param name="request">Informationer om hvilken live quiz der skal fortsættes</param>
     [Authorize]
     [HttpPost("continue")]
     public ActionResult Continue([FromBody] LiveBasicHostRequestDTO request)
@@ -54,14 +65,9 @@ public class LiveController(LiveGameService gameService) : ControllerBase
         return Ok();
     }
 
-    [Authorize]
-    [HttpPost("kick")]
-    public ActionResult Kick()
-    {
-        throw new NotImplementedException();
-    }
-
-    // Delt
+    /// <summary>
+    /// Henter de nuværende informationer om en live quiz, hvis brugeren er opdateret, bruges der long-polling.
+    /// </summary>
     [HttpGet("status")]
     public async Task<ActionResult<dynamic>> Status(
         [FromQuery] string gameId,
@@ -76,7 +82,7 @@ public class LiveController(LiveGameService gameService) : ControllerBase
 
         string? userIdString = User.FindFirst("Id")?.Value;
 
-        // HOST STATUS
+        // Værten ønsker informationer om spillet
         if (userIdString is not null)
         {
             if (int.Parse(userIdString) != game.HostUserId) return Unauthorized();
@@ -124,7 +130,8 @@ public class LiveController(LiveGameService gameService) : ControllerBase
                 }).ToList()
             };
         }
-        // PLAYER STATUS
+        
+        // En deltager ønsker informationer om spillet (viser censorede informationer)
         if (playerId is not null && game.Players.Any(player => player.PlayerId == playerId))
         {
             LiveGamePlayer player = game.Players.Find(player => player.PlayerId == playerId)!;
@@ -164,7 +171,9 @@ public class LiveController(LiveGameService gameService) : ControllerBase
         return BadRequest("Mangler host login eller et player id");
     }
 
-    // Deltagere
+    /// <summary>
+    /// Bruges af deltagere til at tilslutte et spil
+    /// </summary>
     [HttpPost("join")]
     public ActionResult<LiveGameJoinResponseDTO> Join([FromBody] LiveGameJoinRequestDTO request)
     {
@@ -181,6 +190,9 @@ public class LiveController(LiveGameService gameService) : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Bruges af deltagere til at svare på spørgsmål
+    /// </summary>
     [HttpPost("answer")]
     public ActionResult Answer(
         [FromBody] LiveGameAnswerRequestDTO request
