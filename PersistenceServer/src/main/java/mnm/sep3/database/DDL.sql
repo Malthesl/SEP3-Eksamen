@@ -11,6 +11,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA sep3_eksamen
     GRANT ALL PRIVILEGES ON SEQUENCES TO sep3_eksamen;
 
 CREATE DOMAIN visibility AS VARCHAR NOT NULL CHECK (VALUE IN ('public', 'private'));
+CREATE DOMAIN gameid AS VARCHAR(36);
 
 CREATE TABLE users
 (
@@ -44,11 +45,10 @@ CREATE TABLE answers
     question_id INT     NOT NULL REFERENCES questions (id) ON DELETE CASCADE
 );
 
-CREATE DOMAIN GAMEID AS VARCHAR(36);
 
 CREATE TABLE games
 (
-    game_id     GAMEID PRIMARY KEY,
+    game_id     gameid PRIMARY KEY,
     host_id     INT NOT NULL REFERENCES users (id),
     played_time BIGINT NOT NULL,
     quiz_id     INT NOT NULL REFERENCES quizzes (id) ON DELETE CASCADE
@@ -58,7 +58,7 @@ CREATE TABLE participants
 (
     id          SERIAL PRIMARY KEY,
     name        VARCHAR NOT NULL,
-    game_id     GAMEID NOT NULL REFERENCES games (game_id) ON DELETE CASCADE,
+    game_id     gameid NOT NULL REFERENCES games (game_id) ON DELETE CASCADE,
     score       INT NOT NULL
 );
 

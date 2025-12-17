@@ -1,7 +1,6 @@
 package mnm.sep3.model;
 
 import mnm.sep3.database.Database;
-import mnm.sep3.model.entities.QueryResult;
 import mnm.sep3.model.entities.Quiz;
 import mnm.sep3.model.entities.User;
 
