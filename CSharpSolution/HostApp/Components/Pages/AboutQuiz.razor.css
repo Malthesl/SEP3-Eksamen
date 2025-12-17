@@ -12,3 +12,7 @@
   border-radius: 4px;
   margin-left: 8px;
 }
+
+.error-text {
+  color: red;
+}

@@ -14,6 +14,7 @@
         <div>
             <label for="quiz-name">Giv din quiz et navn</label>
             <input id="quiz-name" placeholder="Min quiz" @bind="Title">
+            <p class="error-text">@ErrorText</p>
         </div>
         <div>
             <button class="button" @onclick="Create">Opret</button>
@@ -22,11 +23,18 @@
 </div>
 
 @code {
-    private string Title { get; set; }
+    private string? Title { get; set; }
+    private string? ErrorText { get; set; }
 
     private async Task Create()
     {
-        QuizDTO quiz = await QuizService.CreateQuiz(Title);
+        if (String.IsNullOrWhiteSpace(Title))
+        {
+            ErrorText = "Quiz navnet kan ikke være tomt eller bestå af udelukkende whitespace";
+            return;
+        }
+        
+        QuizDTO quiz = await QuizService.CreateQuiz(Title!);
         Nav.NavigateTo("/quiz/" + quiz.Id + "/edit");
     }
 

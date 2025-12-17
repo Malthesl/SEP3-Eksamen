@@ -1,4 +1,5 @@
 using ApiContracts;
+using static HostApp.Utils.Utils;
 
 namespace HostApp.Services;
 
@@ -10,8 +11,7 @@ public class HttpQuizHostService(HttpClient httpClient) : IQuizHostService
         {
             QuizId = quizId
         });
-        if (!res.IsSuccessStatusCode)
-            throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
+        await CheckResponse(res);
 
         var content = (await res.Content.ReadFromJsonAsync<LiveCreateGameResponseDTO>())!;
         return content.GameId;
@@ -20,12 +20,8 @@ public class HttpQuizHostService(HttpClient httpClient) : IQuizHostService
     public async Task<LiveGameHostStatusDTO> GetGameInfo(string gameId, int lastUpdateNo = 0)
     {
         var res = await httpClient.GetAsync($"/live/status?gameId={gameId}&lastUpdateNo={lastUpdateNo}");
-
-        if (!res.IsSuccessStatusCode)
-        {
-            Console.WriteLine(await res.Content.ReadAsStringAsync());
-            throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
-        }
+        await CheckResponse(res);
+        
         var content = (await res.Content.ReadFromJsonAsync<LiveGameHostStatusDTO>())!;
         return content;
     }
@@ -37,8 +33,7 @@ public class HttpQuizHostService(HttpClient httpClient) : IQuizHostService
             GameId = gameId
         });
 
-        if (!res.IsSuccessStatusCode)
-            throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
+        await CheckResponse(res);
     }
 
     public async Task ContinueQuiz(string gameId)
@@ -48,7 +43,6 @@ public class HttpQuizHostService(HttpClient httpClient) : IQuizHostService
             GameId = gameId
         });
 
-        if (!res.IsSuccessStatusCode)
-            throw new HttpRequestException($"Http status code {(int)res.StatusCode}: {res.ReasonPhrase}");
+        await CheckResponse(res);
     }
 }

@@ -14,7 +14,7 @@ import mnm.sep3.QuizServiceGrpc;
 import mnm.sep3.UpdateQuizRequest;
 import mnm.sep3.UserInfoDTO;
 import mnm.sep3.model.QuizzesManager;
-import mnm.sep3.model.entities.QueryResult;
+import mnm.sep3.model.QueryResult;
 import mnm.sep3.model.entities.Quiz;
 
 public class QuizServiceImpl extends QuizServiceGrpc.QuizServiceImplBase {

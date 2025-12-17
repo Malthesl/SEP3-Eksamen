@@ -1,4 +1,4 @@
-package mnm.sep3.model.entities;
+package mnm.sep3.model;
 
 import java.util.List;
 
